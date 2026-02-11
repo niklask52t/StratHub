@@ -1,4 +1,5 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
+config({ path: '../../.env' });
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';

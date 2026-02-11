@@ -1,4 +1,5 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
+config({ path: '../../.env' });
 import { db } from './connection.js';
 import { users, settings, games, maps, mapFloors, operators, gadgets, operatorGadgets } from './schema/index.js';
 import bcrypt from 'bcrypt';
