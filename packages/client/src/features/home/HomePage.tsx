@@ -23,7 +23,7 @@ export default function HomePage() {
       {/* Hero */}
       <div className="text-center mb-16">
         <div className="flex items-center justify-center mb-4">
-          <img src="/strathub_logo.png" alt="StratHub" className="h-16" />
+          <img src="/tactihub_logo.png" alt="TactiHub" className="h-16" />
         </div>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
           Collaborative strategy planning for competitive games. Draw tactics, share plans, and coordinate with your team in real-time.

@@ -4,7 +4,7 @@ import { Compass } from './Compass';
 import { Button } from '@/components/ui/button';
 import { ChevronUp, ChevronDown, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import { useCanvasStore } from '@/stores/canvas.store';
-import { ZOOM_STEP } from '@strathub/shared';
+import { ZOOM_STEP } from '@tactihub/shared';
 
 interface Floor {
   id: string;

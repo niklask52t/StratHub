@@ -2,15 +2,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const faqs = [
   {
-    q: 'What is StratHub?',
-    a: 'StratHub is a collaborative strategy planning tool for competitive games. It lets teams draw tactics on game maps, save and share battle plans, and coordinate strategies in real-time.',
+    q: 'What is TactiHub?',
+    a: 'TactiHub is a collaborative strategy planning tool for competitive games. It lets teams draw tactics on game maps, save and share battle plans, and coordinate strategies in real-time.',
   },
   {
     q: 'Which games are supported?',
     a: 'Currently Rainbow Six Siege and Valorant are included with full map and operator/agent data. Any game with top-down maps can be added through the admin panel.',
   },
   {
-    q: 'Do I need an account to use StratHub?',
+    q: 'Do I need an account to use TactiHub?',
     a: 'You can browse public plans and try the Sandbox mode without an account. To create rooms, save battle plans, or draw in rooms, you need to register and log in.',
   },
   {
@@ -43,19 +43,19 @@ const faqs = [
   },
   {
     q: 'What is Sandbox mode?',
-    a: 'Sandbox lets you draw on any map without logging in. Drawings are local to your browser and are not saved. It\'s great for trying out StratHub before creating an account.',
+    a: 'Sandbox lets you draw on any map without logging in. Drawings are local to your browser and are not saved. It\'s great for trying out TactiHub before creating an account.',
   },
   {
     q: 'How do I switch between floors?',
     a: 'Use the floor switcher in the top-right corner of the canvas, or press K to go up and J to go down.',
   },
   {
-    q: 'Can I self-host StratHub?',
-    a: 'Yes. StratHub is open source. You need Node.js 20+, pnpm, Docker (for PostgreSQL and Redis), and optionally an SMTP server for email verification. See the README for setup instructions.',
+    q: 'Can I self-host TactiHub?',
+    a: 'Yes. TactiHub is open source. You need Node.js 20+, pnpm, Docker (for PostgreSQL and Redis), and optionally an SMTP server for email verification. See the README for setup instructions.',
   },
   {
     q: 'How do I report a bug or suggest a feature?',
-    a: 'Open an issue on the GitHub repository at github.com/niklask52t/StratHub.',
+    a: 'Open an issue on the GitHub repository at github.com/niklask52t/TactiHub.',
   },
 ];
 
@@ -63,7 +63,7 @@ export default function FAQPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <h1 className="text-3xl font-bold mb-2">FAQ</h1>
-      <p className="text-muted-foreground mb-8">Frequently asked questions about StratHub.</p>
+      <p className="text-muted-foreground mb-8">Frequently asked questions about TactiHub.</p>
 
       <div className="space-y-4">
         {faqs.map(({ q, a }, i) => (

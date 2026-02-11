@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { RoomUser, Battleplan, CursorPosition } from '@strathub/shared';
+import type { RoomUser, Battleplan, CursorPosition } from '@tactihub/shared';
 
 interface RoomStoreState {
   connectionString: string | null;

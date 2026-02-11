@@ -23,8 +23,8 @@ import {
 } from '../services/auth.service.js';
 import { sendVerificationEmail, sendPasswordResetEmail } from '../services/email.service.js';
 import jwt from 'jsonwebtoken';
-import type { TokenPayload } from '@strathub/shared';
-import { REFRESH_TOKEN_EXPIRY_SECONDS } from '@strathub/shared';
+import type { TokenPayload } from '@tactihub/shared';
+import { REFRESH_TOKEN_EXPIRY_SECONDS } from '@tactihub/shared';
 
 const registerSchema = z.object({
   username: z.string().min(3).max(50),

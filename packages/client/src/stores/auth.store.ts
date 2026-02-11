@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { User } from '@strathub/shared';
+import type { User } from '@tactihub/shared';
 
 interface AuthState {
   user: User | null;

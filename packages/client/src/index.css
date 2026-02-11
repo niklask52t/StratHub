@@ -3,7 +3,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Dark theme with orange/red primary matching StratHub logo */
+  /* Dark theme with orange/red primary matching TactiHub logo */
   /* Logo colors: #fd7100 -> #da2c00 (orange/red), #c3c9cc -> #3c4653 (grays) */
 
   --color-background: oklch(0.185 0.01 250);       /* ~#2a2f38 dark blue-gray */

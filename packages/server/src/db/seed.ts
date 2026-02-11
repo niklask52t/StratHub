@@ -11,7 +11,7 @@ async function seed() {
   const passwordHash = await bcrypt.hash('changeme', 10);
   const [admin] = await db.insert(users).values({
     username: 'admin',
-    email: 'admin@strathub.local',
+    email: 'admin@tactihub.local',
     passwordHash,
     role: 'admin',
     emailVerifiedAt: new Date(),

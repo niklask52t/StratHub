@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 import { db } from '../db/connection.js';
 import { rooms, battleplans, battleplanFloors, mapFloors, operatorSlots } from '../db/schema/index.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
-import { MAX_OPERATOR_SLOTS } from '@strathub/shared';
+import { MAX_OPERATOR_SLOTS } from '@tactihub/shared';
 
 export default async function roomsRoutes(fastify: FastifyInstance) {
   // POST /api/rooms

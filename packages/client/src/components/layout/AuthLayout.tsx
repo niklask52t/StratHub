@@ -6,7 +6,7 @@ export function AuthLayout() {
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center gap-2">
           <Link to="/">
-            <img src="/strathub_logo.png" alt="StratHub" className="h-10" />
+            <img src="/tactihub_logo.png" alt="TactiHub" className="h-10" />
           </Link>
         </div>
         <Outlet />

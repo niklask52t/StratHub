@@ -1,15 +1,15 @@
 {
-  "name": "strathub",
+  "name": "tactihub",
   "version": "1.2.1",
   "private": true,
   "description": "Tactical strategy planning for competitive games",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter @strathub/server dev\" \"pnpm --filter @strathub/client dev\"",
-    "build": "pnpm --filter @strathub/shared build && pnpm --filter @strathub/server build && pnpm --filter @strathub/client build",
-    "db:generate": "pnpm --filter @strathub/server db:generate",
-    "db:migrate": "pnpm --filter @strathub/server db:migrate",
-    "db:seed": "pnpm --filter @strathub/server db:seed",
-    "db:studio": "pnpm --filter @strathub/server db:studio"
+    "dev": "concurrently \"pnpm --filter @tactihub/server dev\" \"pnpm --filter @tactihub/client dev\"",
+    "build": "pnpm --filter @tactihub/shared build && pnpm --filter @tactihub/server build && pnpm --filter @tactihub/client build",
+    "db:generate": "pnpm --filter @tactihub/server db:generate",
+    "db:migrate": "pnpm --filter @tactihub/server db:migrate",
+    "db:seed": "pnpm --filter @tactihub/server db:seed",
+    "db:studio": "pnpm --filter @tactihub/server db:studio"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

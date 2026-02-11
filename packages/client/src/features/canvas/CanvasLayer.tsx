@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useCanvasStore } from '@/stores/canvas.store';
-import { Tool, ZOOM_STEP } from '@strathub/shared';
+import { Tool, ZOOM_STEP } from '@tactihub/shared';
 import { hitTestDraw } from './utils/hitTest';
 
 interface Floor {

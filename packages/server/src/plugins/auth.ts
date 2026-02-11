@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin';
 import jwt from 'jsonwebtoken';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
-import type { TokenPayload } from '@strathub/shared';
+import type { TokenPayload } from '@tactihub/shared';
 
 declare module 'fastify' {
   interface FastifyRequest {

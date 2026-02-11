@@ -6,7 +6,7 @@ export default function HelpPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-3xl font-bold mb-2">Help</h1>
-      <p className="text-muted-foreground mb-8">Learn how to use StratHub's canvas, tools, and collaboration features.</p>
+      <p className="text-muted-foreground mb-8">Learn how to use TactiHub's canvas, tools, and collaboration features.</p>
 
       <div className="space-y-8">
         {/* Drawing Tools */}
@@ -158,7 +158,7 @@ export default function HelpPage() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
             <p>
-              Want to try StratHub without creating an account? Use the <strong>Sandbox</strong> to draw on any map locally.
+              Want to try TactiHub without creating an account? Use the <strong>Sandbox</strong> to draw on any map locally.
               Sandbox drawings are not saved — log in and create a room or battle plan to persist your work.
             </p>
           </CardContent>

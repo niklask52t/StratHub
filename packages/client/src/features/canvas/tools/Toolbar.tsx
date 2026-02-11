@@ -1,5 +1,5 @@
 import { useCanvasStore } from '@/stores/canvas.store';
-import { Tool } from '@strathub/shared';
+import { Tool } from '@tactihub/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';

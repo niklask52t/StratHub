@@ -1,8 +1,8 @@
-# StratHub
+# TactiHub
 
 **Collaborative tactical strategy planning for competitive games.**
 
-StratHub is a real-time collaboration tool that lets teams draw tactics on game maps, create and share battle plans, and coordinate strategies together. It supports multiple games (Rainbow Six Siege, Valorant, and more) with a powerful canvas drawing system, live cursors, and persistent battle plan management.
+TactiHub is a real-time collaboration tool that lets teams draw tactics on game maps, create and share battle plans, and coordinate strategies together. It supports multiple games (Rainbow Six Siege, Valorant, and more) with a powerful canvas drawing system, live cursors, and persistent battle plan management.
 
 ![Version](https://img.shields.io/badge/version-1.2.1-orange)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
@@ -30,7 +30,7 @@ StratHub is a real-time collaboration tool that lets teams draw tactics on game 
 - **Admin Panel** — Full CRUD management for games, maps, floors, operators, gadgets, users, and registration tokens.
 - **Token-Based Registration** — Admin can toggle public registration on/off and create invite tokens for controlled access.
 - **Email Verification** — New accounts must verify their email. Unverified accounts are cleaned up after 30 days.
-- **Dark Theme** — Built with a dark color scheme matching the StratHub brand (orange/red + dark grays).
+- **Dark Theme** — Built with a dark color scheme matching the TactiHub brand (orange/red + dark grays).
 - **Help & FAQ** — Built-in help page with tool descriptions, keyboard shortcuts, and frequently asked questions.
 
 ---
@@ -61,7 +61,7 @@ StratHub is a real-time collaboration tool that lets teams draw tactics on game 
 ## Project Structure
 
 ```
-StratHub/
+TactiHub/
 ├── docker-compose.yml          # PostgreSQL 16 + Redis 7
 ├── package.json                # Root workspace config (v1.2.1)
 ├── pnpm-workspace.yaml         # Workspace definition
@@ -70,12 +70,12 @@ StratHub/
 ├── CLAUDE.md                   # AI assistant project guide
 │
 ├── packages/
-│   ├── shared/                 # @strathub/shared — Types, constants, enums
+│   ├── shared/                 # @tactihub/shared — Types, constants, enums
 │   │   └── src/
 │   │       ├── types/          # Auth, Game, Battleplan, Room, Admin, API, Canvas
 │   │       └── constants/      # Colors, defaults, limits, APP_VERSION
 │   │
-│   ├── server/                 # @strathub/server — Fastify API + Socket.IO
+│   ├── server/                 # @tactihub/server — Fastify API + Socket.IO
 │   │   ├── drizzle.config.ts
 │   │   ├── uploads/            # User-uploaded images (gitignored)
 │   │   └── src/
@@ -97,7 +97,7 @@ StratHub/
 │   │       ├── socket/         # Socket.IO handlers (room, drawing, cursor)
 │   │       └── index.ts        # Server entry point
 │   │
-│   └── client/                 # @strathub/client — React SPA
+│   └── client/                 # @tactihub/client — React SPA
 │       ├── public/             # Static assets (logos)
 │       ├── vite.config.ts
 │       └── src/
@@ -173,8 +173,8 @@ docker -v  # 27.x
 ### 2. Clone the repository
 
 ```bash
-git clone https://github.com/niklask52t/StratHub.git
-cd StratHub
+git clone https://github.com/niklask52t/TactiHub.git
+cd TactiHub
 ```
 
 The default branch is `main`. For the latest development features, use `git checkout dev`.
@@ -199,7 +199,7 @@ docker compose up -d
 ```
 
 This starts:
-- **PostgreSQL 16** on port `5432` (user: `strathub`, password: `strathub`, db: `strathub`)
+- **PostgreSQL 16** on port `5432` (user: `tactihub`, password: `tactihub`, db: `tactihub`)
 - **Redis 7** on port `6379`
 
 ### 5. Install dependencies
@@ -222,7 +222,7 @@ pnpm db:seed
 ```
 
 The seed creates:
-- **Admin account**: `admin` / `admin@strathub.local` / `changeme`
+- **Admin account**: `admin` / `admin@tactihub.local` / `changeme`
 - **Rainbow Six Siege**: 19 maps (4 floors each), 42 operators, 55 gadgets
 - **Valorant**: 4 maps (2 floors each), 11 agents, 40 abilities
 
@@ -247,7 +247,7 @@ Log in with the default admin credentials to access the admin panel and manage g
 | Field | Value |
 |-------|-------|
 | **Username** | `admin` |
-| **Email** | `admin@strathub.local` |
+| **Email** | `admin@tactihub.local` |
 | **Password** | `changeme` |
 
 > **Important:** Change the admin password after your first login.
@@ -353,7 +353,7 @@ Supported image formats: PNG, JPG, WebP. Images are automatically processed and 
 
 ## Credits & Acknowledgments
 
-StratHub is developed by **Niklas Kronig**.
+TactiHub is developed by **Niklas Kronig**.
 
 This project is based on and inspired by two original open-source projects:
 
@@ -363,10 +363,10 @@ A real-time collaborative map planning tool built with Node.js, Express and Sock
 ### [r6-maps](https://github.com/jayfoe/r6-maps) by jayfoe
 A battle plan management system built with Laravel and Vue.js. It provided the blueprint for user authentication, database persistence, battle plan CRUD, the voting system, operator management, and the admin panel architecture.
 
-Both projects have been inactive for several years. StratHub merges their best concepts into a modern TypeScript application with a completely rewritten codebase, updated tech stack, and additional features.
+Both projects have been inactive for several years. TactiHub merges their best concepts into a modern TypeScript application with a completely rewritten codebase, updated tech stack, and additional features.
 
 ---
 
 ## Disclaimer
 
-StratHub is a fan-made tool and is not affiliated with, endorsed by, or connected to Ubisoft, Riot Games, or any other game publisher. All game names, logos, and related assets are trademarks of their respective owners. Map images and operator/agent icons are property of their respective game publishers and are used for informational and educational purposes only.
+TactiHub is a fan-made tool and is not affiliated with, endorsed by, or connected to Ubisoft, Riot Games, or any other game publisher. All game names, logos, and related assets are trademarks of their respective owners. Map images and operator/agent icons are property of their respective game publishers and are used for informational and educational purposes only.

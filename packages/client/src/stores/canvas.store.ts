@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Tool, DEFAULT_COLOR, DEFAULT_LINE_WIDTH, DEFAULT_FONT_SIZE, ZOOM_MIN, ZOOM_MAX } from '@strathub/shared';
+import { Tool, DEFAULT_COLOR, DEFAULT_LINE_WIDTH, DEFAULT_FONT_SIZE, ZOOM_MIN, ZOOM_MAX } from '@tactihub/shared';
 
 interface DrawHistoryEntry {
   id: string;

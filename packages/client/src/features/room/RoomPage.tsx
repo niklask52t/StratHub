@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { ArrowLeft, Copy, Users, AlertTriangle } from 'lucide-react';
-import type { CursorPosition } from '@strathub/shared';
+import type { CursorPosition } from '@tactihub/shared';
 
 export default function RoomPage() {
   const { connectionString } = useParams<{ connectionString: string }>();

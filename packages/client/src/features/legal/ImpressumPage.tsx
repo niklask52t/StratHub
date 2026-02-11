@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ExternalLink } from 'lucide-react';
-import { APP_VERSION } from '@strathub/shared';
+import { APP_VERSION } from '@tactihub/shared';
 
 export default function ImpressumPage() {
   return (
@@ -21,7 +21,7 @@ export default function ImpressumPage() {
           <CardContent className="space-y-2">
             <p className="text-lg font-medium">Niklas Kronig</p>
             <p className="text-muted-foreground">
-              StratHub is a personal project developed and maintained by Niklas Kronig.
+              TactiHub is a personal project developed and maintained by Niklas Kronig.
             </p>
           </CardContent>
         </Card>
@@ -29,17 +29,17 @@ export default function ImpressumPage() {
         {/* About */}
         <Card>
           <CardHeader>
-            <CardTitle>About StratHub</CardTitle>
+            <CardTitle>About TactiHub</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              StratHub is a modern, collaborative strategy planning tool for competitive games.
+              TactiHub is a modern, collaborative strategy planning tool for competitive games.
               It allows teams to draw tactics on game maps, share battle plans, and coordinate
               strategies in real-time.
             </p>
             <p className="text-muted-foreground">
               This project is built upon the ideas and work of two original open-source projects
-              that are unfortunately no longer actively maintained. StratHub merges their best
+              that are unfortunately no longer actively maintained. TactiHub merges their best
               features into a single, modern application with a new tech stack and additional functionality.
             </p>
           </CardContent>
@@ -51,8 +51,8 @@ export default function ImpressumPage() {
         <div>
           <h2 className="text-2xl font-bold mb-4">Based On</h2>
           <p className="text-muted-foreground mb-6">
-            StratHub would not exist without these two projects. While both have been inactive for
-            several years, they laid the groundwork for what StratHub is today.
+            TactiHub would not exist without these two projects. While both have been inactive for
+            several years, they laid the groundwork for what TactiHub is today.
           </p>
 
           <div className="grid gap-6 md:grid-cols-2">
@@ -158,7 +158,7 @@ export default function ImpressumPage() {
                 <Badge variant="outline">v1.1.0</Badge>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
-                <li>Branding update (StratHub logo, orange/red color scheme)</li>
+                <li>Branding update (TactiHub logo, orange/red color scheme)</li>
                 <li>Impressum page with credits to original projects</li>
                 <li>README and CLAUDE.md documentation</li>
               </ul>
@@ -188,7 +188,7 @@ export default function ImpressumPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              StratHub is built as a modern TypeScript monorepo using:
+              TactiHub is built as a modern TypeScript monorepo using:
             </p>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
               <li>React + Vite (Frontend)</li>
@@ -208,12 +208,12 @@ export default function ImpressumPage() {
           </CardHeader>
           <CardContent>
             <a
-              href="https://github.com/niklask52t/StratHub"
+              href="https://github.com/niklask52t/TactiHub"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-primary hover:underline"
             >
-              github.com/niklask52t/StratHub
+              github.com/niklask52t/TactiHub
               <ExternalLink className="h-4 w-4" />
             </a>
           </CardContent>
@@ -226,7 +226,7 @@ export default function ImpressumPage() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
             <p>
-              StratHub is a fan-made tool and is not affiliated with, endorsed by, or connected
+              TactiHub is a fan-made tool and is not affiliated with, endorsed by, or connected
               to Ubisoft, Riot Games, or any other game publisher. All game names, logos, and
               related assets are trademarks of their respective owners.
             </p>

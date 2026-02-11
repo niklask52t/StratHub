@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { LogOut, User, Shield } from 'lucide-react';
-import { APP_VERSION } from '@strathub/shared';
+import { APP_VERSION } from '@tactihub/shared';
 import { apiPost } from '@/lib/api';
 
 export function AppLayout() {
@@ -25,7 +25,7 @@ export function AppLayout() {
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between px-4">
           <Link to="/" className="flex items-center">
-            <img src="/strathub_logo.png" alt="StratHub" className="h-8" />
+            <img src="/tactihub_logo.png" alt="TactiHub" className="h-8" />
           </Link>
 
           <div className="flex items-center gap-2">
@@ -72,7 +72,7 @@ export function AppLayout() {
 
       <footer className="border-t py-4">
         <div className="container flex items-center justify-between px-4 text-xs text-muted-foreground">
-          <span>StratHub v{APP_VERSION} &mdash; by Niklas Kronig</span>
+          <span>TactiHub v{APP_VERSION} &mdash; by Niklas Kronig</span>
           <div className="flex items-center gap-4">
             <Link to="/help" className="hover:text-foreground transition-colors">Help</Link>
             <Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link>

@@ -4,8 +4,8 @@ import { nanoid } from 'nanoid';
 import { eq, and, isNull, lt } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { users, registrationTokens, settings } from '../db/schema/index.js';
-import type { TokenPayload, UserRole } from '@strathub/shared';
-import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY_SECONDS } from '@strathub/shared';
+import type { TokenPayload, UserRole } from '@tactihub/shared';
+import { ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY_SECONDS } from '@tactihub/shared';
 import type Redis from 'ioredis';
 
 export function generateAccessToken(userId: string, role: UserRole): string {

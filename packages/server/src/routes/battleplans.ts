@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { db } from '../db/connection.js';
 import { battleplans, battleplanFloors, draws, operatorSlots, mapFloors, votes, users, operators } from '../db/schema/index.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
-import { MAX_OPERATOR_SLOTS } from '@strathub/shared';
+import { MAX_OPERATOR_SLOTS } from '@tactihub/shared';
 
 async function getBattleplanWithDetails(id: string, userId?: string) {
   const [plan] = await db.select().from(battleplans).where(eq(battleplans.id, id));

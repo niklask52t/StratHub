@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Operator } from '@strathub/shared';
+import type { Operator } from '@tactihub/shared';
 
 interface Slot {
   id: string;

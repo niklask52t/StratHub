@@ -1,16 +1,16 @@
-# CLAUDE.md — StratHub Project Guide
+# CLAUDE.md — TactiHub Project Guide
 
-This file provides context for AI assistants working on the StratHub codebase.
+This file provides context for AI assistants working on the TactiHub codebase.
 
 ---
 
-## What is StratHub?
+## What is TactiHub?
 
-StratHub is a real-time collaborative strategy planning tool for competitive games (Rainbow Six Siege, Valorant, etc.). Users can draw tactics on game maps, save/share battle plans, and collaborate in rooms with live cursors and drawing sync.
+TactiHub is a real-time collaborative strategy planning tool for competitive games (Rainbow Six Siege, Valorant, etc.). Users can draw tactics on game maps, save/share battle plans, and collaborate in rooms with live cursors and drawing sync.
 
 **Author**: Niklas Kronig
 **Version**: 1.2.1
-**Repo**: https://github.com/niklask52t/StratHub
+**Repo**: https://github.com/niklask52t/TactiHub
 **Based on**: [r6-map-planner](https://github.com/prayansh/r6-map-planner) (Node/Express/Socket.IO) and [r6-maps](https://github.com/jayfoe/r6-maps) (Laravel/Vue)
 
 ---
@@ -21,16 +21,16 @@ This is a **pnpm monorepo** with 3 packages:
 
 ```
 packages/
-  shared/   → @strathub/shared  — TypeScript types, enums, constants (incl. APP_VERSION)
-  server/   → @strathub/server  — Fastify 5 API + Socket.IO 4.8
-  client/   → @strathub/client  — React 19 + Vite 6 SPA
+  shared/   → @tactihub/shared  — TypeScript types, enums, constants (incl. APP_VERSION)
+  server/   → @tactihub/server  — Fastify 5 API + Socket.IO 4.8
+  client/   → @tactihub/client  — React 19 + Vite 6 SPA
 ```
 
 ### Package Dependencies
 - `shared` has no internal dependencies (standalone types)
 - `server` depends on `shared` (workspace:*)
 - `client` depends on `shared` (workspace:*)
-- Always build `shared` first: `pnpm --filter @strathub/shared build`
+- Always build `shared` first: `pnpm --filter @tactihub/shared build`
 
 ---
 
@@ -133,7 +133,7 @@ packages/
 - **Dark mode only** (class="dark" on html element)
 - **Brand colors**: Orange/Red primary (#fd7100 → #da2c00), Dark blue-grays (#c3c9cc → #3c4653)
 - **CSS**: Tailwind v4 with CSS theme variables in `src/index.css` using oklch color space
-- **Logo**: `public/strathub_logo.png` (icon + text), `public/strathub_icon.png` (icon only, used as favicon)
+- **Logo**: `public/tactihub_logo.png` (icon + text), `public/tactihub_icon.png` (icon only, used as favicon)
 
 ---
 
@@ -159,7 +159,7 @@ docker compose down -v      # Stop + delete all data
 - `tsconfig.node.json` in client is for vite.config.ts only
 - `noUnusedLocals` and `noUnusedParameters` are enabled in client — remove unused imports
 - Seed data includes: 1 admin user, 2 games (R6 + Valorant), maps with floors, operators/agents, gadgets/abilities
-- Admin login after seed: `admin` / `admin@strathub.local` / `changeme`
+- Admin login after seed: `admin` / `admin@tactihub.local` / `changeme`
 - Upload directory structure: `uploads/{games,maps,operators,gadgets}/`
 - Images uploaded via admin panel are processed by Sharp (resized, converted to WebP)
 

@@ -18,7 +18,7 @@ function getTransporter(): Transporter {
   return transporter;
 }
 
-const FROM = process.env.SMTP_FROM || 'noreply@strathub.local';
+const FROM = process.env.SMTP_FROM || 'noreply@tactihub.local';
 const BASE_URL = process.env.VITE_API_URL || 'http://localhost:3001';
 
 export async function sendVerificationEmail(email: string, token: string) {
@@ -27,9 +27,9 @@ export async function sendVerificationEmail(email: string, token: string) {
   await getTransporter().sendMail({
     from: FROM,
     to: email,
-    subject: 'Verify your StratHub email',
+    subject: 'Verify your TactiHub email',
     html: `
-      <h1>Welcome to StratHub!</h1>
+      <h1>Welcome to TactiHub!</h1>
       <p>Please verify your email address by clicking the link below:</p>
       <a href="${verifyUrl}">${verifyUrl}</a>
       <p>This link will expire in 24 hours.</p>
@@ -43,7 +43,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   await getTransporter().sendMail({
     from: FROM,
     to: email,
-    subject: 'Reset your StratHub password',
+    subject: 'Reset your TactiHub password',
     html: `
       <h1>Password Reset</h1>
       <p>You requested a password reset. Click the link below to set a new password:</p>

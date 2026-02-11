@@ -1,8 +1,8 @@
 import type { Server } from 'socket.io';
 import type Redis from 'ioredis';
 import jwt from 'jsonwebtoken';
-import type { TokenPayload } from '@strathub/shared';
-import { COLORS_ARRAY } from '@strathub/shared';
+import type { TokenPayload } from '@tactihub/shared';
+import { COLORS_ARRAY } from '@tactihub/shared';
 import { setupRoomHandlers } from './handlers/room.js';
 import { setupDrawingHandlers } from './handlers/drawing.js';
 import { setupCursorHandlers } from './handlers/cursor.js';

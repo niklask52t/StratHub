@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: strathub
-      POSTGRES_PASSWORD: strathub
-      POSTGRES_DB: strathub
+      POSTGRES_USER: tactihub
+      POSTGRES_PASSWORD: tactihub
+      POSTGRES_DB: tactihub
     ports:
       - "5432:5432"
     volumes:

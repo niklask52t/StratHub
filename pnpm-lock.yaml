@@ -59,7 +59,7 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.1.6
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@strathub/shared':
+      '@tactihub/shared':
         specifier: workspace:*
         version: link:../shared
       '@tanstack/react-query':
@@ -147,7 +147,7 @@ importers:
       '@fastify/static':
         specifier: ^8.1.0
         version: 8.3.0
-      '@strathub/shared':
+      '@tactihub/shared':
         specifier: workspace:*
         version: link:../shared
       bcrypt:
