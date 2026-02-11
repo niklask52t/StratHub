@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { LogOut, User, Shield } from 'lucide-react';
+import { APP_VERSION } from '@strathub/shared';
 import { apiPost } from '@/lib/api';
 
 export function AppLayout() {
@@ -71,10 +72,12 @@ export function AppLayout() {
 
       <footer className="border-t py-4">
         <div className="container flex items-center justify-between px-4 text-xs text-muted-foreground">
-          <span>StratHub &mdash; by Niklas Kronig</span>
-          <Link to="/impressum" className="hover:text-foreground transition-colors">
-            Impressum
-          </Link>
+          <span>StratHub v{APP_VERSION} &mdash; by Niklas Kronig</span>
+          <div className="flex items-center gap-4">
+            <Link to="/help" className="hover:text-foreground transition-colors">Help</Link>
+            <Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
+            <Link to="/impressum" className="hover:text-foreground transition-colors">Impressum</Link>
+          </div>
         </div>
       </footer>
     </div>

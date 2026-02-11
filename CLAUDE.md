@@ -9,6 +9,8 @@ This file provides context for AI assistants working on the StratHub codebase.
 StratHub is a real-time collaborative strategy planning tool for competitive games (Rainbow Six Siege, Valorant, etc.). Users can draw tactics on game maps, save/share battle plans, and collaborate in rooms with live cursors and drawing sync.
 
 **Author**: Niklas Kronig
+**Version**: 1.2.1
+**Repo**: https://github.com/niklask52t/StratHub
 **Based on**: [r6-map-planner](https://github.com/prayansh/r6-map-planner) (Node/Express/Socket.IO) and [r6-maps](https://github.com/jayfoe/r6-maps) (Laravel/Vue)
 
 ---
@@ -19,7 +21,7 @@ This is a **pnpm monorepo** with 3 packages:
 
 ```
 packages/
-  shared/   → @strathub/shared  — TypeScript types, enums, constants
+  shared/   → @strathub/shared  — TypeScript types, enums, constants (incl. APP_VERSION)
   server/   → @strathub/server  — Fastify 5 API + Socket.IO 4.8
   client/   → @strathub/client  — React 19 + Vite 6 SPA
 ```
@@ -41,7 +43,7 @@ packages/
 - **Backend**: Fastify 5 with plugins (@fastify/cors, @fastify/cookie, @fastify/multipart, @fastify/rate-limit, @fastify/static)
 - **Database**: PostgreSQL 16 via Drizzle ORM (drizzle-kit for migrations)
 - **Cache/Sessions**: Redis 7 via ioredis
-- **Realtime**: Socket.IO 4.8 (JWT auth at handshake)
+- **Realtime**: Socket.IO 4.8 (JWT auth at handshake, guests allowed without token)
 - **Auth**: JWT access tokens (15min) + refresh tokens (7d, httpOnly cookie, stored in Redis)
 - **Email**: Nodemailer
 - **Images**: Sharp (resize + WebP conversion)
@@ -63,16 +65,37 @@ packages/
 2. **Drawings layer** — All persisted/committed draws
 3. **Active layer** — Current drawing action + peer cursors
 
+### Viewport (Zoom + Pan)
+- CSS `transform: translate(${offsetX}px, ${offsetY}px) scale(${scale})` on the canvas container
+- `transformOrigin: '0 0'` — zoom/pan works via CSS, not canvas redraw
+- Coordinate conversion: `x = (clientX - containerLeft - offsetX) / scale`
+- Zoom centered on cursor via `zoomTo(newScale, pivotX, pivotY)` in Zustand store
+- Zoom limits: `ZOOM_MIN = 0.25`, `ZOOM_MAX = 4`, `ZOOM_STEP = 0.1`
+
+### Draw Persistence (Socket vs REST)
+- **Socket.IO** handlers are **broadcast-only** — they relay events to other room participants
+- **REST API** handles database persistence (POST to create draws, DELETE to soft-delete)
+- This avoids the dual-write bug where draws were inserted both via socket and REST
+
+### Undo/Redo
+- `myDrawHistory` and `undoStack` in canvas Zustand store
+- `pushMyDraw(entry)` after REST create returns IDs
+- `popUndo()` → delete via REST + socket broadcast
+- `popRedo()` → recreate via REST + socket broadcast
+- Keyboard: Ctrl+Z (undo), Ctrl+Y / Ctrl+Shift+Z (redo)
+
 ### Auth Flow
 1. Register → email verification sent → must verify before login
 2. Login → access token (15min) + refresh token (7d httpOnly cookie + Redis)
 3. Token refresh → POST /api/auth/refresh returns new access token
 4. Admin can toggle public registration and create invite tokens
+5. **Guests**: Socket connects without token → userId = `guest-{socketId}`, drawing events blocked server-side
 
 ### Socket.IO Events
 - Client emits: `room:join`, `room:leave`, `cursor:move`, `draw:create`, `draw:delete`, `draw:update`, `operator-slot:update`, `battleplan:change`
 - Server emits: `room:joined`, `room:user-joined`, `room:user-left`, `cursor:moved`, `draw:created`, `draw:deleted`, `draw:updated`, `operator-slot:updated`, `battleplan:changed`
 - 10 colors in pool, assigned to users on room join
+- Guest connections are allowed but cannot emit draw/update events
 
 ---
 
@@ -95,10 +118,11 @@ packages/
 - Zustand stores in `src/stores/`
 - API/Socket utilities in `src/lib/`
 - Path alias: `@/*` → `./src/*`
+- Canvas utilities in `src/features/canvas/utils/` (e.g., `hitTest.ts`)
 
 ### Shared
 - Types in `src/types/` (auth, game, battleplan, room, admin, api, canvas)
-- Constants in `src/constants/index.ts`
+- Constants in `src/constants/index.ts` (includes `APP_VERSION`)
 - `Tool` enum is in `src/types/canvas.ts`
 - Barrel export from `src/index.ts` (uses `export type *` for type-only re-exports)
 
@@ -141,6 +165,15 @@ docker compose down -v      # Stop + delete all data
 
 ---
 
+## Versioning
+
+- Version is defined in two places: `package.json` (root) and `APP_VERSION` in `packages/shared/src/constants/index.ts`
+- Both must be kept in sync when bumping versions
+- Version is displayed in the footer (AppLayout) and Impressum page
+- Version history is maintained in the Impressum page component
+
+---
+
 ## API Endpoints Overview
 
 ### Auth: `/api/auth/`
@@ -151,13 +184,32 @@ GET verify-email/:token, me
 GET games, games/:slug, games/:slug/maps/:mapSlug, games/:slug/operators, games/:slug/gadgets
 
 ### Battleplans: `/api/battleplans/`
-GET (public, paginated), GET mine, POST create, GET/:id, PUT/:id, DELETE/:id, POST/:id/copy, POST/:id/vote
+GET (public, paginated), GET mine, POST create, GET/:id (optionalAuth), PUT/:id, DELETE/:id, POST/:id/copy, POST/:id/vote
 
 ### Draws: `/api/`
 POST battleplan-floors/:id/draws (batch), PUT draws/:id, DELETE draws/:id (soft delete)
 
 ### Rooms: `/api/rooms/`
-POST create, GET/:connString, PUT/:connString/battleplan, DELETE/:connString
+POST create (supports gameId+mapId for auto-battleplan), GET/:connString (optionalAuth), PUT/:connString/battleplan, DELETE/:connString
 
 ### Admin: `/api/admin/`
 Full CRUD for games, maps, map-floors, operators, gadgets, operator-gadgets, users, tokens, settings, stats
+
+---
+
+## Client Routes
+
+| Path | Page | Auth |
+|------|------|------|
+| `/` | HomePage | Public |
+| `/sandbox` | SandboxPage | Public |
+| `/help` | HelpPage | Public |
+| `/faq` | FAQPage | Public |
+| `/impressum` | ImpressumPage | Public |
+| `/:gameSlug` | GameDashboard | Public |
+| `/:gameSlug/plans/public` | PublicPlansPage | Public |
+| `/:gameSlug/plans/:planId` | BattleplanViewer | Public (optionalAuth on server) |
+| `/:gameSlug/plans` | MyPlansPage | Protected |
+| `/room/create` | CreateRoomPage | Protected |
+| `/room/:connectionString` | RoomPage | Public (guests read-only) |
+| `/admin/*` | Admin pages | Admin only |

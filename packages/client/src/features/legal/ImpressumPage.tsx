@@ -1,11 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ExternalLink } from 'lucide-react';
+import { APP_VERSION } from '@strathub/shared';
 
 export default function ImpressumPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-8">Impressum</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Impressum</h1>
+        <Badge variant="outline" className="text-xs">v{APP_VERSION}</Badge>
+      </div>
 
       <div className="space-y-8">
         {/* Developer Info */}
@@ -125,6 +130,57 @@ export default function ImpressumPage() {
 
         <Separator />
 
+        {/* Version History */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Version History</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="default">v1.2.1</Badge>
+                <span className="text-xs text-muted-foreground">Current</span>
+              </div>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
+                <li>Zoom + Pan (mouse wheel, pan tool, middle-click, zoom limits 25%-400%)</li>
+                <li>Eraser tool (click to delete drawings)</li>
+                <li>Undo/Redo (Ctrl+Z / Ctrl+Y, toolbar buttons)</li>
+                <li>Share battle plans by link (public toggle, share button)</li>
+                <li>Guest access (sandbox mode, read-only room viewing)</li>
+                <li>Compass overlay on canvas</li>
+                <li>Improved room creation with game/map selection flow</li>
+                <li>Help page, FAQ page, and versioned Impressum</li>
+              </ul>
+            </div>
+            <Separator />
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="outline">v1.1.0</Badge>
+              </div>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
+                <li>Branding update (StratHub logo, orange/red color scheme)</li>
+                <li>Impressum page with credits to original projects</li>
+                <li>README and CLAUDE.md documentation</li>
+              </ul>
+            </div>
+            <Separator />
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="outline">v1.0.0</Badge>
+              </div>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
+                <li>Initial release</li>
+                <li>Multi-game support (R6 Siege, Valorant)</li>
+                <li>Real-time collaboration rooms with Socket.IO</li>
+                <li>Canvas drawing (pen, line, rectangle, text, icons)</li>
+                <li>Battle plan CRUD with voting system</li>
+                <li>Admin panel for game/map/operator management</li>
+                <li>JWT authentication with email verification</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Tech Stack */}
         <Card>
           <CardHeader>
@@ -145,7 +201,25 @@ export default function ImpressumPage() {
           </CardContent>
         </Card>
 
-        {/* License / Disclaimer */}
+        {/* Source Code */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Source Code</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <a
+              href="https://github.com/niklask52t/StratHub"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-primary hover:underline"
+            >
+              github.com/niklask52t/StratHub
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </CardContent>
+        </Card>
+
+        {/* Disclaimer */}
         <Card>
           <CardHeader>
             <CardTitle>Disclaimer</CardTitle>

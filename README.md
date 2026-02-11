@@ -4,25 +4,34 @@
 
 StratHub is a real-time collaboration tool that lets teams draw tactics on game maps, create and share battle plans, and coordinate strategies together. It supports multiple games (Rainbow Six Siege, Valorant, and more) with a powerful canvas drawing system, live cursors, and persistent battle plan management.
 
-![License](https://img.shields.io/badge/license-private-red)
+![Version](https://img.shields.io/badge/version-1.2.1-orange)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
 ![Node](https://img.shields.io/badge/Node.js-20+-green)
+![License](https://img.shields.io/badge/license-MIT-brightgreen)
 
 ---
 
 ## Features
 
-- **Multi-Game Support** — Built as a generic platform. Currently ships with Rainbow Six Siege and Valorant data, but any game with top-down maps can be added through the admin panel.
+- **Multi-Game Support** — Built as a generic platform. Ships with Rainbow Six Siege and Valorant data, but any game with top-down maps can be added through the admin panel.
 - **Real-Time Collaboration** — Create rooms and draw together in real-time with Socket.IO. See teammates' cursors and drawings appear instantly.
-- **Canvas Drawing System** — 3-layer canvas (background map, persisted drawings, active layer) with tools for freehand pen, lines, rectangles, text, and operator/gadget icons.
-- **Battle Plan Management** — Save, name, and organize battle plans. Mark them as public to share with the community, or keep them private.
+- **Canvas Drawing System** — 3-layer canvas with tools for freehand pen, straight lines, rectangles, text, and operator/gadget icons.
+- **Zoom + Pan** — Mouse wheel zoom centered on cursor (25%-400%), pan tool, middle-click pan, and reset button.
+- **Eraser** — Click on any drawing to delete it with precise hit-testing.
+- **Undo / Redo** — Ctrl+Z / Ctrl+Y keyboard shortcuts and toolbar buttons.
+- **Battle Plan Management** — Save, name, and organize battle plans. Mark as public to share with the community, or keep private.
+- **Share by Link** — Public toggle + share button copies a direct link. Public plans are viewable without login.
 - **Voting System** — Upvote/downvote public battle plans to surface the best strategies.
 - **Operator/Agent Slots** — Assign operators (R6) or agents (Valorant) to 5 slots per plan, synced in real-time.
-- **Floor Switching** — Navigate multi-floor maps with keyboard shortcuts (J/K).
-- **Admin Panel** — Full CRUD management for games, maps, map floors, operators, gadgets, users, and registration tokens.
+- **Floor Switching** — Navigate multi-floor maps with keyboard shortcuts (J/K) or buttons.
+- **Compass** — SVG north indicator overlay on every canvas.
+- **Sandbox Mode** — Try drawing on any map without creating an account. Drawings are local only.
+- **Guest Access** — Rooms are viewable without login (read-only). Log in to draw.
+- **Admin Panel** — Full CRUD management for games, maps, floors, operators, gadgets, users, and registration tokens.
 - **Token-Based Registration** — Admin can toggle public registration on/off and create invite tokens for controlled access.
-- **Email Verification** — New accounts must verify their email. Unverified accounts are automatically cleaned up after 30 days.
+- **Email Verification** — New accounts must verify their email. Unverified accounts are cleaned up after 30 days.
 - **Dark Theme** — Built with a dark color scheme matching the StratHub brand (orange/red + dark grays).
+- **Help & FAQ** — Built-in help page with tool descriptions, keyboard shortcuts, and frequently asked questions.
 
 ---
 
@@ -30,7 +39,7 @@ StratHub is a real-time collaboration tool that lets teams draw tactics on game 
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| **Frontend** | React + Vite | 19.0 / 6.1 |
+| **Frontend** | React + Vite | 19.0 / 6.x |
 | **UI** | Tailwind CSS v4 + shadcn/ui | 4.0 |
 | **State** | Zustand + TanStack Query | 5.x |
 | **Routing** | React Router | 7.x |
@@ -54,16 +63,17 @@ StratHub is a real-time collaboration tool that lets teams draw tactics on game 
 ```
 StratHub/
 ├── docker-compose.yml          # PostgreSQL 16 + Redis 7
-├── package.json                # Root workspace config
+├── package.json                # Root workspace config (v1.2.1)
 ├── pnpm-workspace.yaml         # Workspace definition
 ├── tsconfig.base.json          # Shared TypeScript config
 ├── .env.example                # Environment template
+├── CLAUDE.md                   # AI assistant project guide
 │
 ├── packages/
 │   ├── shared/                 # @strathub/shared — Types, constants, enums
 │   │   └── src/
 │   │       ├── types/          # Auth, Game, Battleplan, Room, Admin, API, Canvas
-│   │       └── constants/      # Colors, defaults, limits
+│   │       └── constants/      # Colors, defaults, limits, APP_VERSION
 │   │
 │   ├── server/                 # @strathub/server — Fastify API + Socket.IO
 │   │   ├── drizzle.config.ts
@@ -74,7 +84,7 @@ StratHub/
 │   │       │   ├── connection.ts
 │   │       │   └── seed.ts     # R6 Siege + Valorant seed data
 │   │       ├── plugins/        # Fastify plugins (Redis, Auth)
-│   │       ├── middleware/      # Auth middleware (requireAuth, requireAdmin)
+│   │       ├── middleware/      # Auth middleware (requireAuth, optionalAuth, requireAdmin)
 │   │       ├── routes/         # REST API routes
 │   │       │   ├── admin/      # Admin CRUD endpoints (9 files)
 │   │       │   ├── auth.ts     # Registration, login, JWT refresh, email verify
@@ -98,13 +108,14 @@ StratHub/
 │           ├── features/
 │           │   ├── admin/      # Admin panel pages (8 pages)
 │           │   ├── auth/       # Login, Register, Forgot/Reset Password, Verify Email
-│           │   ├── battleplan/ # My Plans, Public Plans, Viewer
-│           │   ├── canvas/     # CanvasView, CanvasLayer, Toolbar, OperatorSlots
+│           │   ├── battleplan/ # My Plans, Public Plans, Viewer (with sharing)
+│           │   ├── canvas/     # CanvasView, CanvasLayer, Toolbar, Compass, hitTest
 │           │   ├── game/       # Game Dashboard
 │           │   ├── home/       # Landing page
-│           │   ├── legal/      # Impressum
-│           │   └── room/       # Create Room, Room (live collaboration)
-│           ├── stores/         # Zustand stores (auth, canvas, room)
+│           │   ├── legal/      # Impressum, Help, FAQ
+│           │   ├── room/       # Create Room (game/map flow), Room (live collaboration)
+│           │   └── sandbox/    # Sandbox (local drawing without login)
+│           ├── stores/         # Zustand stores (auth, canvas with viewport+history, room)
 │           ├── lib/            # API client, Socket.IO client, utilities
 │           └── main.tsx        # App entry point
 ```
@@ -132,7 +143,6 @@ Optional (for email features in production):
 ```bash
 git clone https://github.com/niklask52t/StratHub.git
 cd StratHub
-git checkout dev
 ```
 
 ### 2. Set up environment variables
@@ -223,7 +233,7 @@ Log in with the admin credentials to access the admin panel and manage games, ma
 ### Pull latest changes
 
 ```bash
-git pull origin dev
+git pull origin main
 ```
 
 ### Install new dependencies
