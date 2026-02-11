@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Plus, Trash2, Eye, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, Eye, ArrowLeft, Share2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface Battleplan {
@@ -113,6 +113,12 @@ export default function MyPlansPage() {
               <CardContent className="flex gap-2">
                 <Button variant="outline" size="sm" asChild>
                   <Link to={`/${gameSlug}/plans/${plan.id}`}><Eye className="mr-1 h-3 w-3" /> View</Link>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/${gameSlug}/plans/${plan.id}`);
+                  toast.success('Link copied!');
+                }}>
+                  <Share2 className="h-3 w-3" />
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => { if (confirm('Delete?')) deleteMutation.mutate(plan.id); }}>
                   <Trash2 className="h-3 w-3 text-destructive" />

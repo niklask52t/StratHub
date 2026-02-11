@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useCanvasStore } from '@/stores/canvas.store';
-import { Tool } from '@strathub/shared';
+import { Tool, ZOOM_STEP } from '@strathub/shared';
+import { hitTestDraw } from './utils/hitTest';
 
 interface Floor {
   id: string;
@@ -18,15 +19,17 @@ interface CanvasLayerProps {
   cursors?: Map<string, { x: number; y: number; color: string; userId: string }>;
 }
 
-export function CanvasLayer({ floor, readOnly = false, onDrawCreate, peerDraws, cursors }: CanvasLayerProps) {
+export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelete, peerDraws, cursors }: CanvasLayerProps) {
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const drawCanvasRef = useRef<HTMLCanvasElement>(null);
   const activeCanvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { tool, color, lineWidth, fontSize } = useCanvasStore();
+  const { tool, color, lineWidth, fontSize, offsetX, offsetY, scale, zoomTo, panBy } = useCanvasStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isPanning, setIsPanning] = useState(false);
+  const lastPanPosRef = useRef<{ x: number; y: number } | null>(null);
   const [currentPath, setCurrentPath] = useState<Array<{ x: number; y: number }>>([]);
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 1200, height: 800 });
@@ -137,16 +140,16 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, peerDraws, 
     ctx.restore();
   }
 
-  // Render cursors
+  // Render cursors + active drawing preview
   useEffect(() => {
     const canvas = activeCanvasRef.current;
-    if (!canvas || !cursors) return;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw current path
+    // Draw current path preview
     if (isDrawing && currentPath.length > 1) {
       ctx.beginPath();
       ctx.strokeStyle = color;
@@ -161,27 +164,70 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, peerDraws, 
     }
 
     // Draw peer cursors
-    for (const [, cursor] of cursors) {
-      ctx.beginPath();
-      ctx.fillStyle = cursor.color;
-      ctx.arc(cursor.x, cursor.y, 5, 0, Math.PI * 2);
-      ctx.fill();
+    if (cursors) {
+      for (const [, cursor] of cursors) {
+        ctx.beginPath();
+        ctx.fillStyle = cursor.color;
+        ctx.arc(cursor.x, cursor.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
   }, [cursors, isDrawing, currentPath, color, lineWidth]);
 
+  // Convert screen coordinates to canvas coordinates accounting for viewport transform
   const getCanvasCoords = (e: React.MouseEvent): { x: number; y: number } => {
-    const canvas = activeCanvasRef.current!;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+    const container = containerRef.current!;
+    const containerRect = container.getBoundingClientRect();
     return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
+      x: (e.clientX - containerRect.left - offsetX) / scale,
+      y: (e.clientY - containerRect.top - offsetY) / scale,
     };
   };
 
+  // Zoom with mouse wheel centered on cursor
+  const handleWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    const container = containerRef.current!;
+    const containerRect = container.getBoundingClientRect();
+    const pivotX = e.clientX - containerRect.left;
+    const pivotY = e.clientY - containerRect.top;
+    const currentScale = useCanvasStore.getState().scale;
+    const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+    zoomTo(currentScale + delta, pivotX, pivotY);
+  }, [zoomTo]);
+
+  // Attach wheel handler with passive: false to allow preventDefault
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, [handleWheel]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Pan: middle-click or Pan tool
+    if (e.button === 1 || (tool === Tool.Pan && !readOnly)) {
+      e.preventDefault();
+      setIsPanning(true);
+      lastPanPosRef.current = { x: e.clientX, y: e.clientY };
+      return;
+    }
+
     if (readOnly) return;
+
+    // Eraser: click to delete
+    if (tool === Tool.Eraser) {
+      const pos = getCanvasCoords(e);
+      const allDraws = [...(floor.draws || []), ...(peerDraws || [])];
+      for (let i = allDraws.length - 1; i >= 0; i--) {
+        if (allDraws[i]!.id && hitTestDraw(allDraws[i]!, pos.x, pos.y)) {
+          onDrawDelete?.([allDraws[i]!.id]);
+          return;
+        }
+      }
+      return;
+    }
+
     const pos = getCanvasCoords(e);
     setIsDrawing(true);
     setStartPoint(pos);
@@ -192,6 +238,15 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, peerDraws, 
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    // Pan drag
+    if (isPanning && lastPanPosRef.current) {
+      const dx = e.clientX - lastPanPosRef.current.x;
+      const dy = e.clientY - lastPanPosRef.current.y;
+      panBy(dx, dy);
+      lastPanPosRef.current = { x: e.clientX, y: e.clientY };
+      return;
+    }
+
     if (!isDrawing || readOnly) return;
     const pos = getCanvasCoords(e);
 
@@ -234,6 +289,12 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, peerDraws, 
   };
 
   const handleMouseUp = (e: React.MouseEvent) => {
+    if (isPanning) {
+      setIsPanning(false);
+      lastPanPosRef.current = null;
+      return;
+    }
+
     if (!isDrawing || readOnly) return;
     const pos = getCanvasCoords(e);
     setIsDrawing(false);
@@ -299,26 +360,60 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, peerDraws, 
     setStartPoint(null);
   };
 
+  const getCursorStyle = (): string => {
+    if (readOnly) return 'default';
+    if (isPanning) return 'grabbing';
+    if (tool === Tool.Pan) return 'grab';
+    if (tool === Tool.Eraser) return 'pointer';
+    return 'crosshair';
+  };
+
   return (
-    <div ref={containerRef} className="relative w-full overflow-auto border rounded-lg bg-black/50">
-      <div className="relative" style={{ width: canvasSize.width, height: canvasSize.height, maxWidth: '100%' }}>
+    <div
+      ref={containerRef}
+      className="relative w-full overflow-hidden border rounded-lg bg-black/50"
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      <div
+        className="relative"
+        style={{
+          width: canvasSize.width,
+          height: canvasSize.height,
+          transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
+          transformOrigin: '0 0',
+        }}
+      >
         <canvas
           ref={bgCanvasRef}
-          className="absolute inset-0 w-full h-full"
-          style={{ imageRendering: 'auto' }}
+          width={canvasSize.width}
+          height={canvasSize.height}
+          style={{ imageRendering: 'auto', position: 'absolute', inset: 0 }}
         />
         <canvas
           ref={drawCanvasRef}
-          className="absolute inset-0 w-full h-full"
+          width={canvasSize.width}
+          height={canvasSize.height}
+          style={{ position: 'absolute', inset: 0 }}
         />
         <canvas
           ref={activeCanvasRef}
-          className="absolute inset-0 w-full h-full"
-          style={{ cursor: readOnly ? 'default' : 'crosshair' }}
+          width={canvasSize.width}
+          height={canvasSize.height}
+          style={{ position: 'absolute', inset: 0, cursor: getCursorStyle() }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          onMouseLeave={() => { if (isDrawing) handleMouseUp({} as any); }}
+          onMouseLeave={() => {
+            if (isPanning) {
+              setIsPanning(false);
+              lastPanPosRef.current = null;
+            }
+            if (isDrawing) {
+              setIsDrawing(false);
+              setCurrentPath([]);
+              setStartPoint(null);
+            }
+          }}
         />
       </div>
     </div>

@@ -21,6 +21,7 @@ const PublicPlansPage = lazy(() => import('@/features/battleplan/PublicPlansPage
 const BattleplanViewer = lazy(() => import('@/features/battleplan/BattleplanViewer'));
 const CreateRoomPage = lazy(() => import('@/features/room/CreateRoomPage'));
 const RoomPage = lazy(() => import('@/features/room/RoomPage'));
+const SandboxPage = lazy(() => import('@/features/sandbox/SandboxPage'));
 const AdminDashboard = lazy(() => import('@/features/admin/DashboardPage'));
 const AdminGames = lazy(() => import('@/features/admin/games/GamesPage'));
 const AdminGameMaps = lazy(() => import('@/features/admin/maps/MapsPage'));
@@ -71,13 +72,14 @@ export function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/impressum" element={<ImpressumPage />} />
+          <Route path="/sandbox" element={<SandboxPage />} />
           <Route path="/:gameSlug" element={<GameDashboard />} />
           <Route path="/:gameSlug/plans/public" element={<PublicPlansPage />} />
+          <Route path="/:gameSlug/plans/:planId" element={<BattleplanViewer />} />
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/:gameSlug/plans" element={<MyPlansPage />} />
-            <Route path="/:gameSlug/plans/:planId" element={<BattleplanViewer />} />
             <Route path="/room/create" element={<CreateRoomPage />} />
           </Route>
 
@@ -96,10 +98,8 @@ export function App() {
           </Route>
         </Route>
 
-        {/* Room (full-screen, no layout) */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/room/:connectionString" element={<RoomPage />} />
-        </Route>
+        {/* Room (full-screen, no layout — open to guests too) */}
+        <Route path="/room/:connectionString" element={<RoomPage />} />
       </Routes>
     </Suspense>
   );

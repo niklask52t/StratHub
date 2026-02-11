@@ -1,10 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
-import { apiGet, apiPost } from '@/lib/api';
+import { apiGet, apiPost, apiPut } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Copy } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Copy, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth.store';
 import { CanvasView } from '@/features/canvas/CanvasView';
@@ -25,6 +27,8 @@ interface BattleplanFull {
 export default function BattleplanViewer() {
   const { gameSlug, planId } = useParams<{ gameSlug: string; planId: string }>();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const userId = useAuthStore((s) => s.user?.id);
+  const queryClient = useQueryClient();
 
   const { data } = useQuery({
     queryKey: ['battleplan', planId],
@@ -32,6 +36,16 @@ export default function BattleplanViewer() {
   });
 
   const plan = data?.data;
+  const isOwner = plan && userId && plan.ownerId === userId;
+
+  const togglePublicMutation = useMutation({
+    mutationFn: (isPublic: boolean) => apiPut(`/battleplans/${planId}`, { isPublic }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['battleplan', planId] });
+      toast.success('Visibility updated');
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
 
   const handleCopy = async () => {
     try {
@@ -40,6 +54,15 @@ export default function BattleplanViewer() {
     } catch (err: any) {
       toast.error(err.message);
     }
+  };
+
+  const handleShare = () => {
+    if (plan && !plan.isPublic && isOwner) {
+      toast.error('Make the plan public first to share it.');
+      return;
+    }
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Link copied to clipboard!');
   };
 
   if (!plan) return <div className="container mx-auto p-8">Loading...</div>;
@@ -57,6 +80,22 @@ export default function BattleplanViewer() {
         <div className="flex items-center gap-2">
           {plan.isPublic && <Badge>Public</Badge>}
           <span className="text-sm font-medium">Votes: {plan.voteCount ?? 0}</span>
+
+          {isOwner && (
+            <div className="flex items-center gap-2 ml-2">
+              <Switch
+                id="public-toggle"
+                checked={plan.isPublic}
+                onCheckedChange={(checked) => togglePublicMutation.mutate(checked)}
+              />
+              <Label htmlFor="public-toggle" className="text-xs">Public</Label>
+            </div>
+          )}
+
+          <Button variant="outline" size="sm" onClick={handleShare}>
+            <Share2 className="mr-1 h-3 w-3" /> Share
+          </Button>
+
           {isAuthenticated && (
             <Button variant="outline" size="sm" onClick={handleCopy}><Copy className="mr-1 h-3 w-3" /> Copy</Button>
           )}
@@ -72,7 +111,6 @@ export default function BattleplanViewer() {
 
       <CanvasView
         floors={plan.floors || []}
-        operatorSlots={plan.operatorSlots || []}
         readOnly
       />
     </div>

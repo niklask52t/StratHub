@@ -32,12 +32,16 @@ export function assignColor(state: RoomState): string {
   return color;
 }
 
-export function setupSocket(io: Server, redis: Redis) {
-  // Auth middleware
+export function setupSocket(io: Server, _redis: Redis) {
+  // Auth middleware — allow guests when no token is provided
   io.use(async (socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
-      return next(new Error('Authentication required'));
+      // Guest connection
+      (socket as any).userId = `guest-${socket.id}`;
+      (socket as any).username = 'Guest';
+      (socket as any).isGuest = true;
+      return next();
     }
 
     try {
@@ -49,6 +53,7 @@ export function setupSocket(io: Server, redis: Redis) {
 
       (socket as any).userId = user.id;
       (socket as any).username = user.username;
+      (socket as any).isGuest = false;
       next();
     } catch {
       next(new Error('Invalid token'));

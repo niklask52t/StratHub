@@ -41,6 +41,9 @@ export default function HomePage() {
               <Button size="lg" variant="outline" asChild>
                 <Link to="/auth/login">Login</Link>
               </Button>
+              <Button size="lg" variant="ghost" asChild>
+                <Link to="/sandbox">Try Without Login</Link>
+              </Button>
             </>
           )}
         </div>

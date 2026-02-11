@@ -1,24 +1,29 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { apiGet, apiPost } from '@/lib/api';
+import { apiGet, apiPost, apiDelete } from '@/lib/api';
 import { useRoomStore } from '@/stores/room.store';
+import { useCanvasStore } from '@/stores/canvas.store';
+import { useAuthStore } from '@/stores/auth.store';
 import { getSocket, connectSocket, disconnectSocket } from '@/lib/socket';
 import { CanvasView } from '@/features/canvas/CanvasView';
 import { Toolbar } from '@/features/canvas/tools/Toolbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Copy, Users } from 'lucide-react';
+import { ArrowLeft, Copy, Users, AlertTriangle } from 'lucide-react';
 import type { CursorPosition } from '@strathub/shared';
 
 export default function RoomPage() {
   const { connectionString } = useParams<{ connectionString: string }>();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const {
     users, battleplan,
     setUsers, addUser, removeUser, setMyColor, setBattleplan,
     updateCursor, removeCursor, setConnectionString, reset,
   } = useRoomStore();
+
+  const { pushMyDraw, popUndo, popRedo, clearHistory } = useCanvasStore();
 
   useEffect(() => {
     if (!connectionString) return;
@@ -49,20 +54,15 @@ export default function RoomPage() {
     });
 
     socket.on('draw:created', () => {
-      // Peer draws - trigger re-render
-      setBattleplan(battleplan ? { ...battleplan } : null);
+      refetchPlan();
     });
 
     socket.on('draw:deleted', () => {
-      setBattleplan(battleplan ? { ...battleplan } : null);
+      refetchPlan();
     });
 
     socket.on('battleplan:changed', ({ battleplan: bp }) => {
       setBattleplan(bp);
-    });
-
-    socket.on('operator-slot:updated', () => {
-      // Update local state
     });
 
     return () => {
@@ -74,8 +74,8 @@ export default function RoomPage() {
       socket.off('draw:created');
       socket.off('draw:deleted');
       socket.off('battleplan:changed');
-      socket.off('operator-slot:updated');
       disconnectSocket();
+      clearHistory();
       reset();
     };
   }, [connectionString]);
@@ -88,7 +88,7 @@ export default function RoomPage() {
   });
 
   // Load battleplan if room has one
-  const { data: planData } = useQuery({
+  const { data: planData, refetch: refetchPlan } = useQuery({
     queryKey: ['battleplan', roomData?.data?.battleplanId],
     queryFn: () => apiGet<{ data: any }>(`/battleplans/${roomData?.data?.battleplanId}`),
     enabled: !!roomData?.data?.battleplanId,
@@ -100,18 +100,61 @@ export default function RoomPage() {
     }
   }, [planData]);
 
-  const handleDrawCreate = (floorId: string, draws: any[]) => {
+  const handleDrawCreate = useCallback(async (floorId: string, drawItems: any[]) => {
     const socket = getSocket();
-    socket.emit('draw:create', { battleplanFloorId: floorId, draws });
+    socket.emit('draw:create', { battleplanFloorId: floorId, draws: drawItems });
 
-    // Also persist via API
-    apiPost(`/battleplan-floors/${floorId}/draws`, { items: draws }).catch(() => {});
-  };
+    try {
+      const res = await apiPost<{ data: any[] }>(`/battleplan-floors/${floorId}/draws`, { items: drawItems });
+      // Track each created draw for undo
+      for (const created of res.data) {
+        pushMyDraw({ id: created.id, floorId, payload: drawItems[0] });
+      }
+    } catch {
+      // Persistence failed silently
+    }
+  }, [pushMyDraw]);
 
-  const handleDrawDelete = (drawIds: string[]) => {
+  const handleDrawDelete = useCallback(async (drawIds: string[]) => {
     const socket = getSocket();
     socket.emit('draw:delete', { drawIds });
-  };
+
+    for (const id of drawIds) {
+      apiDelete(`/draws/${id}`).catch(() => {});
+    }
+
+    refetchPlan();
+  }, [refetchPlan]);
+
+  const handleUndo = useCallback(() => {
+    const entry = popUndo();
+    if (entry) {
+      handleDrawDelete([entry.id]);
+    }
+  }, [popUndo, handleDrawDelete]);
+
+  const handleRedo = useCallback(async () => {
+    const entry = popRedo();
+    if (entry) {
+      await handleDrawCreate(entry.floorId, [entry.payload]);
+    }
+  }, [popRedo, handleDrawCreate]);
+
+  // Keyboard shortcuts: Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isAuthenticated) return;
+      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleUndo, handleRedo, isAuthenticated]);
 
   const copyInviteLink = () => {
     navigator.clipboard.writeText(`${window.location.origin}/room/${connectionString}`);
@@ -120,6 +163,14 @@ export default function RoomPage() {
 
   return (
     <div className="h-screen flex flex-col bg-background">
+      {/* Guest banner */}
+      {!isAuthenticated && (
+        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-destructive/10 border-b border-destructive/20 text-sm text-destructive">
+          <AlertTriangle className="h-4 w-4" />
+          Viewing as guest. <Link to="/auth/login" className="underline font-medium">Log in</Link> to draw.
+        </div>
+      )}
+
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 border-b bg-background/95">
         <div className="flex items-center gap-4">
@@ -145,16 +196,18 @@ export default function RoomPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="flex justify-center py-2 border-b">
-        <Toolbar />
-      </div>
+      {isAuthenticated && (
+        <div className="flex justify-center py-2 border-b">
+          <Toolbar onUndo={handleUndo} onRedo={handleRedo} />
+        </div>
+      )}
 
       {/* Canvas area */}
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-hidden p-4">
         {battleplan?.floors ? (
           <CanvasView
             floors={battleplan.floors}
-            operatorSlots={battleplan.operatorSlots}
+            readOnly={!isAuthenticated}
             onDrawCreate={handleDrawCreate}
             onDrawDelete={handleDrawDelete}
           />
