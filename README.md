@@ -242,7 +242,15 @@ The Vite dev server proxies API requests (`/api/*`) and Socket.IO to the Fastify
 
 Navigate to `http://localhost:5173` in your browser.
 
-Log in with the admin credentials to access the admin panel and manage games, maps, operators, etc.
+Log in with the default admin credentials to access the admin panel and manage games, maps, operators, etc.
+
+| Field | Value |
+|-------|-------|
+| **Username** | `admin` |
+| **Email** | `admin@strathub.local` |
+| **Password** | `changeme` |
+
+> **Important:** Change the admin password after your first login.
 
 ---
 
