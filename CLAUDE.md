@@ -65,7 +65,8 @@ packages/
 - View mode switcher appears in top-left of canvas when >1 variant is available
 - Default is always Blueprint; switching swaps the background image 1:1 (same dimensions)
 - Admin can upload variants via Floor Layout management (`/admin/maps/:mapId/floors`)
-- Import script: `pnpm --filter @tactihub/server import:maps <source-folder>` processes JPGs→WebP and updates DB
+- Pre-seeded images are committed to repo under `packages/server/uploads/maps/` (165 WebP) and `packages/server/uploads/gadgets/` (23 WebP)
+- Re-process from source folder: `pnpm --filter @tactihub/server tsx src/scripts/process-images.ts <source-folder>`
 
 ### Canvas System (3 layers per floor)
 1. **Background layer** — Map floor image (variant based on view mode selector)
@@ -173,7 +174,7 @@ pnpm db:migrate             # Apply database migrations
 pnpm db:seed                # Seed admin user + game data
 pnpm db:push                # Push schema changes directly (dev only)
 pnpm db:studio              # Open Drizzle Studio
-pnpm import:maps <path>     # One-time import of floor images + gadget icons
+# Map/gadget images are pre-seeded in repo (uploads/maps/ + uploads/gadgets/)
 docker compose up -d        # Start PostgreSQL + Redis
 docker compose down         # Stop containers (data stays in volumes)
 docker compose down -v      # Stop + delete ALL data (pgdata + redisdata volumes)
@@ -189,13 +190,14 @@ docker compose down -v      # Stop + delete ALL data (pgdata + redisdata volumes
 - `noUnusedLocals` and `noUnusedParameters` are enabled in client — remove unused imports
 - Seed data includes: 1 admin user, 2 games (R6 + Valorant), 21 R6 maps with correct floor counts, operators/agents, gadgets/abilities
 - Admin login after seed: `admin` / `admin@tactihub.local` / `changeme` (forced credential change on first login)
-- Upload directory structure: `uploads/{games,maps,operators,gadgets}/`
-- Images uploaded via admin panel are processed by Sharp (resized, converted to WebP)
+- Upload directory structure: `uploads/{games,maps,operators,gadgets}/` — maps/ and gadgets/ are tracked in git (pre-seeded), games/ and operators/ are gitignored
+- Pre-seeded images: 165 map floor WebP + 23 gadget icon WebP committed to repo, referenced by seed via deterministic names (`{slug}-{num}-{variant}.webp`)
+- Images uploaded via admin panel are processed by Sharp (resized, converted to WebP) and override the seed paths in the DB
 - `processUpload()` returns `null` for empty file buffers (e.g. form submits without selecting a file) — callers skip processing
 - Radix UI Switch sends "on" in FormData, not "true" — client normalizes to "true"/"false" before sending
 - Admin floor management: `/admin/maps/:mapId/floors` — upload blueprint, darkprint, and whiteprint images per floor
 - `map_floors` table has: `imagePath` (blueprint, required), `darkImagePath`, `whiteImagePath` (both nullable)
-- Import script: `packages/server/src/scripts/import-maps.ts` — one-time batch import of floor images + gadget icons from a source folder
+- Process script: `packages/server/src/scripts/process-images.ts` — converts source images to WebP with deterministic names (no DB access needed)
 
 ---
 

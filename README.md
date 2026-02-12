@@ -32,7 +32,7 @@ TactiHub is a real-time collaboration tool that lets teams draw tactics on game 
 - **Token-Based Registration** — Admin can toggle public registration on/off and create invite tokens for controlled access.
 - **Email Verification** — New accounts must verify their email. Admins can also manually verify users from the admin panel.
 - **Floor Layout Management** — Upload and manage floor layout images (blueprint, darkprint, whiteprint) per map through the admin panel with reordering support.
-- **Batch Image Import** — One-time import script processes floor images and gadget icons from a source folder (`pnpm import:maps <path>`).
+- **Pre-Seeded Map Images** — 165 R6 map floor images (Blueprint/Darkprint/Whiteprint) + 23 gadget icons included in the repo as WebP. Works out of the box after seeding.
 - **Dark Theme** — Built with a dark color scheme matching the TactiHub brand (see color palette below).
 - **Help & FAQ** — Built-in help page with tool descriptions, keyboard shortcuts, and frequently asked questions.
 
@@ -105,7 +105,7 @@ TactiHub/
 │   │
 │   ├── server/                 # @tactihub/server — Fastify API + Socket.IO
 │   │   ├── drizzle.config.ts
-│   │   ├── uploads/            # User-uploaded images (gitignored)
+│   │   ├── uploads/            # Image assets (maps/ + gadgets/ tracked, games/ + operators/ gitignored)
 │   │   └── src/
 │   │       ├── db/
 │   │       │   ├── schema/     # 11 Drizzle schema files (15 tables)
@@ -252,8 +252,10 @@ pnpm db:seed
 
 The seed creates:
 - **Admin account**: `admin` / `admin@tactihub.local` / `changeme`
-- **Rainbow Six Siege**: 19 maps (4 floors each), 42 operators, 55 gadgets
+- **Rainbow Six Siege**: 21 maps (correct per-map floor counts with Blueprint/Darkprint/Whiteprint image paths), 42 operators, 55 gadgets (23 with pre-seeded icons)
 - **Valorant**: 4 maps (2 floors each), 11 agents, 40 abilities
+
+All R6 map floor images (165 WebP files) and gadget icons (23 WebP files) are included in the repository under `packages/server/uploads/`. They're available immediately after seeding — no extra import step needed.
 
 ### 7. Start development servers
 
@@ -335,16 +337,6 @@ If the schema has changed:
 pnpm db:generate
 pnpm db:migrate
 ```
-
-### Import floor images (optional, one-time)
-
-If you have a folder of map floor images (blueprint/darkprint/whiteprint variants + gadget icons):
-
-```bash
-pnpm --filter @tactihub/server import:maps "C:\path\to\source\folder"
-```
-
-This processes JPGs to WebP, creates correct floor entries, and assigns gadget icons.
 
 ### Rebuild
 
@@ -494,9 +486,15 @@ For production, you need to:
 
 ## Map Images
 
-Map floor images must be placed in the `packages/server/uploads/` directory structure. They can be uploaded through the admin panel under Games > Maps > Floors.
+All R6 Siege map floor images (Blueprint, Darkprint, Whiteprint variants) and gadget icons are **pre-seeded in the repository** under `packages/server/uploads/maps/` and `packages/server/uploads/gadgets/`. After running `pnpm db:seed`, the database references these files and they work out of the box.
 
-Supported image formats: PNG, JPG, WebP. Images are automatically processed and converted to WebP via Sharp.
+Additional images can be uploaded through the admin panel under Games > Maps > Floors. Admin-uploaded images override the seed paths in the database. Supported formats: PNG, JPG, WebP — all are automatically converted to WebP via Sharp.
+
+To re-process images from an external source folder (e.g. after obtaining new map data):
+
+```bash
+pnpm --filter @tactihub/server tsx src/scripts/process-images.ts "/path/to/source/folder"
+```
 
 ---
 
