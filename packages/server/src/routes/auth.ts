@@ -39,6 +39,12 @@ const loginSchema = z.object({
 });
 
 export default async function authRoutes(fastify: FastifyInstance) {
+  // GET /api/auth/registration-status (public)
+  fastify.get('/registration-status', async () => {
+    const enabled = await isRegistrationEnabled();
+    return { data: { registrationEnabled: enabled } };
+  });
+
   // POST /api/auth/register
   fastify.post('/register', async (request, reply) => {
     const body = registerSchema.parse(request.body);

@@ -4,7 +4,7 @@
 
 TactiHub is a real-time collaboration tool that lets teams draw tactics on game maps, create and share battle plans, and coordinate strategies together. It supports multiple games (Rainbow Six Siege, Valorant, and more) with a powerful canvas drawing system, live cursors, and persistent battle plan management.
 
-![Version](https://img.shields.io/badge/version-1.2.1-orange)
+![Version](https://img.shields.io/badge/version-1.2.2-orange)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
 ![Node](https://img.shields.io/badge/Node.js-20+-green)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
@@ -63,7 +63,7 @@ TactiHub is a real-time collaboration tool that lets teams draw tactics on game 
 ```
 TactiHub/
 ├── docker-compose.yml          # PostgreSQL 16 + Redis 7
-├── package.json                # Root workspace config (v1.2.1)
+├── package.json                # Root workspace config (v1.2.2)
 ├── pnpm-workspace.yaml         # Workspace definition
 ├── tsconfig.base.json          # Shared TypeScript config
 ├── .env.example                # Environment template
@@ -394,7 +394,37 @@ config({ path: '../../.env' });
 
 - The login field accepts both **username** (`admin`) and **email** (`admin@tactihub.local`)
 - Default password is `changeme`
+- On first login with default credentials, you'll be forced to set a new email and password
 - The seed user has email already verified. If you registered a new user, you must verify the email first (check SMTP config)
+
+### Verification emails not arriving
+
+Check your SMTP configuration in `.env`:
+
+```bash
+SMTP_HOST=smtp.example.com     # Your SMTP server hostname
+SMTP_PORT=587                   # 587 for STARTTLS, 465 for SSL
+SMTP_SECURE=false               # Set to "true" for port 465 (SSL)
+SMTP_USER=your-email@example.com
+SMTP_PASS=your-password
+SMTP_FROM=noreply@yourdomain.com
+```
+
+Common issues:
+- **Port 465** requires `SMTP_SECURE=true` (SSL)
+- **Port 587** uses STARTTLS — leave `SMTP_SECURE=false` (default)
+- **Gmail**: Use an [App Password](https://support.google.com/accounts/answer/185833), not your regular password. Set `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`
+- **SMTP_FROM**: Some providers require this to match your authenticated email
+- Check server logs (`pnpm --filter @tactihub/server dev`) for SMTP error messages
+
+Test your SMTP connection:
+```bash
+# From the server, try sending a test email with curl
+curl --url "smtp://SMTP_HOST:SMTP_PORT" --ssl-reqd \
+  --mail-from "SMTP_FROM" --mail-rcpt "your@email.com" \
+  --user "SMTP_USER:SMTP_PASS" \
+  -T /dev/null
+```
 
 ---
 

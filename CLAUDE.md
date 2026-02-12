@@ -9,7 +9,7 @@ This file provides context for AI assistants working on the TactiHub codebase.
 TactiHub is a real-time collaborative strategy planning tool for competitive games (Rainbow Six Siege, Valorant, etc.). Users can draw tactics on game maps, save/share battle plans, and collaborate in rooms with live cursors and drawing sync.
 
 **Author**: Niklas Kronig
-**Version**: 1.2.1
+**Version**: 1.2.2
 **Repo**: https://github.com/niklask52t/TactiHub
 **Based on**: [r6-map-planner](https://github.com/prayansh/r6-map-planner) (Node/Express/Socket.IO) and [r6-maps](https://github.com/jayfoe/r6-maps) (Laravel/Vue)
 
@@ -86,10 +86,12 @@ packages/
 
 ### Auth Flow
 1. Register → email verification sent → must verify before login
-2. Login → access token (15min) + refresh token (7d httpOnly cookie + Redis)
-3. Token refresh → POST /api/auth/refresh returns new access token
-4. Admin can toggle public registration and create invite tokens
-5. **Guests**: Socket connects without token → userId = `guest-{socketId}`, drawing events blocked server-side
+2. Registration flow adapts: if public reg is ON, no token needed; if OFF, user must enter a single-use registration token first
+3. Login → accepts username OR email via `identifier` field → access token (15min) + refresh token (7d httpOnly cookie + Redis)
+4. First login with default admin email (`admin@tactihub.local`) forces credential change (gaming-style modal)
+5. Token refresh → POST /api/auth/refresh returns new access token
+6. Admin can toggle public registration and create invite tokens
+7. **Guests**: Socket connects without token → userId = `guest-{socketId}`, drawing events blocked server-side
 
 ### Socket.IO Events
 - Client emits: `room:join`, `room:leave`, `cursor:move`, `draw:create`, `draw:delete`, `draw:update`, `operator-slot:update`, `battleplan:change`
@@ -160,7 +162,7 @@ docker compose down -v      # Stop + delete ALL data (pgdata + redisdata volumes
 - `tsconfig.node.json` in client is for vite.config.ts only
 - `noUnusedLocals` and `noUnusedParameters` are enabled in client — remove unused imports
 - Seed data includes: 1 admin user, 2 games (R6 + Valorant), maps with floors, operators/agents, gadgets/abilities
-- Admin login after seed: `admin` / `admin@tactihub.local` / `changeme` (accepts username OR email)
+- Admin login after seed: `admin` / `admin@tactihub.local` / `changeme` (forced credential change on first login)
 - Upload directory structure: `uploads/{games,maps,operators,gadgets}/`
 - Images uploaded via admin panel are processed by Sharp (resized, converted to WebP)
 
@@ -199,6 +201,13 @@ Do NOT use `import 'dotenv/config'` — it loads `.env` from cwd which is wrong.
 
 Code, `.env`, and upload files on disk are NOT affected. After `down -v` you must re-run `db:generate`, `db:migrate`, `db:seed`.
 
+### SMTP email not sending
+The email service reads `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` from env.
+- Port 465 → `SMTP_SECURE=true` (SSL)
+- Port 587 → `SMTP_SECURE=false` (STARTTLS, default)
+- If `SMTP_SECURE` is not set, it auto-detects: `true` if port is 465, `false` otherwise
+- `SMTP_FROM` must be set, some providers require it to match the authenticated user
+
 ### Server must be running for client to work
 The Vite dev client proxies all `/api/*` and `/socket.io` requests to `localhost:3001`. If the server is not running, you get `ECONNREFUSED` errors and no data loads. Always start the server before/alongside the client.
 
@@ -216,8 +225,8 @@ The Vite dev client proxies all `/api/*` and `/socket.io` requests to `localhost
 ## API Endpoints Overview
 
 ### Auth: `/api/auth/`
-POST register, login, logout, refresh, forgot-password, reset-password
-GET verify-email/:token, me
+POST register, login, logout, refresh, forgot-password, reset-password, change-credentials
+GET verify-email/:token, me, registration-status (public)
 
 ### Public: `/api/`
 GET games, games/:slug, games/:slug/maps/:mapSlug, games/:slug/operators, games/:slug/gadgets

@@ -138,8 +138,24 @@ export default function ImpressumPage() {
           <CardContent className="space-y-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Badge variant="default">v1.2.1</Badge>
+                <Badge variant="default">v1.2.2</Badge>
                 <span className="text-xs text-muted-foreground">Current</span>
+              </div>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
+                <li>Forced credential change on first login with default admin account</li>
+                <li>Login accepts username or email</li>
+                <li>Token-gated registration flow (separate token entry step when public reg is off)</li>
+                <li>Improved admin tables (proper HTML tables with aligned columns)</li>
+                <li>Tokens page shows info banner when public registration is enabled</li>
+                <li>SMTP SSL/TLS support (SMTP_SECURE env var)</li>
+                <li>Back to Homepage links on auth pages</li>
+                <li>Larger logo throughout the app</li>
+              </ul>
+            </div>
+            <Separator />
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="outline">v1.2.1</Badge>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Zoom + Pan (mouse wheel, pan tool, middle-click, zoom limits 25%-400%)</li>

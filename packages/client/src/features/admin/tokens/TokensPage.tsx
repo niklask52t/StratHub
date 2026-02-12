@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Trash2, Copy } from 'lucide-react';
+import { Plus, Trash2, Copy, Info } from 'lucide-react';
 import { useState } from 'react';
 
 interface Token {
@@ -14,11 +14,22 @@ interface Token {
   usedAt: string | null; expiresAt: string; createdAt: string;
 }
 
+interface Settings {
+  registrationEnabled: boolean;
+}
+
 export default function TokensPage() {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [count, setCount] = useState(1);
   const [days, setDays] = useState(7);
+
+  const { data: settingsData } = useQuery({
+    queryKey: ['admin', 'settings'],
+    queryFn: () => apiGet<{ data: Settings }>('/admin/settings'),
+  });
+
+  const publicRegEnabled = settingsData?.data.registrationEnabled ?? true;
 
   const { data } = useQuery({
     queryKey: ['admin', 'tokens'],
@@ -46,7 +57,11 @@ export default function TokensPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Registration Tokens</h1>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" /> Create Tokens</Button></DialogTrigger>
+          <DialogTrigger asChild>
+            <Button disabled={publicRegEnabled}>
+              <Plus className="mr-2 h-4 w-4" /> Create Tokens
+            </Button>
+          </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Create Registration Tokens</DialogTitle></DialogHeader>
             <div className="space-y-4">
@@ -67,26 +82,52 @@ export default function TokensPage() {
         </Dialog>
       </div>
 
-      <div className="rounded-lg border">
-        <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 p-4 border-b font-medium text-sm text-muted-foreground">
-          <div>Token</div>
-          <div>Status</div>
-          <div>Expires</div>
-          <div>Actions</div>
+      {publicRegEnabled && (
+        <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm">
+          <Info className="h-4 w-4 text-primary shrink-0" />
+          <p>Public registration is enabled. Tokens are not required. Disable public registration in <a href="/admin/settings" className="text-primary underline">Settings</a> to use token-based registration.</p>
         </div>
-        {data?.data.map((token) => (
-          <div key={token.id} className="grid grid-cols-[1fr_auto_auto_auto] gap-4 p-4 border-b last:border-0 items-center">
-            <code className="text-sm font-mono">{token.token}</code>
-            <Badge variant={token.usedBy ? 'secondary' : new Date(token.expiresAt) < new Date() ? 'destructive' : 'default'}>
-              {token.usedBy ? 'Used' : new Date(token.expiresAt) < new Date() ? 'Expired' : 'Available'}
-            </Badge>
-            <span className="text-sm text-muted-foreground">{new Date(token.expiresAt).toLocaleDateString()}</span>
-            <div className="flex gap-1">
-              <Button variant="ghost" size="sm" onClick={() => copyToken(token.token)}><Copy className="h-3 w-3" /></Button>
-              <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate(token.id)}><Trash2 className="h-3 w-3 text-destructive" /></Button>
-            </div>
-          </div>
-        ))}
+      )}
+
+      <div className="rounded-lg border overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left font-medium text-muted-foreground p-4">Token</th>
+              <th className="text-left font-medium text-muted-foreground p-4">Status</th>
+              <th className="text-left font-medium text-muted-foreground p-4">Expires</th>
+              <th className="text-right font-medium text-muted-foreground p-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.data.map((token) => (
+              <tr key={token.id} className="border-b last:border-0 hover:bg-muted/30">
+                <td className="p-4">
+                  <code className="text-sm font-mono">{token.token}</code>
+                </td>
+                <td className="p-4">
+                  <Badge variant={token.usedBy ? 'secondary' : new Date(token.expiresAt) < new Date() ? 'destructive' : 'default'}>
+                    {token.usedBy ? 'Used' : new Date(token.expiresAt) < new Date() ? 'Expired' : 'Available'}
+                  </Badge>
+                </td>
+                <td className="p-4 text-muted-foreground">{new Date(token.expiresAt).toLocaleDateString()}</td>
+                <td className="p-4 text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToken(token.token)}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteMutation.mutate(token.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {data?.data.length === 0 && (
+          <p className="p-4 text-center text-muted-foreground">No tokens created yet</p>
+        )}
       </div>
     </div>
   );

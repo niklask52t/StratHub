@@ -15,7 +15,11 @@ const faqs = [
   },
   {
     q: 'How does registration work?',
-    a: 'Registration may require an invite token depending on the admin settings. After registering, you must verify your email before logging in. Unverified accounts are cleaned up after 30 days.',
+    a: 'If public registration is enabled, you can register directly with username, email, and password. If disabled, you need a registration token from an admin first. Each token can only be used once. After registering, you must verify your email before logging in.',
+  },
+  {
+    q: 'How do I log in?',
+    a: 'You can log in with either your username or email address. After initial setup, the default admin account must change its credentials on first login.',
   },
   {
     q: 'How do I draw on the map?',
@@ -52,6 +56,10 @@ const faqs = [
   {
     q: 'Can I self-host TactiHub?',
     a: 'Yes. TactiHub is open source. You need Node.js 20+, pnpm, Docker (for PostgreSQL and Redis), and optionally an SMTP server for email verification. See the README for setup instructions.',
+  },
+  {
+    q: 'I\'m not receiving verification emails. What should I check?',
+    a: 'Make sure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, and SMTP_FROM are correctly set in your .env file. For SSL (port 465), set SMTP_SECURE=true. For STARTTLS (port 587), leave SMTP_SECURE=false. Check your server logs for SMTP errors.',
   },
   {
     q: 'How do I report a bug or suggest a feature?',

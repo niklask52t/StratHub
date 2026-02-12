@@ -34,35 +34,50 @@ export default function UsersPage() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Users</h1>
 
-      <div className="rounded-lg border">
-        <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 p-4 border-b font-medium text-sm text-muted-foreground">
-          <div>Username</div>
-          <div>Email</div>
-          <div>Role</div>
-          <div>Verified</div>
-          <div>Actions</div>
-        </div>
-        {data?.data.map((user) => (
-          <div key={user.id} className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 p-4 border-b last:border-0 items-center">
-            <div className="font-medium">{user.username}</div>
-            <div className="text-sm text-muted-foreground">{user.email}</div>
-            <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>{user.role}</Badge>
-            <Badge variant={user.emailVerifiedAt ? 'default' : 'destructive'}>
-              {user.emailVerifiedAt ? 'Yes' : 'No'}
-            </Badge>
-            <div className="flex gap-1">
-              <Button variant="ghost" size="sm" onClick={() => {
-                const newRole = user.role === 'admin' ? 'user' : 'admin';
-                roleMutation.mutate({ id: user.id, role: newRole });
-              }}>
-                <Shield className="h-3 w-3" />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => { if (confirm('Delete this user?')) deleteMutation.mutate(user.id); }}>
-                <Trash2 className="h-3 w-3 text-destructive" />
-              </Button>
-            </div>
-          </div>
-        ))}
+      <div className="rounded-lg border overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left font-medium text-muted-foreground p-4">Username</th>
+              <th className="text-left font-medium text-muted-foreground p-4">Email</th>
+              <th className="text-left font-medium text-muted-foreground p-4">Role</th>
+              <th className="text-left font-medium text-muted-foreground p-4">Verified</th>
+              <th className="text-right font-medium text-muted-foreground p-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.data.map((user) => (
+              <tr key={user.id} className="border-b last:border-0 hover:bg-muted/30">
+                <td className="p-4 font-medium">{user.username}</td>
+                <td className="p-4 text-muted-foreground">{user.email}</td>
+                <td className="p-4">
+                  <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>{user.role}</Badge>
+                </td>
+                <td className="p-4">
+                  <Badge variant={user.emailVerifiedAt ? 'default' : 'destructive'}>
+                    {user.emailVerifiedAt ? 'Yes' : 'No'}
+                  </Badge>
+                </td>
+                <td className="p-4 text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                      const newRole = user.role === 'admin' ? 'user' : 'admin';
+                      roleMutation.mutate({ id: user.id, role: newRole });
+                    }}>
+                      <Shield className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { if (confirm('Delete this user?')) deleteMutation.mutate(user.id); }}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {data?.data.length === 0 && (
+          <p className="p-4 text-center text-muted-foreground">No users found</p>
+        )}
       </div>
     </div>
   );
