@@ -221,8 +221,11 @@ Do NOT use `import 'dotenv/config'` — it loads `.env` from cwd which is wrong.
 
 Code, `.env`, and upload files on disk are NOT affected. After `down -v` you must re-run `db:generate`, `db:migrate`, `db:seed`.
 
+### Email links point to wrong URL
+Email links (verify, reset password) use `APP_URL` from `.env`. This must point to the **frontend** (e.g. `https://tactihub.de` or `http://localhost:5173`), NOT the API server (port 3001). The logo in emails is also loaded from `APP_URL/tactihub_logo.png`.
+
 ### SMTP email not sending
-The email service reads `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` from env.
+The email service reads `APP_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` from env.
 - Port 465 → `SMTP_SECURE=true` (SSL)
 - Port 587 → `SMTP_SECURE=false` (STARTTLS, default)
 - If `SMTP_SECURE` is not set, it auto-detects: `true` if port is 465, `false` otherwise

@@ -212,9 +212,10 @@ cp .env.example .env
 ```
 
 Edit `.env` and configure at minimum:
+- `APP_URL` — Your public frontend URL (e.g. `https://tactihub.de`). Used for links in emails and the logo. **Must point to the frontend, not the API server.**
 - `JWT_SECRET` — A long random string for access tokens (`openssl rand -base64 48`)
 - `JWT_REFRESH_SECRET` — A different long random string for refresh tokens (`openssl rand -base64 48`)
-- `SMTP_*` — Your email server credentials (optional for development, required for registration emails)
+- `SMTP_*` — Your email server credentials (**strongly recommended** — without it, users can't verify their email and the admin must manually verify each user)
 
 The default database and Redis URLs work with the included Docker Compose setup.
 
@@ -422,6 +423,18 @@ config({ path: '../../.env' });
 - Default password is `changeme`
 - On first login with default credentials, you'll be forced to set a new email and password
 - The seed user has email already verified. If you registered a new user, you must verify the email first (check SMTP config)
+
+### Email links go to wrong URL / "Route not found" error
+
+Email links (verify, reset password) use the `APP_URL` environment variable. This must point to the **frontend** (your public domain or `http://localhost:5173` for dev), NOT the API server (port 3001):
+
+```bash
+# Correct — points to frontend
+APP_URL=https://tactihub.de
+
+# Wrong — points to API server, will show "Route not found"
+APP_URL=http://localhost:3001
+```
 
 ### Verification emails not arriving
 

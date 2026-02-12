@@ -150,6 +150,8 @@ export default function ImpressumPage() {
                 <li>Gaming-style design across all pages (HUD corners, particles, glow effects, grid background)</li>
                 <li>Improved settings page layout clarity</li>
                 <li>Admin username moved to top-right corner</li>
+                <li>Styled HTML email templates with dark theme, logo, and branded buttons</li>
+                <li>New APP_URL env variable for correct email link generation</li>
               </ul>
             </div>
             <Separator />

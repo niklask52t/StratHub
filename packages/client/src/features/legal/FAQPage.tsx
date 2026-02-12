@@ -59,7 +59,7 @@ const faqs = [
   },
   {
     q: 'I\'m not receiving verification emails. What should I check?',
-    a: 'Make sure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, and SMTP_FROM are correctly set in your .env file. For SSL (port 465), set SMTP_SECURE=true. For STARTTLS (port 587), leave SMTP_SECURE=false. Check your server logs for SMTP errors.',
+    a: 'Make sure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, and SMTP_FROM are correctly set in your .env file. For SSL (port 465), set SMTP_SECURE=true. For STARTTLS (port 587), leave SMTP_SECURE=false. Also check that APP_URL points to your frontend (not the API server). Check your server logs for SMTP errors.',
   },
   {
     q: 'Can admins verify users manually?',
