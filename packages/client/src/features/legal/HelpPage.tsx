@@ -176,7 +176,7 @@ export default function HelpPage() {
               <li><strong>Maps</strong> — Add maps per game with thumbnail, competitive/active toggles</li>
               <li><strong>Floor Layouts</strong> — Upload and manage floor images for each map (reorder, rename, delete)</li>
               <li><strong>Operators &amp; Gadgets</strong> — Manage operators/agents and their gadgets/abilities with icons</li>
-              <li><strong>Users</strong> — View all users, toggle roles (admin/user), manually verify emails, delete users</li>
+              <li><strong>Users</strong> — View all users, toggle roles, manually verify emails (important if no SMTP is set up!), delete users</li>
               <li><strong>Tokens</strong> — Create single-use registration tokens when public registration is disabled</li>
               <li><strong>Settings</strong> — Toggle public registration on/off</li>
             </ul>

@@ -212,7 +212,7 @@ async function seed() {
 
   // 4. Seed Valorant
   const [valGame] = await db.insert(games).values({
-    name: 'Valorant',
+    name: 'Valorant (WIP)',
     slug: 'valorant',
     description: 'Riot Games\' Tactical Shooter',
     isActive: true,

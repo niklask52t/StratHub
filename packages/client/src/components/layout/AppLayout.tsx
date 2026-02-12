@@ -21,11 +21,15 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background gaming-bg relative">
+      {/* Glow lines */}
+      <div className="gaming-glow-line top-0 left-0 z-50" />
+      <div className="gaming-glow-line bottom-0 right-0 z-50" style={{ animationDelay: '2s' }} />
+
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center justify-between px-4">
-          <Link to="/" className="flex items-center">
-            <img src="/tactihub_logo.png" alt="TactiHub" className="h-10" />
+          <Link to="/" className="flex items-center transition-transform hover:scale-105">
+            <img src="/tactihub_logo.png" alt="TactiHub" className="h-10 drop-shadow-[0_0_8px_oklch(0.68_0.19_45/0.3)]" />
           </Link>
 
           <div className="flex items-center gap-2">
@@ -57,7 +61,7 @@ export function AppLayout() {
                 <Button variant="ghost" asChild>
                   <Link to="/auth/login">Login</Link>
                 </Button>
-                <Button asChild>
+                <Button asChild className="gaming-btn">
                   <Link to="/auth/register">Register</Link>
                 </Button>
               </div>
@@ -74,9 +78,9 @@ export function AppLayout() {
         <div className="container flex items-center justify-between px-4 text-xs text-muted-foreground">
           <span>TactiHub v{APP_VERSION} &mdash; by Niklas Kronig</span>
           <div className="flex items-center gap-4">
-            <Link to="/help" className="hover:text-foreground transition-colors">Help</Link>
-            <Link to="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
-            <Link to="/impressum" className="hover:text-foreground transition-colors">Impressum</Link>
+            <Link to="/help" className="hover:text-primary transition-colors">Help</Link>
+            <Link to="/faq" className="hover:text-primary transition-colors">FAQ</Link>
+            <Link to="/impressum" className="hover:text-primary transition-colors">Impressum</Link>
           </div>
         </div>
       </footer>

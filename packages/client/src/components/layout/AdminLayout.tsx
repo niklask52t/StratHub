@@ -1,5 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuthStore } from '@/stores/auth.store';
 import {
   Gamepad2,
   Users,
@@ -7,6 +8,7 @@ import {
   Settings,
   LayoutDashboard,
   ArrowLeft,
+  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -20,6 +22,7 @@ const navItems = [
 
 export function AdminLayout() {
   const location = useLocation();
+  const user = useAuthStore((s) => s.user);
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)]">
@@ -33,7 +36,7 @@ export function AdminLayout() {
               </Link>
             </Button>
 
-            <h2 className="px-2 mb-2 text-lg font-semibold">Admin Panel</h2>
+            <h2 className="px-2 mb-2 text-lg font-semibold tracking-wide">Admin Panel</h2>
 
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -56,8 +59,16 @@ export function AdminLayout() {
         </ScrollArea>
       </aside>
 
-      <div className="flex-1 overflow-auto">
-        <div className="p-6">
+      <div className="flex-1 overflow-auto flex flex-col">
+        {/* Admin top bar with username far right */}
+        <div className="flex items-center justify-end px-6 py-2 border-b bg-background/50">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <User className="h-3.5 w-3.5" />
+            {user?.username}
+          </div>
+        </div>
+
+        <div className="flex-1 p-6">
           <Outlet />
         </div>
       </div>

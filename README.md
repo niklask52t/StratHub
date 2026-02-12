@@ -156,8 +156,8 @@ TactiHub/
 - **Docker** + **Docker Compose** (for PostgreSQL and Redis)
 - **Git**
 
-Optional (for email features in production):
-- An SMTP server or email service (e.g., Gmail, SendGrid, Mailgun)
+**Strongly recommended:**
+- **SMTP server or email service** (e.g., Gmail App Password, Brevo, Mailgun, own SMTP server) — **Users must verify their email after registration before they can log in.** Without a working SMTP setup, the admin has to manually verify every single user in the admin panel (Users > Verify).
 
 > **Proxmox LXC**: If you're running this inside a Proxmox LXC container, make sure **Nesting** is enabled in the container features (Options > Features > Nesting). For unprivileged containers, also enable **keyctl**. A privileged Debian 13 LXC with Nesting works out of the box.
 

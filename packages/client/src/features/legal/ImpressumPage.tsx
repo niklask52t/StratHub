@@ -147,7 +147,9 @@ export default function ImpressumPage() {
                 <li>Fixed "Input Buffer is empty" crash when toggling game/map status without file upload</li>
                 <li>Fixed gadget category dropdown visibility in dark mode</li>
                 <li>Fixed Radix Switch form values not correctly sent as "true"/"false"</li>
-                <li>Gaming-style design (HUD corners, particles, glow effects, grid background on auth pages)</li>
+                <li>Gaming-style design across all pages (HUD corners, particles, glow effects, grid background)</li>
+                <li>Improved settings page layout clarity</li>
+                <li>Admin username moved to top-right corner</li>
               </ul>
             </div>
             <Separator />

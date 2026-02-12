@@ -15,7 +15,7 @@ const faqs = [
   },
   {
     q: 'How does registration work?',
-    a: 'If public registration is enabled, you can register directly with username, email, and password. If disabled, you need a registration token from an admin first. Each token can only be used once. After registering, you must verify your email before logging in.',
+    a: 'If public registration is enabled, you can register directly with username, email, and password. If disabled, you need a registration token from an admin first. Each token can only be used once. After registering, you must verify your email before you can log in. If no SMTP server is configured, an admin must manually verify your account in the admin panel.',
   },
   {
     q: 'How do I log in?',

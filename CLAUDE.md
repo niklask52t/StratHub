@@ -85,7 +85,7 @@ packages/
 - Keyboard: Ctrl+Z (undo), Ctrl+Y / Ctrl+Shift+Z (redo)
 
 ### Auth Flow
-1. Register → email verification sent → must verify before login
+1. Register → email verification sent → **must verify before login** (without SMTP, admin must manually verify each user)
 2. Registration flow adapts: if public reg is ON, no token needed; if OFF, user must enter a single-use registration token first
 3. Login → accepts username OR email via `identifier` field → access token (15min) + refresh token (7d httpOnly cookie + Redis)
 4. First login with default admin email (`admin@tactihub.local`) forces credential change (gaming-style modal)
