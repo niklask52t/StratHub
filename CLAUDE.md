@@ -243,6 +243,14 @@ pnpm --filter @tactihub/server dev
 pnpm --filter @tactihub/client exec vite --host
 ```
 
+### Stale Drizzle migration files cause "already exists" errors
+When resetting the database (`docker compose down -v`), the old migration files in `packages/server/drizzle/` still exist. If the schema evolved across multiple migrations (e.g., one creates a table, another adds a column), regenerating on top of stale files produces conflicts. **Always clean migrations before regenerating from scratch:**
+```bash
+rm -rf packages/server/drizzle/*
+pnpm db:generate
+```
+The `dev-reset.sh` script does this automatically.
+
 ### drizzle-kit cannot resolve .js extensions
 drizzle-kit uses CJS `require()` internally which cannot resolve `.js` → `.ts` imports. All `db:generate`, `db:migrate`, `db:seed`, and `db:studio` scripts run through `tsx` to handle this. Do NOT remove the `tsx` prefix from these scripts in `packages/server/package.json`.
 

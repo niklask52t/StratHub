@@ -398,11 +398,16 @@ docker compose up -d
 # Wait for PostgreSQL to be ready
 sleep 3
 
+# Clean old migration files to avoid conflicts
+rm -rf packages/server/drizzle/*
+
 # Re-run migrations and seed
 pnpm db:generate
 pnpm db:migrate
 pnpm db:seed
 ```
+
+> **Why `rm -rf packages/server/drizzle/*`?** Old migration files can conflict with each other when regenerating from scratch (e.g., one migration creates a column, another tries to add it again). Cleaning them ensures a single, clean migration from the current schema.
 
 ### Browse the database
 
@@ -441,6 +446,16 @@ pnpm --filter @tactihub/client exec vite --host
 | Code / `.env` / uploads on disk | Source code, config, uploaded images | No |
 
 After `down -v`, re-run: `docker compose up -d && pnpm db:generate && pnpm db:migrate && pnpm db:seed`
+
+### `db:migrate` fails with "column already exists"
+
+This happens when old migration files in `packages/server/drizzle/` conflict with each other after a database reset. Clean them and regenerate:
+
+```bash
+rm -rf packages/server/drizzle/*
+pnpm db:generate
+pnpm db:migrate
+```
 
 ### `db:generate` fails with "Cannot find module './users.js'"
 
