@@ -139,7 +139,7 @@ export default function ImpressumPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="default">v1.5.2</Badge>
-                <span className="text-xs text-muted-foreground">Current</span>
+                <span className="text-xs text-muted-foreground">Current — 2026-02-12</span>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Magic Link (passwordless) login via email — enter email or username, receive a login link, click to log in</li>
@@ -149,6 +149,7 @@ export default function ImpressumPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="outline">v1.5.1</Badge>
+                <span className="text-xs text-muted-foreground">2026-02-12</span>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Account self-deletion with double confirmation, email verification, and 30-day grace period</li>
@@ -166,6 +167,7 @@ export default function ImpressumPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="outline">v1.5.0</Badge>
+                <span className="text-xs text-muted-foreground">2026-02-12</span>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Drawings now stay permanent after releasing the mouse button</li>
@@ -183,6 +185,7 @@ export default function ImpressumPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="outline">v1.4.0</Badge>
+                <span className="text-xs text-muted-foreground">2026-02-12</span>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Floor image variants: Blueprint, Darkprint, and Whiteprint per floor</li>
@@ -199,6 +202,7 @@ export default function ImpressumPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="outline">v1.3.0</Badge>
+                <span className="text-xs text-muted-foreground">2026-02-12</span>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Admin manual user verification (with confirmation dialog and notification email)</li>
@@ -217,6 +221,7 @@ export default function ImpressumPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="outline">v1.2.2</Badge>
+                <span className="text-xs text-muted-foreground">2026-02-12</span>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Forced credential change on first login with default admin account</li>
@@ -233,6 +238,7 @@ export default function ImpressumPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="outline">v1.2.1</Badge>
+                <span className="text-xs text-muted-foreground">2026-02-11</span>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Zoom + Pan (mouse wheel, pan tool, middle-click, zoom limits 25%-400%)</li>
@@ -249,6 +255,7 @@ export default function ImpressumPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="outline">v1.1.0</Badge>
+                <span className="text-xs text-muted-foreground">2026-02-11</span>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Branding update (TactiHub logo, orange/red color scheme)</li>
@@ -260,6 +267,7 @@ export default function ImpressumPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant="outline">v1.0.0</Badge>
+                <span className="text-xs text-muted-foreground">2026-02-11</span>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Initial release</li>
