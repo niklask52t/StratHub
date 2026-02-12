@@ -28,6 +28,8 @@ export interface MapFloor {
   name: string;
   floorNumber: number;
   imagePath: string;
+  darkImagePath: string | null;
+  whiteImagePath: string | null;
   createdAt: string;
   updatedAt: string;
 }

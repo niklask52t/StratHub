@@ -17,7 +17,7 @@ interface BattleplanFull {
   owner?: { id: string; username: string };
   floors?: Array<{
     id: string; mapFloorId: string;
-    mapFloor?: { id: string; name: string; floorNumber: number; imagePath: string };
+    mapFloor?: { id: string; name: string; floorNumber: number; imagePath: string; darkImagePath?: string | null; whiteImagePath?: string | null };
     draws?: any[];
   }>;
   operatorSlots?: Array<{ id: string; slotNumber: number; operatorId: string | null; operator?: any }>;

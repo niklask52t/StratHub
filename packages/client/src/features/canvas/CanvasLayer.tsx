@@ -6,7 +6,7 @@ import { hitTestDraw } from './utils/hitTest';
 interface Floor {
   id: string;
   mapFloorId: string;
-  mapFloor?: { id: string; name: string; floorNumber: number; imagePath: string };
+  mapFloor?: { id: string; name: string; floorNumber: number; imagePath: string; darkImagePath?: string | null; whiteImagePath?: string | null };
   draws?: any[];
 }
 
@@ -17,9 +17,10 @@ interface CanvasLayerProps {
   onDrawDelete?: (drawIds: string[]) => void;
   peerDraws?: any[];
   cursors?: Map<string, { x: number; y: number; color: string; userId: string }>;
+  activeImagePath?: string;
 }
 
-export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelete, peerDraws, cursors }: CanvasLayerProps) {
+export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelete, peerDraws, cursors, activeImagePath }: CanvasLayerProps) {
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const drawCanvasRef = useRef<HTMLCanvasElement>(null);
   const activeCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,9 +35,12 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 1200, height: 800 });
 
+  // Resolve the image path: prefer activeImagePath prop, fall back to floor.mapFloor.imagePath
+  const resolvedImagePath = activeImagePath ?? floor.mapFloor?.imagePath;
+
   // Load background image
   useEffect(() => {
-    if (!floor.mapFloor?.imagePath || !bgCanvasRef.current) return;
+    if (!resolvedImagePath || !bgCanvasRef.current) return;
     const ctx = bgCanvasRef.current.getContext('2d');
     if (!ctx) return;
 
@@ -53,8 +57,8 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       ctx.drawImage(img, 0, 0);
       renderDraws();
     };
-    img.src = `/uploads${floor.mapFloor.imagePath}`;
-  }, [floor.mapFloor?.imagePath]);
+    img.src = `/uploads${resolvedImagePath}`;
+  }, [resolvedImagePath]);
 
   // Render existing draws
   const renderDraws = useCallback(() => {

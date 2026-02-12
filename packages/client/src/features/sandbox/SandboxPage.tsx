@@ -23,6 +23,7 @@ interface GameWithMaps extends Game {
 
 interface MapFloor {
   id: string; name: string; floorNumber: number; imagePath: string;
+  darkImagePath?: string | null; whiteImagePath?: string | null;
 }
 
 interface MapWithFloors extends MapData {

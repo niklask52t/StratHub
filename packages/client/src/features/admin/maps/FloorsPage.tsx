@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, Trash2, ArrowLeft, ArrowUp, ArrowDown, Pencil } from 'lucide-react';
 import { useState } from 'react';
@@ -16,6 +17,8 @@ interface Floor {
   name: string;
   floorNumber: number;
   imagePath: string;
+  darkImagePath: string | null;
+  whiteImagePath: string | null;
 }
 
 export default function FloorsPage() {
@@ -115,27 +118,35 @@ export default function FloorsPage() {
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 h-4 w-4" /> Add Floor</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>{editFloor ? 'Edit Floor' : 'Add Floor'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label>Floor Name</Label>
-                <Input name="name" defaultValue={editFloor?.name} placeholder="e.g. 1F, 2F, Basement, Roof" required />
+                <Input name="name" defaultValue={editFloor?.name} placeholder="e.g. Ground Floor, Basement, Roof" required />
               </div>
               <div className="space-y-2">
                 <Label>Floor Number (order)</Label>
                 <Input name="floorNumber" type="number" defaultValue={editFloor?.floorNumber ?? nextFloorNumber} required />
               </div>
               <div className="space-y-2">
-                <Label>Floor Image {editFloor ? '(leave empty to keep current)' : ''}</Label>
+                <Label>Blueprint Image {editFloor ? '(leave empty to keep current)' : ''}</Label>
                 <Input name="image" type="file" accept="image/*" required={!editFloor} />
+              </div>
+              <div className="space-y-2">
+                <Label>Darkprint Image <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                <Input name="darkImage" type="file" accept="image/*" />
+              </div>
+              <div className="space-y-2">
+                <Label>Whiteprint Image <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                <Input name="whiteImage" type="file" accept="image/*" />
               </div>
               {editFloor?.imagePath && (
                 <div className="space-y-1">
-                  <Label className="text-xs text-muted-foreground">Current Image</Label>
-                  <img src={`/uploads${editFloor.imagePath}`} className="rounded-lg max-h-32 object-contain" alt="" />
+                  <Label className="text-xs text-muted-foreground">Current Blueprint</Label>
+                  <img src={`/uploads${editFloor.imagePath}`} className="rounded-lg max-h-24 object-contain" alt="" />
                 </div>
               )}
               <DialogFooter>
@@ -167,6 +178,11 @@ export default function FloorsPage() {
               <div className="flex-1">
                 <h3 className="font-semibold text-lg">{floor.name}</h3>
                 <p className="text-sm text-muted-foreground">Floor #{floor.floorNumber}</p>
+                <div className="flex gap-1 mt-1">
+                  <Badge variant="default" className="text-[10px] px-1.5 py-0">Blueprint</Badge>
+                  {floor.darkImagePath && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Dark</Badge>}
+                  {floor.whiteImagePath && <Badge variant="outline" className="text-[10px] px-1.5 py-0">White</Badge>}
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => { setEditFloor(floor); setIsOpen(true); }}>

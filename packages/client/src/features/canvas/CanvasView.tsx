@@ -5,11 +5,21 @@ import { Button } from '@/components/ui/button';
 import { ChevronUp, ChevronDown, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import { useCanvasStore } from '@/stores/canvas.store';
 import { ZOOM_STEP } from '@tactihub/shared';
+import type { ViewMode } from '@tactihub/shared';
+
+interface MapFloor {
+  id: string;
+  name: string;
+  floorNumber: number;
+  imagePath: string;
+  darkImagePath?: string | null;
+  whiteImagePath?: string | null;
+}
 
 interface Floor {
   id: string;
   mapFloorId: string;
-  mapFloor?: { id: string; name: string; floorNumber: number; imagePath: string };
+  mapFloor?: MapFloor;
   draws?: any[];
 }
 
@@ -20,6 +30,12 @@ interface CanvasViewProps {
   onDrawDelete?: (drawIds: string[]) => void;
 }
 
+const VIEW_MODE_LABELS: Record<ViewMode, string> = {
+  blueprint: 'Blueprint',
+  dark: 'Darkprint',
+  white: 'Whiteprint',
+};
+
 export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelete }: CanvasViewProps) {
   const { scale, zoomTo, resetViewport, offsetX, offsetY } = useCanvasStore();
 
@@ -29,7 +45,27 @@ export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelet
   );
 
   const [currentFloorIndex, setCurrentFloorIndex] = useState(0);
+  const [viewMode, setViewMode] = useState<ViewMode>('blueprint');
   const currentFloor = sortedFloors[currentFloorIndex];
+
+  // Check which view modes are available for the current floor
+  const availableModes = useMemo<ViewMode[]>(() => {
+    const mf = currentFloor?.mapFloor;
+    if (!mf) return ['blueprint'];
+    const modes: ViewMode[] = ['blueprint'];
+    if (mf.darkImagePath) modes.push('dark');
+    if (mf.whiteImagePath) modes.push('white');
+    return modes;
+  }, [currentFloor?.mapFloor]);
+
+  // Get the image path for the current view mode
+  const activeImagePath = useMemo(() => {
+    const mf = currentFloor?.mapFloor;
+    if (!mf) return undefined;
+    if (viewMode === 'dark' && mf.darkImagePath) return mf.darkImagePath;
+    if (viewMode === 'white' && mf.whiteImagePath) return mf.whiteImagePath;
+    return mf.imagePath;
+  }, [currentFloor?.mapFloor, viewMode]);
 
   const goUp = () => setCurrentFloorIndex((i) => Math.min(i + 1, sortedFloors.length - 1));
   const goDown = () => setCurrentFloorIndex((i) => Math.max(i - 1, 0));
@@ -70,6 +106,23 @@ export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelet
         </Button>
       </div>
 
+      {/* View mode switcher — top left (only show if more than 1 mode available) */}
+      {availableModes.length > 1 && (
+        <div className="absolute top-4 left-4 z-10 flex items-center gap-1 bg-background/90 rounded-lg border p-1">
+          {availableModes.map((mode) => (
+            <Button
+              key={mode}
+              variant={viewMode === mode ? 'default' : 'ghost'}
+              size="sm"
+              className="text-xs px-2 h-7"
+              onClick={() => setViewMode(mode)}
+            >
+              {VIEW_MODE_LABELS[mode]}
+            </Button>
+          ))}
+        </div>
+      )}
+
       {/* Zoom controls — bottom right */}
       <div className="absolute bottom-4 right-4 z-10 flex flex-col items-center gap-1 bg-background/90 rounded-lg border p-1">
         <Button variant="ghost" size="sm" onClick={zoomIn}>
@@ -93,6 +146,7 @@ export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelet
         readOnly={readOnly}
         onDrawCreate={onDrawCreate}
         onDrawDelete={onDrawDelete}
+        activeImagePath={activeImagePath}
       />
     </div>
   );

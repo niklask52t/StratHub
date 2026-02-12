@@ -23,12 +23,18 @@ export default async function adminMapFloorsRoutes(fastify: FastifyInstance) {
     let name = '';
     let floorNumber = 0;
     let imagePath: string | null = null;
+    let darkImagePath: string | null = null;
+    let whiteImagePath: string | null = null;
 
     const parts = request.parts();
     for await (const part of parts) {
       if (part.type === 'file') {
         const result = await processUpload(part, 'maps', { width: 1200 });
-        if (result) imagePath = result;
+        if (result) {
+          if (part.fieldname === 'darkImage') darkImagePath = result;
+          else if (part.fieldname === 'whiteImage') whiteImagePath = result;
+          else imagePath = result;
+        }
       } else if (part.fieldname === 'name') {
         name = (part as any).value;
       } else if (part.fieldname === 'floorNumber') {
@@ -45,6 +51,8 @@ export default async function adminMapFloorsRoutes(fastify: FastifyInstance) {
       name,
       floorNumber,
       imagePath,
+      darkImagePath,
+      whiteImagePath,
     }).returning();
 
     return reply.status(201).send({ data: floor });
@@ -61,7 +69,11 @@ export default async function adminMapFloorsRoutes(fastify: FastifyInstance) {
       for await (const part of parts) {
         if (part.type === 'file') {
           const result = await processUpload(part, 'maps', { width: 1200 });
-          if (result) updates.imagePath = result;
+          if (result) {
+            if (part.fieldname === 'darkImage') updates.darkImagePath = result;
+            else if (part.fieldname === 'whiteImage') updates.whiteImagePath = result;
+            else updates.imagePath = result;
+          }
         } else if (part.fieldname === 'name') {
           updates.name = (part as any).value;
         } else if (part.fieldname === 'floorNumber') {
@@ -103,6 +115,8 @@ export default async function adminMapFloorsRoutes(fastify: FastifyInstance) {
     if (!floor) return reply.status(404).send({ error: 'Not Found', message: 'Floor not found', statusCode: 404 });
 
     if (floor.imagePath) await deleteUpload(floor.imagePath);
+    if (floor.darkImagePath) await deleteUpload(floor.darkImagePath);
+    if (floor.whiteImagePath) await deleteUpload(floor.whiteImagePath);
     await db.delete(mapFloors).where(eq(mapFloors.id, id));
     return { message: 'Floor deleted' };
   });

@@ -54,6 +54,10 @@ const faqs = [
     a: 'Use the floor switcher in the top-right corner of the canvas, or press K to go up and J to go down.',
   },
   {
+    q: 'What are Blueprint, Darkprint, and Whiteprint?',
+    a: 'These are different visual styles for the same floor layout. Blueprint is the default colored version, Darkprint is a dark/black version, and Whiteprint is a white/clean version. Use the view mode buttons in the top-left corner of the canvas to switch between them (only visible when a floor has multiple variants).',
+  },
+  {
     q: 'Can I self-host TactiHub?',
     a: 'Yes. TactiHub is open source. You need Node.js 20+, pnpm, Docker (for PostgreSQL and Redis), and optionally an SMTP server for email verification. See the README for setup instructions.',
   },

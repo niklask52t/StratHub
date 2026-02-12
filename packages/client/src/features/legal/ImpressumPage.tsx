@@ -138,8 +138,24 @@ export default function ImpressumPage() {
           <CardContent className="space-y-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Badge variant="default">v1.3.0</Badge>
+                <Badge variant="default">v1.4.0</Badge>
                 <span className="text-xs text-muted-foreground">Current</span>
+              </div>
+              <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
+                <li>Floor image variants: Blueprint, Darkprint, and Whiteprint per floor</li>
+                <li>View mode switcher on canvas (top-left, only visible when floor has multiple variants)</li>
+                <li>Batch image import script for floor images and gadget icons</li>
+                <li>Added 3 new R6 maps: Fortress, Nighthaven Labs, Outback</li>
+                <li>Correct floor names and counts per map (was generic 4-floor placeholder)</li>
+                <li>Removed Bartlett map (no image data available)</li>
+                <li>Admin floor upload now supports dark and white image variants</li>
+                <li>Gadget icon import from source folder</li>
+              </ul>
+            </div>
+            <Separator />
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="outline">v1.3.0</Badge>
               </div>
               <ul className="list-disc list-inside text-sm text-muted-foreground space-y-0.5 ml-2">
                 <li>Admin manual user verification (with confirmation dialog and notification email)</li>

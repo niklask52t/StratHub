@@ -4,7 +4,7 @@
 
 TactiHub is a real-time collaboration tool that lets teams draw tactics on game maps, create and share battle plans, and coordinate strategies together. It supports multiple games (Rainbow Six Siege, Valorant, and more) with a powerful canvas drawing system, live cursors, and persistent battle plan management.
 
-![Version](https://img.shields.io/badge/version-1.3.0-orange)
+![Version](https://img.shields.io/badge/version-1.4.0-orange)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
 ![Node](https://img.shields.io/badge/Node.js-20+-green)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
@@ -24,13 +24,15 @@ TactiHub is a real-time collaboration tool that lets teams draw tactics on game 
 - **Voting System** — Upvote/downvote public battle plans to surface the best strategies.
 - **Operator/Agent Slots** — Assign operators (R6) or agents (Valorant) to 5 slots per plan, synced in real-time.
 - **Floor Switching** — Navigate multi-floor maps with keyboard shortcuts (J/K) or buttons.
+- **View Mode Switcher** — Toggle between Blueprint, Darkprint, and Whiteprint floor views (when available). Default is always Blueprint.
 - **Compass** — SVG north indicator overlay on every canvas.
 - **Sandbox Mode** — Try drawing on any map without creating an account. Drawings are local only.
 - **Guest Access** — Rooms are viewable without login (read-only). Log in to draw.
 - **Admin Panel** — Full CRUD management for games, maps, floors, operators, gadgets, users, and registration tokens.
 - **Token-Based Registration** — Admin can toggle public registration on/off and create invite tokens for controlled access.
 - **Email Verification** — New accounts must verify their email. Admins can also manually verify users from the admin panel.
-- **Floor Layout Management** — Upload and manage floor layout images per map through the admin panel with reordering support.
+- **Floor Layout Management** — Upload and manage floor layout images (blueprint, darkprint, whiteprint) per map through the admin panel with reordering support.
+- **Batch Image Import** — One-time import script processes floor images and gadget icons from a source folder (`pnpm import:maps <path>`).
 - **Dark Theme** — Built with a dark color scheme matching the TactiHub brand (see color palette below).
 - **Help & FAQ** — Built-in help page with tool descriptions, keyboard shortcuts, and frequently asked questions.
 
@@ -333,6 +335,16 @@ If the schema has changed:
 pnpm db:generate
 pnpm db:migrate
 ```
+
+### Import floor images (optional, one-time)
+
+If you have a folder of map floor images (blueprint/darkprint/whiteprint variants + gadget icons):
+
+```bash
+pnpm --filter @tactihub/server import:maps "C:\path\to\source\folder"
+```
+
+This processes JPGs to WebP, creates correct floor entries, and assigns gadget icons.
 
 ### Rebuild
 

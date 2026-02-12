@@ -1,6 +1,6 @@
 {
   "name": "tactihub",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "description": "Tactical strategy planning for competitive games",
   "scripts": {
@@ -9,7 +9,9 @@
     "db:generate": "pnpm --filter @tactihub/server db:generate",
     "db:migrate": "pnpm --filter @tactihub/server db:migrate",
     "db:seed": "pnpm --filter @tactihub/server db:seed",
-    "db:studio": "pnpm --filter @tactihub/server db:studio"
+    "db:push": "pnpm --filter @tactihub/server db:push",
+    "db:studio": "pnpm --filter @tactihub/server db:studio",
+    "import:maps": "pnpm --filter @tactihub/server import:maps"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

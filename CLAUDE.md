@@ -9,7 +9,7 @@ This file provides context for AI assistants working on the TactiHub codebase.
 TactiHub is a real-time collaborative strategy planning tool for competitive games (Rainbow Six Siege, Valorant, etc.). Users can draw tactics on game maps, save/share battle plans, and collaborate in rooms with live cursors and drawing sync.
 
 **Author**: Niklas Kronig
-**Version**: 1.3.0
+**Version**: 1.4.0
 **Repo**: https://github.com/niklask52t/TactiHub
 **Based on**: [r6-map-planner](https://github.com/prayansh/r6-map-planner) (Node/Express/Socket.IO) and [r6-maps](https://github.com/jayfoe/r6-maps) (Laravel/Vue)
 
@@ -60,8 +60,15 @@ packages/
 - `operator_gadgets` is a many-to-many junction table (composite PK)
 - `votes` has unique constraint on (user_id, battleplan_id)
 
+### Floor Image Variants (Blueprint / Darkprint / Whiteprint)
+- Each floor can have up to 3 image variants: `imagePath` (blueprint, required), `darkImagePath`, `whiteImagePath` (optional)
+- View mode switcher appears in top-left of canvas when >1 variant is available
+- Default is always Blueprint; switching swaps the background image 1:1 (same dimensions)
+- Admin can upload variants via Floor Layout management (`/admin/maps/:mapId/floors`)
+- Import script: `pnpm --filter @tactihub/server import:maps <source-folder>` processes JPGs→WebP and updates DB
+
 ### Canvas System (3 layers per floor)
-1. **Background layer** — Map floor image
+1. **Background layer** — Map floor image (variant based on view mode selector)
 2. **Drawings layer** — All persisted/committed draws
 3. **Active layer** — Current drawing action + peer cursors
 
@@ -164,7 +171,9 @@ pnpm build                  # Build shared → server → client
 pnpm db:generate            # Generate Drizzle migration files
 pnpm db:migrate             # Apply database migrations
 pnpm db:seed                # Seed admin user + game data
+pnpm db:push                # Push schema changes directly (dev only)
 pnpm db:studio              # Open Drizzle Studio
+pnpm import:maps <path>     # One-time import of floor images + gadget icons
 docker compose up -d        # Start PostgreSQL + Redis
 docker compose down         # Stop containers (data stays in volumes)
 docker compose down -v      # Stop + delete ALL data (pgdata + redisdata volumes)
@@ -178,13 +187,15 @@ docker compose down -v      # Stop + delete ALL data (pgdata + redisdata volumes
 - The client uses `tsc -b` (project references) for build — `shared` must have `composite: true`
 - `tsconfig.node.json` in client is for vite.config.ts only
 - `noUnusedLocals` and `noUnusedParameters` are enabled in client — remove unused imports
-- Seed data includes: 1 admin user, 2 games (R6 + Valorant), maps with floors, operators/agents, gadgets/abilities
+- Seed data includes: 1 admin user, 2 games (R6 + Valorant), 21 R6 maps with correct floor counts, operators/agents, gadgets/abilities
 - Admin login after seed: `admin` / `admin@tactihub.local` / `changeme` (forced credential change on first login)
 - Upload directory structure: `uploads/{games,maps,operators,gadgets}/`
 - Images uploaded via admin panel are processed by Sharp (resized, converted to WebP)
 - `processUpload()` returns `null` for empty file buffers (e.g. form submits without selecting a file) — callers skip processing
 - Radix UI Switch sends "on" in FormData, not "true" — client normalizes to "true"/"false" before sending
-- Admin floor management: `/admin/maps/:mapId/floors` — upload floor layout images per map
+- Admin floor management: `/admin/maps/:mapId/floors` — upload blueprint, darkprint, and whiteprint images per floor
+- `map_floors` table has: `imagePath` (blueprint, required), `darkImagePath`, `whiteImagePath` (both nullable)
+- Import script: `packages/server/src/scripts/import-maps.ts` — one-time batch import of floor images + gadget icons from a source folder
 
 ---
 

@@ -34,27 +34,31 @@ async function seed() {
   if (r6Game) {
     console.log('Seeding R6 Siege...');
 
-    // R6 Maps
-    const r6Maps = [
-      { name: 'Bank', slug: 'bank', isCompetitive: true },
-      { name: 'Border', slug: 'border', isCompetitive: true },
-      { name: 'Coastline', slug: 'coastline', isCompetitive: true },
-      { name: 'Consulate', slug: 'consulate', isCompetitive: true },
-      { name: 'Chalet', slug: 'chalet', isCompetitive: true },
-      { name: 'Clubhouse', slug: 'clubhouse', isCompetitive: true },
-      { name: 'Hereford', slug: 'hereford', isCompetitive: true },
-      { name: 'Kafe', slug: 'kafe', isCompetitive: true },
-      { name: 'Oregon', slug: 'oregon', isCompetitive: true },
-      { name: 'Skyscraper', slug: 'skyscraper', isCompetitive: true },
-      { name: 'Theme Park', slug: 'theme-park', isCompetitive: true },
-      { name: 'Villa', slug: 'villa', isCompetitive: true },
-      { name: 'Bartlett', slug: 'bartlett', isCompetitive: false },
-      { name: 'Favela', slug: 'favela', isCompetitive: false },
-      { name: 'House', slug: 'house', isCompetitive: false },
-      { name: 'Kanal', slug: 'kanal', isCompetitive: false },
-      { name: 'Plane', slug: 'plane', isCompetitive: false },
-      { name: 'Tower', slug: 'tower', isCompetitive: false },
-      { name: 'Yacht', slug: 'yacht', isCompetitive: false },
+    // R6 Maps — each with correct floor layout
+    const r6Maps: Array<{ name: string; slug: string; isCompetitive: boolean; floors: string[] }> = [
+      // Competitive
+      { name: 'Bank', slug: 'bank', isCompetitive: true, floors: ['Basement', 'Ground Floor', 'Top Floor'] },
+      { name: 'Border', slug: 'border', isCompetitive: true, floors: ['Ground Floor', 'Top Floor'] },
+      { name: 'Coastline', slug: 'coastline', isCompetitive: true, floors: ['Ground Floor', 'Top Floor'] },
+      { name: 'Consulate', slug: 'consulate', isCompetitive: true, floors: ['Basement', 'Ground Floor', 'Top Floor'] },
+      { name: 'Chalet', slug: 'chalet', isCompetitive: true, floors: ['Basement', 'Ground Floor', 'Top Floor'] },
+      { name: 'Clubhouse', slug: 'clubhouse', isCompetitive: true, floors: ['Basement', 'Ground Floor', 'Top Floor'] },
+      { name: 'Hereford', slug: 'hereford', isCompetitive: true, floors: ['Basement', 'Ground Floor', 'First Floor', 'Top Floor'] },
+      { name: 'Kafe', slug: 'kafe', isCompetitive: true, floors: ['Ground Floor', 'Middle Floor', 'Top Floor'] },
+      { name: 'Oregon', slug: 'oregon', isCompetitive: true, floors: ['Basement', 'Ground Floor', 'Tier 3', 'Top Floor'] },
+      { name: 'Skyscraper', slug: 'skyscraper', isCompetitive: true, floors: ['Ground Floor', 'Top Floor'] },
+      { name: 'Theme Park', slug: 'theme-park', isCompetitive: true, floors: ['Ground Floor', 'Top Floor'] },
+      { name: 'Villa', slug: 'villa', isCompetitive: true, floors: ['Basement', 'Ground Floor', 'Top Floor'] },
+      // Non-competitive
+      { name: 'Favela', slug: 'favela', isCompetitive: false, floors: ['Basement', 'First Floor', 'Second Floor', 'Top Floor'] },
+      { name: 'Fortress', slug: 'fortress', isCompetitive: false, floors: ['Ground Floor', 'Top Floor'] },
+      { name: 'House', slug: 'house', isCompetitive: false, floors: ['Basement', 'Ground Floor', 'Top Floor'] },
+      { name: 'Kanal', slug: 'kanal', isCompetitive: false, floors: ['Lower Basement', 'Basement', 'Ground Floor', 'Middle Floor', 'Top Floor'] },
+      { name: 'Nighthaven Labs', slug: 'nighthaven-labs', isCompetitive: false, floors: ['Basement', 'Ground Floor', 'Top Floor'] },
+      { name: 'Outback', slug: 'outback', isCompetitive: false, floors: ['Ground Floor', 'Top Floor'] },
+      { name: 'Plane', slug: 'plane', isCompetitive: false, floors: ['Bottom Floor', 'Middle Floor', 'Top Floor'] },
+      { name: 'Tower', slug: 'tower', isCompetitive: false, floors: ['Bottom Floor', 'Top Floor'] },
+      { name: 'Yacht', slug: 'yacht', isCompetitive: false, floors: ['Basement', 'First Floor', 'Second Floor', 'Top Floor'] },
     ];
 
     for (const map of r6Maps) {
@@ -65,12 +69,10 @@ async function seed() {
         isCompetitive: map.isCompetitive,
       }).returning();
 
-      // Create placeholder floors for each map
-      const floorNames = ['Basement', 'Ground Floor', 'First Floor', 'Roof'];
-      for (let i = 0; i < floorNames.length; i++) {
+      for (let i = 0; i < map.floors.length; i++) {
         await db.insert(mapFloors).values({
           mapId: m.id,
-          name: floorNames[i]!,
+          name: map.floors[i]!,
           floorNumber: i + 1,
           imagePath: `/maps/${map.slug}-floor-${i + 1}.webp`,
         });
