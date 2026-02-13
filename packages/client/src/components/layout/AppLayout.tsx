@@ -21,7 +21,7 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-background gaming-bg relative overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-background gaming-bg relative overflow-x-hidden">
       {/* Glow line */}
       <div className="gaming-glow-line top-0 left-0 z-50" />
 
