@@ -104,7 +104,12 @@ if [ "$MODE" = "dev" ]; then
 
   echo ""
   echo "=== Dev reset complete! ==="
-  echo "Run 'pnpm dev' to start developing."
+
+  if ask_yn "Start dev server now?"; then
+    pnpm dev
+  else
+    echo "Run 'pnpm dev' to start developing."
+  fi
 
 elif [ "$MODE" = "prod" ]; then
   echo "=== PRODUCTION UPDATE ==="
