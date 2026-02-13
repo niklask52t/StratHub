@@ -251,34 +251,58 @@ Edit `.env` and configure at minimum:
 
 The default database and Redis URLs work with the included Docker Compose setup.
 
-### 4. Start infrastructure
+### 4. Set up and start
+
+**Option A — Script (recommended):**
+
+The `update.sh` script handles everything automatically: starts Docker containers, installs dependencies, builds packages, generates and applies database migrations, and seeds the database.
 
 ```bash
+bash update.sh
+```
+
+Select mode **1 (dev)**. The script will ask for double confirmation since it resets the database, then:
+1. Starts PostgreSQL + Redis containers
+2. Installs all dependencies (`pnpm install`)
+3. Builds the shared package
+4. Cleans old migration files and generates fresh ones
+5. Applies migrations and seeds the database
+6. Builds all packages
+7. Asks if you want to start the dev server
+
+> **Tip:** Set up the global command so you can run `tactihub-update` from anywhere:
+> ```bash
+> sudo ln -sf $(pwd)/update.sh /usr/local/bin/tactihub-update
+> ```
+
+**Option B — Manual:**
+
+```bash
+# Start PostgreSQL 16 + Redis 7
 docker compose up -d
-```
 
-This starts:
-- **PostgreSQL 16** on port `5432` (user: `tactihub`, password: `tactihub`, db: `tactihub`)
-- **Redis 7** on port `6379`
-
-### 5. Install dependencies
-
-```bash
+# Install dependencies
 pnpm install
-```
 
-### 6. Set up the database
+# Build shared package (must be built before server/client)
+pnpm --filter @tactihub/shared build
 
-```bash
 # Generate migration files from schema
 pnpm db:generate
 
-# Run migrations to create tables
+# Apply migrations to create tables
 pnpm db:migrate
 
 # Seed with initial data (admin user + R6 Siege + Valorant)
 pnpm db:seed
+
+# Start dev server
+pnpm dev
 ```
+
+Docker Compose starts:
+- **PostgreSQL 16** on port `5432` (user: `tactihub`, password: `tactihub`, db: `tactihub`)
+- **Redis 7** on port `6379`
 
 The seed creates:
 - **Admin account**: `admin` / `admin@tactihub.local` / `changeme`
@@ -287,19 +311,13 @@ The seed creates:
 
 All R6 map floor images (165 WebP files) and gadget icons (23 WebP files) are included in the repository under `packages/server/uploads/`. They're available immediately after seeding — no extra import step needed.
 
-### 7. Start development servers
+### 5. Dev server
 
-**Option A — Localhost only (single command):**
-
-```bash
-pnpm dev
-```
-
-This starts both the server (port 3001) and client (port 5173). The client listens on `0.0.0.0`, so it's accessible from other machines on your network.
+`pnpm dev` starts both the server (port 3001) and client (port 5173). The client listens on `0.0.0.0`, so it's accessible from other machines on your network.
 
 The Vite dev server proxies API requests (`/api/*`) and Socket.IO to the Fastify server on port 3001 automatically.
 
-### 8. Open the app
+### 6. Open the app
 
 Navigate to `http://localhost:5173` (or `http://<server-ip>:5173` for remote access) in your browser.
 
