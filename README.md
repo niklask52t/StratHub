@@ -345,31 +345,29 @@ Replace `/opt/tactihub` with your actual install path. After this, simply run `t
 
 ## Updating
 
-### Pull latest changes
+### Option A — Script (recommended)
+
+```bash
+tactihub-update
+```
+
+Or if not symlinked yet: `bash update.sh`. Select mode **2 (prod)** to pull, install dependencies, run migrations, and rebuild — all in one step. Your data is preserved.
+
+### Option B — Manual
 
 ```bash
 git pull origin main
-```
-
-### Install new dependencies
-
-```bash
 pnpm install
-```
-
-### Apply database changes
-
-If the schema has changed:
-
-```bash
+pnpm --filter @tactihub/shared build
 pnpm db:generate
 pnpm db:migrate
+pnpm build
 ```
 
-### Rebuild
+After either option, restart the server:
 
 ```bash
-pnpm build
+sudo systemctl restart tactihub
 ```
 
 ---
