@@ -11,6 +11,7 @@ interface Floor {
 }
 
 export interface LaserLineData {
+  id: string;
   userId: string;
   points: Array<{ x: number; y: number }>;
   color: string;
@@ -47,32 +48,73 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
 
   // Laser pointer state
   const laserPointsRef = useRef<Array<{ x: number; y: number }>>([]);
-  const [laserFadeLines, setLaserFadeLines] = useState<Array<{ points: Array<{ x: number; y: number }>; color: string; fadeStart: number }>>([]);
+  const [laserFadeLines, setLaserFadeLines] = useState<Array<{ id: string; points: Array<{ x: number; y: number }>; color: string; fadeStart: number }>>([]);
   const laserThrottleRef = useRef(0);
+
+  // Local laser dot position (Issue 3: show local user's laser dot)
+  const [localLaserPos, setLocalLaserPos] = useState<{ x: number; y: number } | null>(null);
 
   // Resolve the image path: prefer activeImagePath prop, fall back to floor.mapFloor.imagePath
   const resolvedImagePath = activeImagePath ?? floor.mapFloor?.imagePath;
 
+  const bgImageRef = useRef<HTMLImageElement | null>(null);
+  const prevDimensionsRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+
+  // Keep a ref to the latest renderDraws to avoid stale closures in the image onload callback
+  const renderDrawsRef = useRef<() => void>(() => {});
+
   // Load background image
   useEffect(() => {
-    if (!resolvedImagePath || !bgCanvasRef.current) return;
-    const ctx = bgCanvasRef.current.getContext('2d');
-    if (!ctx) return;
+    if (!resolvedImagePath) return;
+    let cancelled = false;
 
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      setCanvasSize({ width: img.width, height: img.height });
-      bgCanvasRef.current!.width = img.width;
-      bgCanvasRef.current!.height = img.height;
-      drawCanvasRef.current!.width = img.width;
-      drawCanvasRef.current!.height = img.height;
-      activeCanvasRef.current!.width = img.width;
-      activeCanvasRef.current!.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      renderDraws();
+      if (cancelled || !bgCanvasRef.current || !drawCanvasRef.current || !activeCanvasRef.current) return;
+      bgImageRef.current = img;
+
+      const dimensionsChanged =
+        prevDimensionsRef.current.width !== img.width ||
+        prevDimensionsRef.current.height !== img.height;
+
+      if (dimensionsChanged) {
+        // Dimensions changed (new floor or first load) — resize all canvases (this clears them)
+        bgCanvasRef.current.width = img.width;
+        bgCanvasRef.current.height = img.height;
+        drawCanvasRef.current.width = img.width;
+        drawCanvasRef.current.height = img.height;
+        activeCanvasRef.current.width = img.width;
+        activeCanvasRef.current.height = img.height;
+        prevDimensionsRef.current = { width: img.width, height: img.height };
+        setCanvasSize({ width: img.width, height: img.height });
+      }
+
+      // Always redraw background image (view mode switch swaps the image)
+      const bgCtx = bgCanvasRef.current.getContext('2d');
+      if (bgCtx) {
+        bgCtx.clearRect(0, 0, img.width, img.height);
+        bgCtx.drawImage(img, 0, 0);
+      }
+
+      // Re-render draws (use ref to avoid stale closure)
+      if (dimensionsChanged) {
+        renderDrawsRef.current();
+      }
+
+      // Center the image in the viewport only when dimensions change
+      if (dimensionsChanged) {
+        const container = containerRef.current;
+        if (container) {
+          const store = useCanvasStore.getState();
+          store.setDimensions(img.width, img.height, container.clientWidth, container.clientHeight);
+          store.resetViewport();
+        }
+      }
     };
     img.src = `/uploads${resolvedImagePath}`;
+
+    return () => { cancelled = true; };
   }, [resolvedImagePath]);
 
   // Render existing draws
@@ -90,6 +132,9 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       renderDraw(ctx, draw);
     }
   }, [floor.draws, peerDraws]);
+
+  // Keep renderDrawsRef in sync with the latest renderDraws callback
+  renderDrawsRef.current = renderDraws;
 
   useEffect(() => { renderDraws(); }, [renderDraws]);
 
@@ -144,14 +189,25 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
         break;
       }
       case 'icon': {
+        const s = data.size || 32;
         if (data.iconUrl) {
           const img = new Image();
           img.crossOrigin = 'anonymous';
           img.onload = () => {
-            const s = data.size || 32;
             ctx.drawImage(img, draw.originX - s / 2, draw.originY - s / 2, s, s);
           };
           img.src = data.iconUrl;
+        } else if (data.fallbackText) {
+          // Colored circle with initial letter for operators without icons
+          ctx.beginPath();
+          ctx.fillStyle = data.fallbackColor || '#888888';
+          ctx.arc(draw.originX, draw.originY, s / 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.font = `bold ${Math.round(s * 0.5)}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(data.fallbackText, draw.originX, draw.originY);
         }
         break;
       }
@@ -195,6 +251,18 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
         ctx.lineTo(currentPath[i]!.x, currentPath[i]!.y);
       }
       ctx.stroke();
+    }
+
+    // Draw local laser dot
+    if (localLaserPos && tool === Tool.LaserDot) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 15;
+      ctx.arc(localLaserPos.x, localLaserPos.y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
     // Draw peer cursors (with laser dot glow for laser-dot users)
@@ -264,7 +332,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       ctx.stroke();
       ctx.restore();
     }
-  }, [cursors, isDrawing, currentPath, color, lineWidth, laserFadeLines, peerLaserLines]);
+  }, [cursors, isDrawing, currentPath, color, lineWidth, laserFadeLines, peerLaserLines, tool, localLaserPos]);
 
   // Convert screen coordinates to canvas coordinates accounting for viewport transform
   const getCanvasCoords = (e: React.MouseEvent): { x: number; y: number } => {
@@ -330,13 +398,28 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       const { selectedIcon } = useCanvasStore.getState();
       if (selectedIcon) {
         const pos = getCanvasCoords(e);
-        const iconUrl = selectedIcon.url ? `/uploads${selectedIcon.url}` : '';
-        const draw = {
-          type: 'icon',
-          originX: pos.x,
-          originY: pos.y,
-          data: { iconUrl, size: 40 },
-        };
+        let draw: any;
+        if (selectedIcon.url) {
+          draw = {
+            type: 'icon',
+            originX: pos.x,
+            originY: pos.y,
+            data: { iconUrl: `/uploads${selectedIcon.url}`, size: 40 },
+          };
+        } else {
+          // Operator without icon: place a colored circle with initial letter
+          draw = {
+            type: 'icon',
+            originX: pos.x,
+            originY: pos.y,
+            data: {
+              iconUrl: '',
+              size: 40,
+              fallbackText: selectedIcon.name?.[0] || '?',
+              fallbackColor: selectedIcon.color || '#888888',
+            },
+          };
+        }
         // Optimistic render
         const drawCtx = drawCanvasRef.current?.getContext('2d');
         if (drawCtx) renderDraw(drawCtx, draw);
@@ -376,6 +459,13 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
     {
       const pos = getCanvasCoords(e);
       onCursorMove?.(pos.x, pos.y, tool === Tool.LaserDot);
+
+      // Track local laser dot position
+      if (tool === Tool.LaserDot && !readOnly) {
+        setLocalLaserPos(pos);
+      } else if (localLaserPos) {
+        setLocalLaserPos(null);
+      }
     }
 
     if (!isDrawing || readOnly) return;
@@ -470,7 +560,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       onLaserLine?.(points, color);
       // Add to local fade lines
       if (points.length > 1) {
-        setLaserFadeLines((prev) => [...prev, { points, color, fadeStart: Date.now() }]);
+        setLaserFadeLines((prev) => [...prev, { id: `local-${Date.now()}`, points, color, fadeStart: Date.now() }]);
       }
       laserPointsRef.current = [];
       // Clear active canvas
@@ -575,20 +665,14 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       >
         <canvas
           ref={bgCanvasRef}
-          width={canvasSize.width}
-          height={canvasSize.height}
           style={{ imageRendering: 'auto', position: 'absolute', inset: 0 }}
         />
         <canvas
           ref={drawCanvasRef}
-          width={canvasSize.width}
-          height={canvasSize.height}
           style={{ position: 'absolute', inset: 0 }}
         />
         <canvas
           ref={activeCanvasRef}
-          width={canvasSize.width}
-          height={canvasSize.height}
           style={{ position: 'absolute', inset: 0, cursor: getCursorStyle() }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
@@ -603,6 +687,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
               setCurrentPath([]);
               setStartPoint(null);
             }
+            setLocalLaserPos(null);
           }}
         />
       </div>

@@ -41,7 +41,7 @@ const VIEW_MODE_LABELS: Record<ViewMode, string> = {
 };
 
 export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelete, onLaserLine, onCursorMove, peerLaserLines, cursors }: CanvasViewProps) {
-  const { scale, zoomTo, resetViewport, offsetX, offsetY } = useCanvasStore();
+  const { scale, zoomTo, resetViewport, containerWidth, containerHeight } = useCanvasStore();
 
   const sortedFloors = useMemo(() =>
     [...floors].sort((a, b) => (a.mapFloor?.floorNumber ?? 0) - (b.mapFloor?.floorNumber ?? 0)),
@@ -82,15 +82,69 @@ export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelet
     if (e.key === 'j' || e.key === 'J') goDown();
   };
 
+  // WASD + Arrow key panning (smooth, RAF-based)
+  useEffect(() => {
+    const pressedKeys = new Set<string>();
+    let animId: number | null = null;
+    const PAN_SPEED = 8;
+
+    const PAN_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+
+    const animate = () => {
+      const { panBy } = useCanvasStore.getState();
+      let dx = 0;
+      let dy = 0;
+      if (pressedKeys.has('w') || pressedKeys.has('arrowup')) dy += PAN_SPEED;
+      if (pressedKeys.has('s') || pressedKeys.has('arrowdown')) dy -= PAN_SPEED;
+      if (pressedKeys.has('a') || pressedKeys.has('arrowleft')) dx += PAN_SPEED;
+      if (pressedKeys.has('d') || pressedKeys.has('arrowright')) dx -= PAN_SPEED;
+      if (dx !== 0 || dy !== 0) {
+        panBy(dx, dy);
+        animId = requestAnimationFrame(animate);
+      } else {
+        animId = null;
+      }
+    };
+
+    const startLoop = () => {
+      if (animId === null) {
+        animId = requestAnimationFrame(animate);
+      }
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const key = e.key.toLowerCase();
+      if (PAN_KEYS.includes(key)) {
+        e.preventDefault();
+        pressedKeys.add(key);
+        startLoop();
+      }
+    };
+
+    const onKeyUp = (e: KeyboardEvent) => {
+      pressedKeys.delete(e.key.toLowerCase());
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+
+    return () => {
+      if (animId !== null) cancelAnimationFrame(animId);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
+
   // Zoom via buttons — zoom centered on current viewport center
   const zoomIn = () => {
-    const cx = -offsetX + 600;
-    const cy = -offsetY + 400;
+    const cx = (containerWidth || 1200) / 2;
+    const cy = (containerHeight || 800) / 2;
     zoomTo(scale + ZOOM_STEP, cx, cy);
   };
   const zoomOut = () => {
-    const cx = -offsetX + 600;
-    const cy = -offsetY + 400;
+    const cx = (containerWidth || 1200) / 2;
+    const cy = (containerHeight || 800) / 2;
     zoomTo(scale - ZOOM_STEP, cx, cy);
   };
 

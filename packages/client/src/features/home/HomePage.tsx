@@ -58,15 +58,15 @@ export default function HomePage() {
         </div>
 
         {/* Games Grid */}
-        <h2 className="text-2xl font-bold mb-6 tracking-wide uppercase text-sm text-muted-foreground">Choose a Game</h2>
+        <h2 className="text-2xl font-bold mb-6 tracking-wide uppercase text-sm text-muted-foreground text-center">Choose a Game</h2>
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-48" />)}
+          <div className="flex flex-wrap justify-center gap-6">
+            {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-48 w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]" />)}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-wrap justify-center gap-6">
             {data?.data.map((game) => (
-              <Link key={game.id} to={`/${game.slug}`}>
+              <Link key={game.id} to={`/${game.slug}`} className="w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
                 <div className="gaming-card">
                   <div className="gaming-card-corners">
                     <Card className="hover:border-primary/40 transition-all cursor-pointer h-full border-primary/10 bg-card/80">

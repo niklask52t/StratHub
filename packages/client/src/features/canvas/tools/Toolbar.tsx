@@ -4,17 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Pencil, Minus, Square, Type, MousePointer, Move, Undo2, Redo2, Eraser, Crosshair, Presentation, Sticker } from 'lucide-react';
-import { IconPicker } from './IconPicker';
+import { Pencil, Minus, Square, Type, Move, Undo2, Redo2, Eraser, Crosshair, Presentation } from 'lucide-react';
 
 const tools = [
   { tool: Tool.Pen, icon: Pencil, label: 'Pen' },
   { tool: Tool.Line, icon: Minus, label: 'Line' },
   { tool: Tool.Rectangle, icon: Square, label: 'Rectangle' },
   { tool: Tool.Text, icon: Type, label: 'Text' },
-  { tool: Tool.Icon, icon: Sticker, label: 'Icon' },
   { tool: Tool.Eraser, icon: Eraser, label: 'Eraser' },
-  { tool: Tool.Select, icon: MousePointer, label: 'Select' },
   { tool: Tool.Pan, icon: Move, label: 'Pan' },
 ];
 
@@ -26,10 +23,9 @@ const laserTools = [
 interface ToolbarProps {
   onUndo?: () => void;
   onRedo?: () => void;
-  gameSlug?: string;
 }
 
-export function Toolbar({ onUndo, onRedo, gameSlug }: ToolbarProps) {
+export function Toolbar({ onUndo, onRedo }: ToolbarProps) {
   const { tool: activeTool, setTool, color, setColor, lineWidth, setLineWidth } = useCanvasStore();
 
   return (
@@ -105,10 +101,6 @@ export function Toolbar({ onUndo, onRedo, gameSlug }: ToolbarProps) {
         </TooltipTrigger>
         <TooltipContent>Redo</TooltipContent>
       </Tooltip>
-
-      {activeTool === Tool.Icon && gameSlug && (
-        <IconPicker gameSlug={gameSlug} />
-      )}
     </div>
   );
 }

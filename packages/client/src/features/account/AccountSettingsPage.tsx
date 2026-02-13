@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { AlertTriangle } from 'lucide-react';
+import { DEFAULT_ADMIN_EMAIL } from '@tactihub/shared';
 
 export default function AccountSettingsPage() {
   const { user } = useAuthStore();
@@ -55,23 +56,25 @@ export default function AccountSettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-destructive/30">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="h-5 w-5" />
-            Danger Zone
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            Deleting your account is irreversible after the 30-day grace period.
-            All your battle plans, drawings, and rooms will be permanently deleted.
-          </p>
-          <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-            Delete Account
-          </Button>
-        </CardContent>
-      </Card>
+      {user.email !== DEFAULT_ADMIN_EMAIL && (
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Danger Zone
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Deleting your account is irreversible after the 30-day grace period.
+              All your battle plans, drawings, and rooms will be permanently deleted.
+            </p>
+            <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+              Delete Account
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* First Dialog: Are you sure? */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

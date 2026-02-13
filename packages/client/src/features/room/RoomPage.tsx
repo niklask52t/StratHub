@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { getSocket, connectSocket, disconnectSocket } from '@/lib/socket';
 import { CanvasView } from '@/features/canvas/CanvasView';
 import { Toolbar } from '@/features/canvas/tools/Toolbar';
+import { IconSidebar } from '@/features/canvas/tools/IconSidebar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -31,6 +32,7 @@ export default function RoomPage() {
   // Peer laser lines state
   const [peerLaserLines, setPeerLaserLines] = useState<LaserLineData[]>([]);
   const cursorThrottleRef = useRef(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!connectionString) return;
@@ -73,11 +75,10 @@ export default function RoomPage() {
     });
 
     socket.on('laser:line', ({ userId, points, color }: { userId: string; points: Array<{ x: number; y: number }>; color: string }) => {
-      setPeerLaserLines((prev) => {
-        // Replace existing line from same user, or add new
-        const filtered = prev.filter((l) => l.userId !== userId);
-        return [...filtered, { userId, points, color, fadeStart: undefined }];
-      });
+      setPeerLaserLines((prev) => [
+        ...prev,
+        { id: `${userId}-${Date.now()}`, userId, points, color, fadeStart: undefined },
+      ]);
     });
 
     return () => {
@@ -252,28 +253,39 @@ export default function RoomPage() {
       {/* Toolbar */}
       {isAuthenticated && (
         <div className="flex justify-center py-2 border-b">
-          <Toolbar onUndo={handleUndo} onRedo={handleRedo} gameSlug={gameSlug} />
+          <Toolbar onUndo={handleUndo} onRedo={handleRedo} />
         </div>
       )}
 
       {/* Canvas area */}
-      <div className="flex-1 overflow-hidden p-4">
-        {battleplan?.floors ? (
-          <CanvasView
-            floors={battleplan.floors}
-            readOnly={!isAuthenticated}
-            onDrawCreate={handleDrawCreate}
-            onDrawDelete={handleDrawDelete}
-            onLaserLine={handleLaserLine}
-            onCursorMove={handleCursorMove}
-            peerLaserLines={peerLaserLines}
-            cursors={cursors}
+      <div className="flex-1 overflow-hidden relative">
+        {/* Icon sidebar */}
+        {isAuthenticated && gameSlug && (
+          <IconSidebar
+            gameSlug={gameSlug}
+            open={sidebarOpen}
+            onToggle={() => setSidebarOpen((v) => !v)}
           />
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            <p>No battleplan selected. The room owner can set one.</p>
-          </div>
         )}
+
+        <div className="h-full p-4" style={{ marginLeft: isAuthenticated && gameSlug && sidebarOpen ? 280 : 0, transition: 'margin-left 0.2s ease-in-out' }}>
+          {battleplan?.floors ? (
+            <CanvasView
+              floors={battleplan.floors}
+              readOnly={!isAuthenticated}
+              onDrawCreate={handleDrawCreate}
+              onDrawDelete={handleDrawDelete}
+              onLaserLine={handleLaserLine}
+              onCursorMove={handleCursorMove}
+              peerLaserLines={peerLaserLines}
+              cursors={cursors}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <p>No battleplan selected. The room owner can set one.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

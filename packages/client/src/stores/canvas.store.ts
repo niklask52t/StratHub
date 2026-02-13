@@ -13,19 +13,24 @@ interface CanvasStoreState {
   color: string;
   lineWidth: number;
   fontSize: number;
-  selectedIcon: { type: 'operator' | 'gadget'; id: string; url: string } | null;
+  selectedIcon: { type: 'operator' | 'gadget'; id: string; url: string; name?: string; color?: string } | null;
   setTool: (tool: Tool) => void;
   setColor: (color: string) => void;
   setLineWidth: (width: number) => void;
   setFontSize: (size: number) => void;
-  setSelectedIcon: (icon: { type: 'operator' | 'gadget'; id: string; url: string } | null) => void;
+  setSelectedIcon: (icon: { type: 'operator' | 'gadget'; id: string; url: string; name?: string; color?: string } | null) => void;
 
   // Viewport (zoom + pan)
   offsetX: number;
   offsetY: number;
   scale: number;
+  imageWidth: number;
+  imageHeight: number;
+  containerWidth: number;
+  containerHeight: number;
   zoomTo: (newScale: number, pivotX: number, pivotY: number) => void;
   panBy: (dx: number, dy: number) => void;
+  setDimensions: (imgW: number, imgH: number, contW: number, contH: number) => void;
   resetViewport: () => void;
 
   // Undo/Redo history
@@ -54,6 +59,10 @@ export const useCanvasStore = create<CanvasStoreState>((set, get) => ({
   offsetX: 0,
   offsetY: 0,
   scale: 1,
+  imageWidth: 0,
+  imageHeight: 0,
+  containerWidth: 0,
+  containerHeight: 0,
   zoomTo: (newScale, pivotX, pivotY) => {
     const s = get();
     const clamped = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, newScale));
@@ -65,7 +74,26 @@ export const useCanvasStore = create<CanvasStoreState>((set, get) => ({
     });
   },
   panBy: (dx, dy) => set((s) => ({ offsetX: s.offsetX + dx, offsetY: s.offsetY + dy })),
-  resetViewport: () => set({ offsetX: 0, offsetY: 0, scale: 1 }),
+  setDimensions: (imgW, imgH, contW, contH) => set({
+    imageWidth: imgW,
+    imageHeight: imgH,
+    containerWidth: contW,
+    containerHeight: contH,
+  }),
+  resetViewport: () => {
+    const { imageWidth, imageHeight, containerWidth, containerHeight } = get();
+    if (!imageWidth || !imageHeight || !containerWidth || !containerHeight) {
+      set({ offsetX: 0, offsetY: 0, scale: 1 });
+      return;
+    }
+    const fitScale = Math.min(containerWidth / imageWidth, containerHeight / imageHeight, 1);
+    const clamped = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, fitScale));
+    set({
+      scale: clamped,
+      offsetX: (containerWidth - imageWidth * clamped) / 2,
+      offsetY: (containerHeight - imageHeight * clamped) / 2,
+    });
+  },
 
   // Undo/Redo
   myDrawHistory: [],

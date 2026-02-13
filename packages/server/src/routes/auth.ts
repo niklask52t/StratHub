@@ -27,7 +27,7 @@ import {
   verifyRecaptcha,
 } from '../services/auth.service.js';
 import { sendVerificationEmail, sendPasswordResetEmail, sendDeletionConfirmationEmail, sendAccountDeactivatedEmail, sendMagicLinkEmail } from '../services/email.service.js';
-import { DELETION_GRACE_PERIOD_DAYS } from '@tactihub/shared';
+import { DELETION_GRACE_PERIOD_DAYS, DEFAULT_ADMIN_EMAIL } from '@tactihub/shared';
 import jwt from 'jsonwebtoken';
 import type { TokenPayload } from '@tactihub/shared';
 import { REFRESH_TOKEN_EXPIRY_SECONDS } from '@tactihub/shared';
@@ -457,6 +457,10 @@ export default async function authRoutes(fastify: FastifyInstance) {
     const [user] = await db.select().from(users).where(eq(users.id, request.user!.userId));
     if (!user) {
       return reply.status(404).send({ error: 'Not Found', message: 'User not found', statusCode: 404 });
+    }
+
+    if (user.email === DEFAULT_ADMIN_EMAIL) {
+      return reply.status(403).send({ error: 'Forbidden', message: 'The default admin account cannot be deleted', statusCode: 403 });
     }
 
     if (username !== user.username) {
