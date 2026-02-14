@@ -4,9 +4,6 @@ import type {
   OperatorBan,
   StratConfig,
   StratOperatorSlot,
-  StratSide,
-  StratMode,
-  StratSite,
   ViewMode,
 } from '@tactihub/shared';
 import { getDefaultLayerVisibility } from '@/data/mainData';

@@ -62,9 +62,7 @@ export interface SvgLayerDef {
   defaultVisible: boolean;
 }
 
-// --- View Modes ---
-
-export type ViewMode = 'blueprint' | 'dark' | 'white' | 'realview';
+// ViewMode is defined in constants/index.ts (extended with 'realview')
 
 // --- Extended Operator Slot (with strat fields) ---
 

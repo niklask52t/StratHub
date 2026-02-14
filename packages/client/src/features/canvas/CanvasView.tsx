@@ -42,6 +42,7 @@ const VIEW_MODE_LABELS: Record<ViewMode, string> = {
   blueprint: 'Blueprint',
   dark: 'Darkprint',
   white: 'Whiteprint',
+  realview: 'Real View',
 };
 
 export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelete, onDrawUpdate, onLaserLine, onCursorMove, peerLaserLines, cursors, localDraws, currentUserId }: CanvasViewProps) {
