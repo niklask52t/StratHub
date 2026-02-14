@@ -111,10 +111,15 @@ export default async function authRoutes(fastify: FastifyInstance) {
       }
     }
 
-    // Send verification email
+    // Send verification email (best-effort — don't fail registration if SMTP is down)
     const emailToken = generateEmailToken();
     await storeEmailVerificationToken(user.id, emailToken);
-    await sendVerificationEmail(user.email, emailToken);
+    let emailSent = true;
+    try {
+      await sendVerificationEmail(user.email, emailToken);
+    } catch {
+      emailSent = false;
+    }
 
     return reply.status(201).send({
       data: {
@@ -123,7 +128,9 @@ export default async function authRoutes(fastify: FastifyInstance) {
         email: user.email,
         role: user.role,
       },
-      message: 'Registration successful. Please check your email to verify your account.',
+      message: emailSent
+        ? 'Registration successful. Please check your email to verify your account.'
+        : 'Registration successful. Verification email could not be sent — please ask an admin to verify your account or try resending later.',
     });
   });
 
