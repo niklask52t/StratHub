@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { apiGet } from '@/lib/api';
-import { CanvasView } from '@/features/canvas/CanvasView';
+import MapCanvas from '@/features/canvas/MapCanvas';
 import { Toolbar } from '@/features/canvas/tools/Toolbar';
 import { IconSidebar } from '@/features/canvas/tools/IconSidebar';
 import StratLayout from '@/features/strat/StratLayout';
@@ -375,7 +375,7 @@ export default function SandboxPage() {
 
             <div className="h-full p-2" style={{ marginLeft: selectedGame?.slug && sidebarOpen ? 280 : 0, transition: 'margin-left 0.2s ease-in-out' }}>
               {floors.length > 0 ? (
-                <CanvasView
+                <MapCanvas
                   floors={floors}
                   onDrawCreate={handleDrawCreate}
                   onDrawDelete={handleDrawDelete}

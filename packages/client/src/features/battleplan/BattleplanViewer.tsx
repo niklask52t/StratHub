@@ -13,7 +13,7 @@ import { ArrowLeft, Copy, Share2, Pencil, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth.store';
 import { useStratStore } from '@/stores/strat.store';
-import { CanvasView } from '@/features/canvas/CanvasView';
+import MapCanvas from '@/features/canvas/MapCanvas';
 import StratLayout from '@/features/strat/StratLayout';
 
 const SUGGESTED_TAGS = ['Aggressive', 'Default', 'Retake', 'Rush', 'Anchor', 'Roam', 'Site A', 'Site B'];
@@ -324,7 +324,7 @@ export default function BattleplanViewer() {
             onColorChange={() => {}}
             readOnly
           >
-            <CanvasView
+            <MapCanvas
               floors={plan.floors || []}
               readOnly
               activePhaseId={activePhaseId}
@@ -334,7 +334,7 @@ export default function BattleplanViewer() {
             />
           </StratLayout>
         ) : (
-          <CanvasView
+          <MapCanvas
             floors={plan.floors || []}
             readOnly
             mapSlug={plan.map?.slug}

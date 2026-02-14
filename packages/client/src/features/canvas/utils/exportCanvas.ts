@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { renderDraw } from '../CanvasLayer';
+import { renderDraw } from '../rendering/renderDraw';
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -85,7 +85,6 @@ export async function exportAllFloorsAsPdf(
     const fitW = Math.min(availW, availH * ratio);
     const fitH = fitW / ratio;
 
-    // Floor name header
     pdf.setFontSize(12);
     pdf.text(floor.mapFloor?.name || `Floor ${i + 1}`, margin, margin - 4);
 

@@ -1,0 +1,33 @@
+export type { ViewMode } from '@tactihub/shared';
+
+export interface MapFloor {
+  id: string;
+  name: string;
+  floorNumber: number;
+  imagePath: string;
+  darkImagePath?: string | null;
+  whiteImagePath?: string | null;
+}
+
+export interface Floor {
+  id: string;
+  mapFloorId: string;
+  mapFloor?: MapFloor;
+  draws?: any[];
+}
+
+export interface LaserLineData {
+  id: string;
+  userId: string;
+  points: Array<{ x: number; y: number }>;
+  color: string;
+  fadeStart?: number;
+}
+
+export interface CursorData {
+  x: number;
+  y: number;
+  color: string;
+  userId: string;
+  isLaser?: boolean;
+}

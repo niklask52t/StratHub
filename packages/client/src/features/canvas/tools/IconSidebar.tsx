@@ -87,7 +87,6 @@ export function IconSidebar({
   const operators = operatorsData?.data || [];
   const gadgets = gadgetsData?.data || [];
 
-  // Lineup data
   const defenderSlots = useMemo(() =>
     (operatorSlots || []).filter(s => s.side === 'defender').sort((a, b) => a.slotNumber - b.slotNumber),
     [operatorSlots]
@@ -98,7 +97,6 @@ export function IconSidebar({
   );
   const hasAttackerLineup = attackerSlots.length > 0;
 
-  // IDs of operators in the lineup
   const lineupDefenderIds = useMemo(() =>
     new Set(defenderSlots.filter(s => s.operatorId).map(s => s.operatorId!)),
     [defenderSlots]
@@ -112,46 +110,35 @@ export function IconSidebar({
     [lineupDefenderIds, lineupAttackerIds]
   );
 
-  // Whether lineup has any assigned operators (to decide filtering)
   const hasAnyLineupOperators = allLineupOperatorIds.size > 0;
 
-  // Gadget IDs from lineup operators
   const lineupGadgetIds = useMemo(() => {
     const ids = new Set<string>();
     for (const op of operators) {
       if (allLineupOperatorIds.has(op.id) && op.gadgets) {
-        for (const g of op.gadgets) {
-          ids.add(g.id);
-        }
+        for (const g of op.gadgets) ids.add(g.id);
       }
     }
     return ids;
   }, [operators, allLineupOperatorIds]);
 
-  // Search filter
   const lowerSearch = search.toLowerCase();
 
-  // Filtered operators for the Operators tab
   const allAttackers = operators.filter(op => op.isAttacker);
   const allDefenders = operators.filter(op => !op.isAttacker);
 
   const filteredOperatorsForTab = useMemo(() => {
     let filtered = operators;
-    if (lowerSearch) {
-      filtered = filtered.filter(op => op.name.toLowerCase().includes(lowerSearch));
-    }
+    if (lowerSearch) filtered = filtered.filter(op => op.name.toLowerCase().includes(lowerSearch));
     return filtered;
   }, [operators, lowerSearch]);
 
   const filteredGadgetsForTab = useMemo(() => {
     let filtered = gadgets;
-    if (lowerSearch) {
-      filtered = filtered.filter(g => g.name.toLowerCase().includes(lowerSearch));
-    }
+    if (lowerSearch) filtered = filtered.filter(g => g.name.toLowerCase().includes(lowerSearch));
     return filtered;
   }, [gadgets, lowerSearch]);
 
-  // Get available operators for lineup dropdowns (not already assigned in same side)
   const getAvailableOperators = (side: 'defender' | 'attacker', currentSlotId: string) => {
     const sideOps = side === 'defender' ? allDefenders : allAttackers;
     const sideSlots = side === 'defender' ? defenderSlots : attackerSlots;
@@ -177,10 +164,7 @@ export function IconSidebar({
         {op.icon ? (
           <img src={`/uploads${op.icon}`} alt={op.name} className="h-8 w-8 rounded-full" />
         ) : (
-          <div
-            className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
-            style={{ backgroundColor: op.color }}
-          >
+          <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: op.color }}>
             {op.name[0]}
           </div>
         )}
@@ -203,10 +187,7 @@ export function IconSidebar({
         {g.icon ? (
           <img src={`/uploads${g.icon}`} alt={g.name} className="h-8 w-8" />
         ) : (
-          <div
-            className="h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-            style={{ backgroundColor: CATEGORY_COLORS[g.category] || '#888888' }}
-          >
+          <div className="h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: CATEGORY_COLORS[g.category] || '#888888' }}>
             {getGadgetAbbrev(g.name)}
           </div>
         )}
@@ -218,16 +199,14 @@ export function IconSidebar({
     </div>
   );
 
-  // Operators tab: determine which to show
   const getVisibleOperators = (side: 'defender' | 'attacker') => {
     const sideOps = filteredOperatorsForTab.filter(op => side === 'attacker' ? op.isAttacker : !op.isAttacker);
-    if (!hasAnyLineupOperators) return sideOps; // Show all when no lineup assigned
+    if (!hasAnyLineupOperators) return sideOps;
     if (showAll) return sideOps;
     const lineupIds = side === 'defender' ? lineupDefenderIds : lineupAttackerIds;
     return sideOps.filter(op => lineupIds.has(op.id));
   };
 
-  // Whether to show attacker section in operators tab
   const showAttackerSection = () => {
     if (!hasAttackerLineup) return false;
     if (showAll) return true;
@@ -235,7 +214,6 @@ export function IconSidebar({
     return lineupAttackerIds.size > 0;
   };
 
-  // Gadgets tab: determine which to show
   const getVisibleGadgets = () => {
     if (!hasAnyLineupOperators) return filteredGadgetsForTab;
     if (showAll) return filteredGadgetsForTab;
@@ -249,7 +227,6 @@ export function IconSidebar({
 
     return (
       <div key={slot.id} className="mb-1">
-        {/* Slot row — clickable to expand picker */}
         <div
           className={`flex items-center gap-2 px-1.5 py-1 rounded cursor-pointer transition-colors ${isExpanded ? 'bg-muted' : 'hover:bg-muted/50'}`}
           onClick={() => {
@@ -272,7 +249,6 @@ export function IconSidebar({
           <span className={`text-xs flex-1 truncate ${currentOp ? 'text-foreground' : 'text-muted-foreground'}`}>
             {currentOp?.name || 'Select operator...'}
           </span>
-          {/* Clear button */}
           {isAuthenticated && onSlotChange && currentOp && (
             <button
               className="h-5 w-5 flex items-center justify-center rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors shrink-0"
@@ -284,7 +260,6 @@ export function IconSidebar({
           )}
         </div>
 
-        {/* Expanded operator picker grid */}
         {isExpanded && isAuthenticated && onSlotChange && (
           <div className="mt-1 mb-2 p-2 bg-muted/30 rounded border border-border/50">
             {available.length > 0 ? (
@@ -294,18 +269,12 @@ export function IconSidebar({
                     key={op.id}
                     className="flex flex-col items-center justify-center gap-0.5 p-1 rounded hover:bg-muted transition-colors"
                     title={op.name}
-                    onClick={() => {
-                      onSlotChange(slot.id, op.id);
-                      setExpandedSlotId(null);
-                    }}
+                    onClick={() => { onSlotChange(slot.id, op.id); setExpandedSlotId(null); }}
                   >
                     {op.icon ? (
                       <img src={`/uploads${op.icon}`} alt={op.name} className="h-8 w-8 rounded-full" />
                     ) : (
-                      <div
-                        className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                        style={{ backgroundColor: op.color }}
-                      >
+                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: op.color }}>
                         {op.name[0]}
                       </div>
                     )}
@@ -324,7 +293,6 @@ export function IconSidebar({
 
   return (
     <>
-      {/* Toggle button */}
       <button
         onClick={handleToggle}
         className={`absolute top-1/2 -translate-y-1/2 z-20 flex items-center gap-0.5 px-1 py-3 bg-background/95 backdrop-blur border border-l-0 rounded-r-lg hover:bg-muted transition-all duration-200 ${!hasBeenSeen && !open ? 'animate-pulse' : ''}`}
@@ -343,27 +311,19 @@ export function IconSidebar({
         )}
       </button>
 
-      {/* Sidebar panel */}
       <div
         className="absolute left-0 top-0 bottom-0 z-10 bg-background/95 backdrop-blur border-r overflow-hidden transition-all duration-200 ease-in-out"
         style={{ width: open ? 280 : 0 }}
       >
         {open && (
           <div className="flex flex-col h-full w-[280px]">
-            {/* Search */}
             <div className="p-3 border-b">
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-8 h-8 text-sm"
-                />
+                <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-8 h-8 text-sm" />
               </div>
             </div>
 
-            {/* Tabs */}
             <Tabs defaultValue="lineup" className="flex-1 flex flex-col min-h-0">
               <TabsList className="mx-3 mt-2">
                 <TabsTrigger value="lineup" className="flex-1 text-xs">Lineup</TabsTrigger>
@@ -371,9 +331,7 @@ export function IconSidebar({
                 <TabsTrigger value="gadgets" className="flex-1 text-xs">Gadgets</TabsTrigger>
               </TabsList>
 
-              {/* Lineup Tab */}
               <TabsContent value="lineup" className="flex-1 overflow-y-auto px-3 pb-3 mt-2">
-                {/* Defenders */}
                 <div className="mb-4">
                   <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide flex items-center gap-1">
                     <span className="inline-block h-2 w-2 rounded-full bg-blue-500" />
@@ -382,7 +340,6 @@ export function IconSidebar({
                   {defenderSlots.map(slot => renderSlotRow(slot, 'defender'))}
                 </div>
 
-                {/* Attackers */}
                 {hasAttackerLineup ? (
                   <div className="mb-3">
                     <div className="flex items-center justify-between mb-2">
@@ -391,13 +348,7 @@ export function IconSidebar({
                         Attackers
                       </p>
                       {isAuthenticated && onRemoveAttackerLineup && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-5 px-1 text-destructive hover:text-destructive"
-                          onClick={onRemoveAttackerLineup}
-                          title="Remove attacker lineup"
-                        >
+                        <Button variant="ghost" size="sm" className="h-5 px-1 text-destructive hover:text-destructive" onClick={onRemoveAttackerLineup} title="Remove attacker lineup">
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       )}
@@ -405,55 +356,36 @@ export function IconSidebar({
                     {attackerSlots.map(slot => renderSlotRow(slot, 'attacker'))}
                   </div>
                 ) : isAuthenticated && onCreateAttackerLineup ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs"
-                    onClick={onCreateAttackerLineup}
-                  >
+                  <Button variant="outline" size="sm" className="w-full text-xs" onClick={onCreateAttackerLineup}>
                     <Plus className="h-3 w-3 mr-1" /> Add Attacker Lineup
                   </Button>
                 ) : null}
               </TabsContent>
 
-              {/* Operators Tab */}
               <TabsContent value="operators" className="flex-1 overflow-y-auto px-3 pb-3 mt-2">
-                {/* Show all toggle */}
                 {hasAnyLineupOperators && (
                   <div className="flex items-center gap-2 mb-3">
-                    <Checkbox
-                      id="showAllOps"
-                      checked={showAll}
-                      onCheckedChange={(v) => setShowAll(!!v)}
-                    />
-                    <label htmlFor="showAllOps" className="text-xs text-muted-foreground cursor-pointer">
-                      Show all operators
-                    </label>
+                    <Checkbox id="showAllOps" checked={showAll} onCheckedChange={(v) => setShowAll(!!v)} />
+                    <label htmlFor="showAllOps" className="text-xs text-muted-foreground cursor-pointer">Show all operators</label>
                   </div>
                 )}
 
-                {/* Defenders section */}
                 {(() => {
                   const visibleDefs = getVisibleOperators('defender');
                   return visibleDefs.length > 0 ? (
                     <div className="mb-3">
                       <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide">Defenders</p>
-                      <div className="grid grid-cols-4 gap-1">
-                        {visibleDefs.map(op => renderOperatorButton(op, lineupDefenderIds.has(op.id)))}
-                      </div>
+                      <div className="grid grid-cols-4 gap-1">{visibleDefs.map(op => renderOperatorButton(op, lineupDefenderIds.has(op.id)))}</div>
                     </div>
                   ) : null;
                 })()}
 
-                {/* Attackers section */}
                 {showAttackerSection() && (() => {
                   const visibleAtks = getVisibleOperators('attacker');
                   return visibleAtks.length > 0 ? (
                     <div className="mb-3">
                       <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide">Attackers</p>
-                      <div className="grid grid-cols-4 gap-1">
-                        {visibleAtks.map(op => renderOperatorButton(op, lineupAttackerIds.has(op.id)))}
-                      </div>
+                      <div className="grid grid-cols-4 gap-1">{visibleAtks.map(op => renderOperatorButton(op, lineupAttackerIds.has(op.id)))}</div>
                     </div>
                   ) : null;
                 })()}
@@ -463,19 +395,11 @@ export function IconSidebar({
                 )}
               </TabsContent>
 
-              {/* Gadgets Tab */}
               <TabsContent value="gadgets" className="flex-1 overflow-y-auto px-3 pb-3 mt-2">
-                {/* Show all toggle */}
                 {hasAnyLineupOperators && (
                   <div className="flex items-center gap-2 mb-3">
-                    <Checkbox
-                      id="showAllGadgets"
-                      checked={showAll}
-                      onCheckedChange={(v) => setShowAll(!!v)}
-                    />
-                    <label htmlFor="showAllGadgets" className="text-xs text-muted-foreground cursor-pointer">
-                      Show all gadgets
-                    </label>
+                    <Checkbox id="showAllGadgets" checked={showAll} onCheckedChange={(v) => setShowAll(!!v)} />
+                    <label htmlFor="showAllGadgets" className="text-xs text-muted-foreground cursor-pointer">Show all gadgets</label>
                   </div>
                 )}
 
@@ -492,9 +416,7 @@ export function IconSidebar({
                   ].map(({ label, items }) => items.length > 0 ? (
                     <div key={label} className="mb-3">
                       <p className="text-xs text-muted-foreground mb-2 font-medium uppercase tracking-wide">{label}</p>
-                      <div className="grid grid-cols-4 gap-1">
-                        {items.map(g => renderGadgetButton(g, lineupGadgetIds.has(g.id)))}
-                      </div>
+                      <div className="grid grid-cols-4 gap-1">{items.map(g => renderGadgetButton(g, lineupGadgetIds.has(g.id)))}</div>
                     </div>
                   ) : null);
                 })()}

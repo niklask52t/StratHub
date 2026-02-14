@@ -7,7 +7,7 @@ import { useCanvasStore } from '@/stores/canvas.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useStratStore } from '@/stores/strat.store';
 import { getSocket, connectSocket, disconnectSocket } from '@/lib/socket';
-import { CanvasView } from '@/features/canvas/CanvasView';
+import MapCanvas from '@/features/canvas/MapCanvas';
 import { Toolbar } from '@/features/canvas/tools/Toolbar';
 import { IconSidebar } from '@/features/canvas/tools/IconSidebar';
 import StratLayout from '@/features/strat/StratLayout';
@@ -22,7 +22,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Copy, Users, Info, Settings, X } from 'lucide-react';
 import type { CursorPosition } from '@tactihub/shared';
 import { CURSOR_THROTTLE_MS } from '@tactihub/shared';
-import type { LaserLineData } from '@/features/canvas/CanvasLayer';
+import type { LaserLineData } from '@/features/canvas/types';
 import { ChatPanel } from './ChatPanel';
 import type { ChatMessage } from '@tactihub/shared';
 
@@ -767,7 +767,7 @@ export default function RoomPage() {
             <ChatPanel open={chatOpen} onToggle={() => setChatOpen(v => !v)} />
 
             <div className="h-full p-2" style={{ marginLeft: gameSlug && sidebarOpen ? 280 : 0, transition: 'margin-left 0.2s ease-in-out' }}>
-              <CanvasView
+              <MapCanvas
                 floors={battleplan.floors}
                 onDrawCreate={wrappedDrawCreate}
                 onDrawDelete={handleDrawDelete}
