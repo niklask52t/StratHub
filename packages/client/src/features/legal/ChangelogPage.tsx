@@ -14,9 +14,27 @@ interface Release {
 
 const releases: Release[] = [
   {
-    version: '1.8.4',
+    version: '1.8.5',
     date: '2026-02-14',
     tag: 'Latest',
+    changes: [
+      { type: 'feature', text: 'Plan settings dialog in room view \u2014 edit name, description, notes, tags, and public toggle with manual save' },
+      { type: 'feature', text: 'Resend verification email option on login page when email is not yet verified' },
+      { type: 'improvement', text: 'Email verification tokens stored in database instead of Redis (survives Redis restarts)' },
+      { type: 'improvement', text: 'Registration no longer fails when SMTP is unavailable (best-effort email)' },
+      { type: 'improvement', text: 'Dismissable toast notifications (close button on all toasts)' },
+      { type: 'improvement', text: 'Ubisoft screenshot disclaimer added to Impressum and About pages' },
+      { type: 'fix', text: 'All API endpoints changed from PUT/DELETE to POST (fixes nginx 403 blocking in production)' },
+      { type: 'fix', text: 'Battleplan delete now works correctly (was silently failing)' },
+      { type: 'fix', text: 'Public toggle on battleplans works in production' },
+      { type: 'fix', text: 'Non-public plans show "not found" message instead of infinite loading for anonymous users' },
+      { type: 'fix', text: 'Admin manual user verification works in production' },
+      { type: 'fix', text: 'Draw operations (move, resize, erase) work in production' },
+    ],
+  },
+  {
+    version: '1.8.4',
+    date: '2026-02-14',
     changes: [
       { type: 'feature', text: 'Map name displayed in room and sandbox header bar' },
       { type: 'improvement', text: 'Map name included in battleplan API response' },

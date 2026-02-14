@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.8.5 — 2026-02-14
+
+- [feature] Plan settings dialog in room view — edit name, description, notes, tags, and public toggle with manual save
+- [feature] Resend verification email option on login page when email is not yet verified
+- [improvement] Email verification tokens stored in database instead of Redis (survives Redis restarts)
+- [improvement] Registration no longer fails when SMTP is unavailable (best-effort email)
+- [improvement] Dismissable toast notifications (close button on all toasts)
+- [improvement] Ubisoft screenshot disclaimer added to Impressum and About pages
+- [fix] All API endpoints changed from PUT/DELETE to POST (fixes nginx 403 blocking in production)
+- [fix] Battleplan delete now works correctly (was silently failing due to blocked DELETE method)
+- [fix] Public toggle on battleplans works in production (was returning 403)
+- [fix] Non-public plans show "not found" message for anonymous users instead of infinite "Loading..."
+- [fix] Admin manual user verification works in production (changed from PUT to POST)
+- [fix] Draw operations (move, resize, erase) work in production (PUT/DELETE replaced with POST)
+
 ## v1.8.4 — 2026-02-14
 
 - [feature] Map name displayed in room and sandbox header bar

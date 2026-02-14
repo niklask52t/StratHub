@@ -9,7 +9,7 @@ This file provides context for AI assistants working on the TactiHub codebase.
 TactiHub is a real-time collaborative strategy planning tool for Rainbow Six Siege. Users can draw tactics on game maps, save/share battle plans, and collaborate in rooms with live cursors and drawing sync.
 
 **Author**: Niklas Kronig
-**Version**: 1.8.4
+**Version**: 1.8.5
 **Repo**: https://github.com/niklask52t/TactiHub
 **Based on**: [r6-map-planner](https://github.com/prayansh/r6-map-planner) (Node/Express/Socket.IO) and [r6-maps](https://github.com/jayfoe/r6-maps) (Laravel/Vue)
 
@@ -44,8 +44,8 @@ packages/
 - **Database**: PostgreSQL 16 via Drizzle ORM (drizzle-kit for migrations)
 - **Cache/Sessions**: Redis 7 via ioredis
 - **Realtime**: Socket.IO 4.8 (JWT auth at handshake, guests allowed without token)
-- **Auth**: JWT access tokens (15min) + refresh tokens (7d, httpOnly cookie, stored in Redis)
-- **Email**: Nodemailer
+- **Auth**: JWT access tokens (15min) + refresh tokens (7d, httpOnly cookie, stored in Redis), email verification tokens stored in DB (users table)
+- **Email**: Nodemailer (best-effort — SMTP failures do not block registration)
 - **Images**: Sharp (resize + WebP conversion)
 - **Infrastructure**: Docker Compose (postgres:16-alpine + redis:7-alpine)
 
@@ -83,7 +83,7 @@ packages/
 
 ### Draw Persistence (Socket vs REST)
 - **Socket.IO** handlers are **broadcast-only** — they relay events to other room participants
-- **REST API** handles database persistence (POST to create draws, DELETE to soft-delete)
+- **REST API** handles database persistence (POST to create draws, POST to soft-delete)
 - This avoids the dual-write bug where draws were inserted both via socket and REST
 
 ### Optimistic Draw Tracking (v1.8.1)
@@ -99,8 +99,8 @@ packages/
 - `DrawHistoryEntry` has `action` discriminator ('create' | 'update') and optional `previousState`
 - `pushMyDraw(entry)` after REST create returns IDs (guarded by `isRedoingRef` to prevent double-push) — action defaults to 'create'
 - `pushMyUpdate(entry)` for move/resize/rotate operations — stores `previousState` for undo reversal
-- `popUndo()` → if action is 'update': restore `previousState` via PUT; if 'create': delete via REST + socket broadcast
-- `popRedo()` → if action is 'update': re-apply via PUT; if 'create': recreate via REST + socket broadcast + `updateDrawId(oldId, newId)`
+- `popUndo()` → if action is 'update': restore `previousState` via POST; if 'create': delete via REST + socket broadcast
+- `popRedo()` → if action is 'update': re-apply via POST; if 'create': recreate via REST + socket broadcast + `updateDrawId(oldId, newId)`
 - `updateDrawId(oldId, newId)` updates both `myDrawHistory` and `undoStack` when redo creates a new draw with a different ID
 - Keyboard: Ctrl+Z (undo), Ctrl+Y / Ctrl+Shift+Z (redo)
 
@@ -113,7 +113,7 @@ packages/
 5. First login with default admin email (`admin@tactihub.local`) forces credential change (gaming-style modal)
 6. Token refresh → POST /api/auth/refresh returns new access token (App.tsx session restore on mount uses `apiPost`, not `apiGet` — the server endpoint is POST-only)
 7. Admin can toggle public registration and create invite tokens
-8. **Admin manual verification**: PUT /api/admin/users/:id/verify — verifies a user without email, sends notification email
+8. **Admin manual verification**: POST /api/admin/users/:id/verify — verifies a user without email, sends notification email
 9. **Guests**: Socket connects without token → userId = `guest-{socketId}`, drawing events blocked server-side. Client-side guests have full toolbar/icon access and can draw locally (stored in React state, not persisted or synced)
 
 ### Account Deletion Flow
@@ -123,7 +123,7 @@ packages/
 4. Account is **deactivated** (`deactivatedAt` set, `deletionScheduledAt` = now + 30 days)
 5. Refresh token revoked → user logged out
 6. Deactivated users cannot log in (checked in login + refresh routes)
-7. Admin can **reactivate** via `PUT /api/admin/users/:id/reactivate` (clears deactivatedAt + deletionScheduledAt)
+7. Admin can **reactivate** via `POST /api/admin/users/:id/reactivate` (clears deactivatedAt + deletionScheduledAt)
 8. Daily cleanup job permanently deletes users where `deletionScheduledAt < now()` and sends final email
 9. DB fields: `users.deactivated_at` (nullable timestamp), `users.deletion_scheduled_at` (nullable timestamp)
 
@@ -143,7 +143,7 @@ packages/
 
 ### Operator Lineup System
 - Each battleplan has 5 defender operator slots (created automatically via `side: 'defender'`)
-- Optional attacker lineup: POST `/:id/attacker-lineup` creates 5 attacker slots, DELETE removes them
+- Optional attacker lineup: POST `/:id/attacker-lineup` creates 5 attacker slots, POST `/:id/attacker-lineup/delete` removes them
 - `operator_slots` table has `side` column (`slot_side` pgEnum: 'defender' | 'attacker') with default 'defender'
 - IconSidebar has 3 tabs: **Lineup** (visual grid picker), **Operators** (filtered grid), **Gadgets** (filtered grid)
 - Lineup slots: click row to expand 4-column operator image grid, click operator to assign, X button to clear
@@ -169,7 +169,7 @@ packages/
 - **Move**: Drag the selected draw to reposition — offsets all coordinates (originX/Y, destinationX/Y, path points)
 - **Resize**: 8 handles (nw/n/ne/e/se/s/sw/w) — drag to scale the draw proportionally. Uses `applyResizeToDraw()` to transform coordinates per draw type
 - **Rotate**: Circle handle above bounding box — drag to rotate. Stores `rotation` (radians) in draw data. Rendered via `ctx.translate → ctx.rotate → ctx.translate` around bounding box center
-- Release: persists via PUT /api/draws/:id + socket broadcast
+- Release: persists via POST /api/draws/:id + socket broadcast
 - `getDrawBounds()` helper in CanvasLayer computes axis-aligned bounding box for all draw types
 - `selectedDrawId`, `interactionMode` ('none'|'move'|'resize'|'rotate'), `activeResizeHandle` in Zustand canvas store
 - **Auto-switch**: After completing a Line or Rectangle drawing, tool automatically switches to Select and auto-selects the new draw. Pen and Text tools stay active. Icon tool stays active for multi-placement.
@@ -177,7 +177,7 @@ packages/
 ### Ownership-Based Draw Interaction
 - Eraser and Select tools only interact with draws where `draw.userId === currentUserId`
 - Others' draws are rendered with reduced opacity (0.6 alpha) as visual distinction
-- Server enforces ownership on PUT /api/draws/:id and DELETE /api/draws/:id (403 if not owner)
+- Server enforces ownership on POST /api/draws/:id and POST /api/draws/:id/delete (403 if not owner)
 - `currentUserId` prop passed from RoomPage → CanvasView → CanvasLayer
 
 ### Text Font Size Control
@@ -371,26 +371,29 @@ The Vite dev client proxies all `/api/*` and `/socket.io` requests to `localhost
 ## API Endpoints Overview
 
 ### Auth: `/api/auth/`
-POST register, login, logout, refresh, forgot-password, reset-password, change-credentials, request-deletion, request-magic-link
+POST register, login, logout, refresh, forgot-password, reset-password, change-credentials, request-deletion, request-magic-link, resend-verification
 GET verify-email, confirm-deletion, magic-login, me, registration-status (public), recaptcha-key (public)
 
 ### Admin Users: `/api/admin/users/`
-GET (paginated), PUT/:id/role, PUT/:id/verify (manual email verification + notification), PUT/:id/reactivate, DELETE/:id
+GET (paginated), POST/:id/role, POST/:id/verify (manual email verification + notification), POST/:id/reactivate, POST/:id/delete
 
 ### Public: `/api/`
 GET games, games/:slug, games/:slug/maps/:mapSlug, games/:slug/operators, games/:slug/gadgets
 
 ### Battleplans: `/api/battleplans/`
-GET (public, paginated), GET mine, POST create, GET/:id (optionalAuth), PUT/:id, DELETE/:id, POST/:id/copy, POST/:id/vote
+GET (public, paginated), GET mine, POST create, GET/:id (optionalAuth), POST/:id (update), POST/:id/delete, POST/:id/copy, POST/:id/vote
 
 ### Draws: `/api/`
-POST battleplan-floors/:id/draws (batch), PUT draws/:id, DELETE draws/:id (soft delete)
+POST battleplan-floors/:id/draws (batch), POST draws/:id (update), POST draws/:id/delete (soft delete)
 
 ### Rooms: `/api/rooms/`
-POST create (supports gameId+mapId for auto-battleplan), GET/:connString (optionalAuth), PUT/:connString/battleplan, DELETE/:connString
+POST create (supports gameId+mapId for auto-battleplan), GET/:connString (optionalAuth), POST/:connString/battleplan (update), POST/:connString/delete
 
 ### Admin: `/api/admin/`
 Full CRUD for games, maps, map-floors, operators, gadgets, operator-gadgets, users, tokens, settings, stats
+
+### HTTP Method Convention
+All mutating endpoints use POST only (no PUT or DELETE). This ensures compatibility with reverse proxies that restrict HTTP methods. The `apiPut()` client helper internally sends POST. The `apiDelete()` helper sends POST to `path + '/delete'`.
 
 ---
 

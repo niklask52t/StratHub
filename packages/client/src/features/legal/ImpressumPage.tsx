@@ -110,6 +110,7 @@ export default function ImpressumPage() {
               TactiHub is a fan-made tool and is not affiliated with, endorsed by, or connected to Ubisoft or any other game publisher. All game names, logos, and related assets are trademarks of their respective owners.
             </p>
             <p>
+              Some images used on this website are screenshots from the game Tom Clancy&apos;s Rainbow Six Siege, developed and published by Ubisoft.
               Map images and operator icons used in this application are property of their respective game publishers and are used for informational and educational purposes only.
             </p>
           </CardContent>

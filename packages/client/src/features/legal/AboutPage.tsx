@@ -193,6 +193,8 @@ export default function AboutPage() {
               related assets are trademarks of their respective owners.
             </p>
             <p>
+              Some images used on this website are screenshots from the game Tom Clancy&apos;s Rainbow Six Siege,
+              developed and published by Ubisoft.
               Map images and operator icons used in this application are property of their
               respective game publishers and are used for informational and educational purposes only.
             </p>
