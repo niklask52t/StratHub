@@ -4,7 +4,7 @@ import sharp from 'sharp';
 import { nanoid } from 'nanoid';
 import type { MultipartFile } from '@fastify/multipart';
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(import.meta.dirname, '..', '..', 'uploads');
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '5242880');
 
 type UploadCategory = 'games' | 'maps' | 'operators' | 'gadgets';

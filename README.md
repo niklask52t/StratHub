@@ -590,7 +590,6 @@ SMTP_PASS=your-password
 SMTP_FROM=noreply@yourdomain.com
 
 # Uploads
-UPLOAD_DIR=uploads
 MAX_FILE_SIZE=5242880
 
 # reCAPTCHA v2 (optional — see "reCAPTCHA Setup" below)

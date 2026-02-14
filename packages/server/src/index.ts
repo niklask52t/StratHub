@@ -50,7 +50,7 @@ async function start() {
 
   // Static files for uploads
   await fastify.register(fastifyStatic, {
-    root: path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '..', 'uploads')),
+    root: path.resolve(process.env.UPLOAD_DIR || path.join(import.meta.dirname, '..', 'uploads')),
     prefix: '/uploads/',
   });
 
