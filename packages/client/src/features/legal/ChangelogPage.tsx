@@ -17,9 +17,23 @@ interface Release {
 
 const releases: Release[] = [
   {
-    version: '1.8.2',
+    version: '1.8.3',
     date: '2026-02-14',
     tag: 'Latest',
+    changes: [
+      { type: 'fix', text: 'Sandbox lineup \u2014 operator slot selection now works in sandbox mode' },
+      { type: 'fix', text: 'Logout redirects to homepage instead of login page' },
+      { type: 'fix', text: 'Sandbox scrollbar removed \u2014 info banner merged into toolbar row' },
+      { type: 'fix', text: 'Move/resize ghost eliminated \u2014 original draw hidden during drag' },
+      { type: 'fix', text: 'Laser line no longer jumps when restarting during fade' },
+      { type: 'fix', text: 'Auto-switch to Select only for shapes (Line, Rectangle), not Pen/freehand' },
+      { type: 'feature', text: 'Undo/redo now covers move and resize operations' },
+      { type: 'feature', text: 'Rainbow Six Siege game logo added' },
+    ],
+  },
+  {
+    version: '1.8.2',
+    date: '2026-02-14',
     changes: [
       { type: 'removed', text: 'Valorant game data removed from seed \u2014 TactiHub now focuses exclusively on Rainbow Six Siege' },
       { type: 'improvement', text: 'Updated all documentation to reflect R6 Siege-only focus' },

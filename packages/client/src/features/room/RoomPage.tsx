@@ -303,14 +303,23 @@ export default function RoomPage() {
 
   const handleUndo = useCallback(() => {
     const entry = popUndo();
-    if (entry) {
+    if (!entry) return;
+    if (entry.action === 'update') {
+      handleDrawUpdate(entry.id, entry.previousState);
+    } else {
       handleDrawDelete([entry.id]);
     }
-  }, [popUndo, handleDrawDelete]);
+  }, [popUndo, handleDrawDelete, handleDrawUpdate]);
 
   const handleRedo = useCallback(async () => {
     const entry = popRedo();
     if (!entry) return;
+
+    // Redo an update: re-apply the new state
+    if (entry.action === 'update') {
+      handleDrawUpdate(entry.id, entry.payload);
+      return;
+    }
 
     isRedoingRef.current = true;
     try {

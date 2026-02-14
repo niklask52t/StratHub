@@ -28,6 +28,7 @@ async function seed() {
     name: 'Rainbow Six Siege',
     slug: 'r6',
     description: 'Tom Clancy\'s Rainbow Six Siege - Tactical FPS',
+    icon: '/games/r6-logo.webp',
     isActive: true,
   }).onConflictDoNothing().returning();
 

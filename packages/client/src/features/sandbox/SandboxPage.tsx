@@ -8,8 +8,10 @@ import { IconSidebar } from '@/features/canvas/tools/IconSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, AlertTriangle, Gamepad2, Info } from 'lucide-react';
 import { useCanvasStore } from '@/stores/canvas.store';
+import type { OperatorSlot } from '@tactihub/shared';
 
 interface Game {
   id: string; name: string; slug: string; icon: string | null;
@@ -37,6 +39,35 @@ export default function SandboxPage() {
   const [selectedGame, setSelectedGame] = useState<GameWithMaps | null>(null);
   const [selectedMap, setSelectedMap] = useState<MapWithFloors | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Local operator slots for sandbox lineup
+  const slotIdCounter = useRef(0);
+  const makeSlots = (side: 'defender' | 'attacker', count: number): OperatorSlot[] =>
+    Array.from({ length: count }, (_, i) => ({
+      id: `sandbox-${side}-${++slotIdCounter.current}`,
+      battleplanId: 'sandbox',
+      slotNumber: i + 1,
+      operatorId: null,
+      side,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+
+  const [operatorSlots, setOperatorSlots] = useState<OperatorSlot[]>(() => makeSlots('defender', 5));
+
+  const handleSlotChange = useCallback((slotId: string, operatorId: string | null) => {
+    setOperatorSlots((prev) =>
+      prev.map((s) => (s.id === slotId ? { ...s, operatorId, updatedAt: new Date().toISOString() } : s))
+    );
+  }, []);
+
+  const handleCreateAttackerLineup = useCallback(() => {
+    setOperatorSlots((prev) => [...prev, ...makeSlots('attacker', 5)]);
+  }, []);
+
+  const handleRemoveAttackerLineup = useCallback(() => {
+    setOperatorSlots((prev) => prev.filter((s) => s.side !== 'attacker'));
+  }, []);
 
   // Local draws state (no persistence)
   const [localDraws, setLocalDraws] = useState<Record<string, any[]>>({});
@@ -121,12 +152,21 @@ export default function SandboxPage() {
 
   const handleUndo = useCallback(() => {
     const entry = popUndo();
-    if (entry) handleDrawDelete([entry.id]);
-  }, [popUndo, handleDrawDelete]);
+    if (!entry) return;
+    if (entry.action === 'update') {
+      handleDrawUpdate(entry.id, entry.previousState);
+    } else {
+      handleDrawDelete([entry.id]);
+    }
+  }, [popUndo, handleDrawDelete, handleDrawUpdate]);
 
   const handleRedo = useCallback(() => {
     const entry = popRedo();
     if (!entry) return;
+    if (entry.action === 'update') {
+      handleDrawUpdate(entry.id, entry.payload);
+      return;
+    }
     isRedoingRef.current = true;
     const newId = `local-${++localIdCounter.current}`;
     const newDraw = { ...entry.payload, id: newId, isLocal: true };
@@ -136,7 +176,7 @@ export default function SandboxPage() {
     }));
     updateDrawId(entry.id, newId);
     isRedoingRef.current = false;
-  }, [popRedo, updateDrawId]);
+  }, [popRedo, updateDrawId, handleDrawUpdate]);
 
   // Keyboard shortcuts: Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z
   useEffect(() => {
@@ -173,12 +213,6 @@ export default function SandboxPage() {
   if (step === 'canvas' && selectedMap) {
     return (
       <div className="h-screen flex flex-col bg-background">
-        {/* Sandbox info banner */}
-        <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-primary/10 border-b text-sm text-muted-foreground">
-          <Info className="h-3.5 w-3.5" />
-          Sandbox Mode — Changes won&apos;t be saved. <Link to="/auth/login" className="underline font-medium text-primary">Log in</Link> to persist.
-        </div>
-
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 py-2 border-b bg-background/95">
           <div className="flex items-center gap-4">
@@ -189,8 +223,12 @@ export default function SandboxPage() {
           </div>
         </div>
 
-        {/* Toolbar */}
-        <div className="flex justify-center py-2 border-b">
+        {/* Toolbar + sandbox hint */}
+        <div className="flex items-center justify-center gap-2 py-2 border-b">
+          <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Info className="h-3 w-3" /> Sandbox &mdash; <Link to="/auth/login" className="underline text-primary">Log in</Link> to save
+          </span>
+          <Separator orientation="vertical" className="mx-2 h-6" />
           <Toolbar onUndo={handleUndo} onRedo={handleRedo} />
         </div>
 
@@ -202,7 +240,11 @@ export default function SandboxPage() {
               gameSlug={selectedGame.slug}
               open={sidebarOpen}
               onToggle={() => setSidebarOpen((v) => !v)}
-              isAuthenticated={false}
+              operatorSlots={operatorSlots}
+              onSlotChange={handleSlotChange}
+              onCreateAttackerLineup={handleCreateAttackerLineup}
+              onRemoveAttackerLineup={handleRemoveAttackerLineup}
+              isAuthenticated={true}
             />
           )}
 

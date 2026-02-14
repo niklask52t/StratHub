@@ -262,6 +262,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
   // Select & drag state
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef<{ x: number; y: number; draw: any } | null>(null);
+  const [draggedDrawId, setDraggedDrawId] = useState<string | null>(null);
 
   // Laser pointer state
   const laserPointsRef = useRef<Array<{ x: number; y: number }>>([]);
@@ -378,6 +379,8 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
     const allDraws = [...(floor.draws || []), ...(peerDraws || [])];
     for (const draw of allDraws) {
       if (draw.isDeleted) continue;
+      // Hide the draw being dragged (it's shown as a preview on the active canvas)
+      if (draggedDrawId && draw.id === draggedDrawId) continue;
       ctx.save();
       // Dim others' draws
       if (currentUserId && draw.userId && draw.userId !== currentUserId) {
@@ -435,7 +438,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
         }
       }
     }
-  }, [floor.draws, peerDraws, currentUserId, selectedDrawId]);
+  }, [floor.draws, peerDraws, currentUserId, selectedDrawId, draggedDrawId]);
 
   // Keep renderDrawsRef in sync with the latest renderDraws callback
   renderDrawsRef.current = renderDraws;
@@ -515,27 +518,30 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       }
     }
 
-    // Draw fading laser lines (local)
+    // Draw fading laser lines (local) — skip while actively drawing laser to avoid flicker
     const now = Date.now();
-    for (const line of laserFadeLines) {
-      const elapsed = now - line.fadeStart;
-      const alpha = Math.max(0, 1 - elapsed / 3000);
-      if (alpha <= 0 || line.points.length < 2) continue;
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = line.color;
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.shadowColor = line.color;
-      ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.moveTo(line.points[0]!.x, line.points[0]!.y);
-      for (let i = 1; i < line.points.length; i++) {
-        ctx.lineTo(line.points[i]!.x, line.points[i]!.y);
+    const skipLocalFade = isDrawing && tool === Tool.LaserLine;
+    if (!skipLocalFade) {
+      for (const line of laserFadeLines) {
+        const elapsed = now - line.fadeStart;
+        const alpha = Math.max(0, 1 - elapsed / 3000);
+        if (alpha <= 0 || line.points.length < 2) continue;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowColor = line.color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(line.points[0]!.x, line.points[0]!.y);
+        for (let i = 1; i < line.points.length; i++) {
+          ctx.lineTo(line.points[i]!.x, line.points[i]!.y);
+        }
+        ctx.stroke();
+        ctx.restore();
       }
-      ctx.stroke();
-      ctx.restore();
     }
 
     // Draw fading peer laser lines
@@ -639,6 +645,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
             if (hitTestHandle(pos.x, pos.y, handles.rotate, 10)) {
               setIsDragging(true);
               setInteractionMode('rotate');
+              setDraggedDrawId(selectedDraw.id);
               dragStartRef.current = { x: pos.x, y: pos.y, draw: JSON.parse(JSON.stringify(selectedDraw)) };
               return;
             }
@@ -649,6 +656,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
                 setIsDragging(true);
                 setInteractionMode('resize');
                 setActiveResizeHandle(key);
+                setDraggedDrawId(selectedDraw.id);
                 dragStartRef.current = { x: pos.x, y: pos.y, draw: JSON.parse(JSON.stringify(selectedDraw)) };
                 return;
               }
@@ -667,6 +675,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
           setSelectedDrawId(draw.id);
           setIsDragging(true);
           setInteractionMode('move');
+          setDraggedDrawId(draw.id);
           dragStartRef.current = { x: pos.x, y: pos.y, draw: JSON.parse(JSON.stringify(draw)) };
           return;
         }
@@ -720,6 +729,8 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
     if (tool === Tool.LaserLine) {
       const pos = getCanvasCoords(e);
       laserPointsRef.current = [pos];
+      // Clear old fading lines to prevent visual interference
+      setLaserFadeLines([]);
       setIsDrawing(true);
       return;
     }
@@ -928,6 +939,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       // If barely moved, treat as click-select only
       if (Math.abs(dx) < 2 && Math.abs(dy) < 2 && interactionMode === 'move') {
         dragStartRef.current = null;
+        setDraggedDrawId(null);
         setInteractionMode('none');
         setActiveResizeHandle(null);
         return;
@@ -979,9 +991,23 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       }
 
       if (updates) {
+        // Track move/resize/rotate in undo history
+        useCanvasStore.getState().pushMyUpdate({
+          id: original.id,
+          floorId: floor.id,
+          payload: updates,
+          previousState: {
+            originX: original.originX,
+            originY: original.originY,
+            destinationX: original.destinationX,
+            destinationY: original.destinationY,
+            data: original.data,
+          },
+        });
         onDrawUpdate?.(original.id, updates);
       }
       dragStartRef.current = null;
+      setDraggedDrawId(null);
       setInteractionMode('none');
       setActiveResizeHandle(null);
       return;
@@ -1070,8 +1096,8 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
 
     if (draw && onDrawCreate) {
       onDrawCreate(floor.id, [draw]);
-      // Auto-switch to Select after drawing (except Icon tool for repeated placement)
-      if (tool !== Tool.Icon) {
+      // Auto-switch to Select after shapes (Line, Rectangle) for immediate resize/move
+      if (tool === Tool.Line || tool === Tool.Rectangle) {
         useCanvasStore.getState().setTool(Tool.Select);
       }
     }
@@ -1134,6 +1160,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
             if (isDragging) {
               setIsDragging(false);
               dragStartRef.current = null;
+              setDraggedDrawId(null);
               setInteractionMode('none');
               setActiveResizeHandle(null);
             }

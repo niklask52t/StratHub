@@ -29,7 +29,7 @@ export function AppLayout() {
       // Continue even if request fails
     }
     logout();
-    navigate('/auth/login');
+    navigate('/');
   };
 
   return (

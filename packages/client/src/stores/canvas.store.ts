@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { Tool, DEFAULT_COLOR, DEFAULT_LINE_WIDTH, DEFAULT_FONT_SIZE, ZOOM_MIN, ZOOM_MAX } from '@tactihub/shared';
 
-interface DrawHistoryEntry {
+export interface DrawHistoryEntry {
   id: string;
   floorId: string;
   payload: any;
+  action: 'create' | 'update';
+  previousState?: any;
 }
 
 interface CanvasStoreState {
@@ -44,7 +46,8 @@ interface CanvasStoreState {
   // Undo/Redo history
   myDrawHistory: DrawHistoryEntry[];
   undoStack: DrawHistoryEntry[];
-  pushMyDraw: (entry: DrawHistoryEntry) => void;
+  pushMyDraw: (entry: Omit<DrawHistoryEntry, 'action'>) => void;
+  pushMyUpdate: (entry: { id: string; floorId: string; payload: any; previousState: any }) => void;
   popUndo: () => DrawHistoryEntry | null;
   popRedo: () => DrawHistoryEntry | null;
   updateDrawId: (oldId: string, newId: string) => void;
@@ -116,7 +119,11 @@ export const useCanvasStore = create<CanvasStoreState>((set, get) => ({
   myDrawHistory: [],
   undoStack: [],
   pushMyDraw: (entry) => set((s) => ({
-    myDrawHistory: [...s.myDrawHistory, entry],
+    myDrawHistory: [...s.myDrawHistory, { ...entry, action: 'create' as const }],
+    undoStack: [],
+  })),
+  pushMyUpdate: (entry) => set((s) => ({
+    myDrawHistory: [...s.myDrawHistory, { ...entry, action: 'update' as const }],
     undoStack: [],
   })),
   popUndo: () => {

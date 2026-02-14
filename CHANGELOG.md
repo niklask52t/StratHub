@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.8.3 — 2026-02-14
+
+- [fix] Sandbox lineup — operator slot selection now works in sandbox mode
+- [fix] Logout redirects to homepage instead of login page
+- [fix] Sandbox scrollbar removed — info banner merged into toolbar row
+- [fix] Move/resize ghost eliminated — original draw hidden during drag
+- [fix] Laser line no longer jumps when restarting during fade
+- [fix] Auto-switch to Select only for shapes (Line, Rectangle), not Pen/freehand
+- [feature] Undo/redo now covers move and resize operations
+- [feature] Rainbow Six Siege game logo added
+
 ## v1.8.2 — 2026-02-14
 
 - [removed] Valorant game data removed from seed — TactiHub now focuses exclusively on Rainbow Six Siege
