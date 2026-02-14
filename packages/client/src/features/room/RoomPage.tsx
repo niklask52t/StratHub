@@ -41,9 +41,10 @@ export default function RoomPage() {
 
   const [chatOpen, setChatOpen] = useState(false);
 
-  // Local-only draws for guests (not persisted)
+  // Local draws: guest draws (local-*) + authenticated optimistic draws (optimistic-* → server UUIDs)
   const [localDraws, setLocalDraws] = useState<Record<string, any[]>>({});
   const localIdCounter = useRef(0);
+  const optimisticIdCounter = useRef(0);
 
   useEffect(() => {
     if (!connectionString) return;
@@ -150,6 +151,32 @@ export default function RoomPage() {
     }
   }, [planData]);
 
+  // Deduplication: remove optimistic draws once they appear in server data
+  useEffect(() => {
+    if (!planData?.data?.floors) return;
+    const serverDrawIds = new Set<string>();
+    for (const floor of planData.data.floors) {
+      for (const draw of (floor.draws || [])) {
+        serverDrawIds.add(draw.id);
+      }
+    }
+    setLocalDraws(prev => {
+      let changed = false;
+      const next: Record<string, any[]> = {};
+      for (const [fid, draws] of Object.entries(prev)) {
+        const filtered = draws.filter(d => {
+          // Keep guest draws (local-*) and still-pending optimistic draws
+          if (d.id.startsWith('local-') || d.id.startsWith('optimistic-')) return true;
+          // Remove server-ID draws that now exist in planData (they've been confirmed)
+          if (serverDrawIds.has(d.id)) { changed = true; return false; }
+          return true;
+        });
+        next[fid] = filtered;
+      }
+      return changed ? next : prev;
+    });
+  }, [planData]);
+
   const handleDrawCreate = useCallback(async (floorId: string, drawItems: any[]) => {
     if (!isAuthenticated) {
       // Guest: store locally, no API/socket calls
@@ -170,42 +197,69 @@ export default function RoomPage() {
       return;
     }
 
+    // Authenticated: add optimistic draws immediately so eraser/select/floor-switch work
+    const tempIds = drawItems.map(() => `optimistic-${++optimisticIdCounter.current}`);
+    const optimisticDraws = drawItems.map((item, i) => ({
+      ...item,
+      id: tempIds[i],
+      userId: userId,
+      isDeleted: false,
+    }));
+    setLocalDraws(prev => ({
+      ...prev,
+      [floorId]: [...(prev[floorId] || []), ...optimisticDraws],
+    }));
+
     const socket = getSocket();
     socket.emit('draw:create', { battleplanFloorId: floorId, draws: drawItems });
 
     try {
       const res = await apiPost<{ data: any[] }>(`/battleplan-floors/${floorId}/draws`, { items: drawItems });
+
+      // Replace temp IDs with server IDs in localDraws
+      setLocalDraws(prev => {
+        const floorDraws = prev[floorId] || [];
+        const updated = floorDraws.map(d => {
+          const tempIndex = tempIds.indexOf(d.id);
+          return tempIndex >= 0 && res.data[tempIndex] ? { ...d, id: res.data[tempIndex].id } : d;
+        });
+        return { ...prev, [floorId]: updated };
+      });
+
       if (!isRedoingRef.current) {
-        // Track each created draw for undo with correct payload
         for (let i = 0; i < res.data.length; i++) {
           pushMyDraw({ id: res.data[i].id, floorId, payload: drawItems[i] ?? drawItems[0] });
         }
-        // Auto-select the last created draw
         if (res.data.length > 0) {
           useCanvasStore.getState().setSelectedDrawId(res.data[res.data.length - 1].id);
         }
       }
       refetchPlan();
     } catch {
-      // Persistence failed silently
+      // Remove optimistic draws on failure
+      const tempIdSet = new Set(tempIds);
+      setLocalDraws(prev => ({
+        ...prev,
+        [floorId]: (prev[floorId] || []).filter(d => !tempIdSet.has(d.id)),
+      }));
     }
-  }, [isAuthenticated, pushMyDraw]);
+  }, [isAuthenticated, userId, pushMyDraw]);
 
   const handleDrawDelete = useCallback(async (drawIds: string[]) => {
-    // Handle local draws (guest or authenticated)
-    const localIds = drawIds.filter(id => id.startsWith('local-'));
-    if (localIds.length > 0) {
-      setLocalDraws(prev => {
-        const next = { ...prev };
-        for (const fid of Object.keys(next)) {
-          next[fid] = next[fid]!.filter(d => !localIds.includes(d.id));
-        }
-        return next;
-      });
-    }
+    // Remove from localDraws (handles guest local-*, optimistic-*, and server-ID optimistic draws)
+    const idSet = new Set(drawIds);
+    setLocalDraws(prev => {
+      const next = { ...prev };
+      let changed = false;
+      for (const fid of Object.keys(next)) {
+        const filtered = next[fid]!.filter(d => !idSet.has(d.id));
+        if (filtered.length !== next[fid]!.length) { next[fid] = filtered; changed = true; }
+      }
+      return changed ? next : prev;
+    });
 
     // Handle server draws (only when authenticated)
-    const serverIds = drawIds.filter(id => !id.startsWith('local-'));
+    const serverIds = drawIds.filter(id => !id.startsWith('local-') && !id.startsWith('optimistic-'));
     if (serverIds.length > 0 && isAuthenticated) {
       const socket = getSocket();
       socket.emit('draw:delete', { drawIds: serverIds });
@@ -220,6 +274,23 @@ export default function RoomPage() {
 
   const handleDrawUpdate = useCallback(async (drawId: string, updates: any) => {
     if (!isAuthenticated) return;
+
+    // Apply update optimistically in localDraws (for draws that are still optimistic)
+    setLocalDraws(prev => {
+      const next = { ...prev };
+      let changed = false;
+      for (const fid of Object.keys(next)) {
+        next[fid] = next[fid]!.map(d => {
+          if (d.id === drawId) {
+            changed = true;
+            return { ...d, ...updates, data: updates.data ? { ...d.data, ...updates.data } : d.data };
+          }
+          return d;
+        });
+      }
+      return changed ? next : prev;
+    });
+
     const socket = getSocket();
     socket.emit('draw:update', { drawId, data: updates });
     try {
@@ -253,13 +324,36 @@ export default function RoomPage() {
         }));
         updateDrawId(entry.id, newId);
       } else {
+        // Authenticated redo: add optimistic draw immediately
+        const tempId = `optimistic-${++optimisticIdCounter.current}`;
+        const optimisticDraw = { ...entry.payload, id: tempId, userId, isDeleted: false };
+        setLocalDraws(prev => ({
+          ...prev,
+          [entry.floorId]: [...(prev[entry.floorId] || []), optimisticDraw],
+        }));
+
         const socket = getSocket();
         socket.emit('draw:create', { battleplanFloorId: entry.floorId, draws: [entry.payload] });
-        const res = await apiPost<{ data: any[] }>(`/battleplan-floors/${entry.floorId}/draws`, { items: [entry.payload] });
-        if (res.data.length > 0) {
-          updateDrawId(entry.id, res.data[0].id);
+        try {
+          const res = await apiPost<{ data: any[] }>(`/battleplan-floors/${entry.floorId}/draws`, { items: [entry.payload] });
+          if (res.data.length > 0) {
+            // Replace temp ID with server ID in localDraws
+            setLocalDraws(prev => ({
+              ...prev,
+              [entry.floorId]: (prev[entry.floorId] || []).map(d =>
+                d.id === tempId ? { ...d, id: res.data[0].id } : d
+              ),
+            }));
+            updateDrawId(entry.id, res.data[0].id);
+          }
+          refetchPlan();
+        } catch {
+          // Remove optimistic draw on failure
+          setLocalDraws(prev => ({
+            ...prev,
+            [entry.floorId]: (prev[entry.floorId] || []).filter(d => d.id !== tempId),
+          }));
         }
-        refetchPlan();
       }
     } catch {
       // Silent failure

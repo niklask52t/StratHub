@@ -9,7 +9,7 @@ This file provides context for AI assistants working on the TactiHub codebase.
 TactiHub is a real-time collaborative strategy planning tool for competitive games (Rainbow Six Siege, Valorant, etc.). Users can draw tactics on game maps, save/share battle plans, and collaborate in rooms with live cursors and drawing sync.
 
 **Author**: Niklas Kronig
-**Version**: 1.8.0
+**Version**: 1.8.1
 **Repo**: https://github.com/niklask52t/TactiHub
 **Based on**: [r6-map-planner](https://github.com/prayansh/r6-map-planner) (Node/Express/Socket.IO) and [r6-maps](https://github.com/jayfoe/r6-maps) (Laravel/Vue)
 
@@ -86,6 +86,14 @@ packages/
 - **REST API** handles database persistence (POST to create draws, DELETE to soft-delete)
 - This avoids the dual-write bug where draws were inserted both via socket and REST
 
+### Optimistic Draw Tracking (v1.8.1)
+- Authenticated draws are immediately added to `localDraws` state with `optimistic-*` ID prefix
+- After API responds with server IDs, the temp IDs are replaced in `localDraws`
+- After `refetchPlan()` returns, a deduplication `useEffect` removes confirmed draws from `localDraws` (by matching server IDs in `planData.floors[].draws`)
+- Guest draws use `local-*` ID prefix and are never sent to server
+- This ensures eraser, select/move, and floor-switch all work immediately without waiting for API round-trip
+- Both `handleDrawCreate` and `handleRedo` follow this pattern for authenticated users
+
 ### Undo/Redo
 - `myDrawHistory` and `undoStack` in canvas Zustand store
 - `pushMyDraw(entry)` after REST create returns IDs (guarded by `isRedoingRef` to prevent double-push)
@@ -101,7 +109,7 @@ packages/
 4. **Magic Link Login**: POST /request-magic-link sends email with login link (15min TTL), GET /magic-login consumes token and returns access+refresh tokens (same as login)
 5. Login → accepts username OR email via `identifier` field → access token (15min) + refresh token (7d httpOnly cookie + Redis)
 5. First login with default admin email (`admin@tactihub.local`) forces credential change (gaming-style modal)
-6. Token refresh → POST /api/auth/refresh returns new access token
+6. Token refresh → POST /api/auth/refresh returns new access token (App.tsx session restore on mount uses `apiPost`, not `apiGet` — the server endpoint is POST-only)
 7. Admin can toggle public registration and create invite tokens
 8. **Admin manual verification**: PUT /api/admin/users/:id/verify — verifies a user without email, sends notification email
 9. **Guests**: Socket connects without token → userId = `guest-{socketId}`, drawing events blocked server-side. Client-side guests have full toolbar/icon access and can draw locally (stored in React state, not persisted or synced)
@@ -135,7 +143,8 @@ packages/
 - Each battleplan has 5 defender operator slots (created automatically via `side: 'defender'`)
 - Optional attacker lineup: POST `/:id/attacker-lineup` creates 5 attacker slots, DELETE removes them
 - `operator_slots` table has `side` column (`slot_side` pgEnum: 'defender' | 'attacker') with default 'defender'
-- IconSidebar has 3 tabs: **Lineup** (dropdowns), **Operators** (filtered grid), **Gadgets** (filtered grid)
+- IconSidebar has 3 tabs: **Lineup** (visual grid picker), **Operators** (filtered grid), **Gadgets** (filtered grid)
+- Lineup slots: click row to expand 4-column operator image grid, click operator to assign, X button to clear
 - When lineup has assigned operators: Operators/Gadgets tabs auto-filter to lineup members
 - When lineup is empty (no operators assigned): all operators/gadgets shown (no filtering)
 - "Show all" checkbox reveals all items with orange "Nicht im Lineup" warning on non-lineup entries

@@ -17,9 +17,23 @@ interface Release {
 
 const releases: Release[] = [
   {
-    version: '1.8.0',
+    version: '1.8.1',
     date: '2026-02-13',
     tag: 'Latest',
+    changes: [
+      { type: 'feature', text: 'Visual operator lineup picker \u2014 clickable image grid replaces dropdown selectors' },
+      { type: 'feature', text: 'Sandbox mode matches room layout \u2014 full-screen canvas with icon sidebar and toolbar' },
+      { type: 'fix', text: 'Session persistence \u2014 sessions now survive page reload' },
+      { type: 'fix', text: 'Admin self-deletion protection \u2014 admin role users can no longer see or trigger account deletion' },
+      { type: 'fix', text: 'Eraser tool now works immediately \u2014 optimistic draw tracking makes draws erasable before API response' },
+      { type: 'fix', text: 'Select/Move tool works immediately \u2014 draws are selectable and movable right after creation' },
+      { type: 'fix', text: 'Draws persist on floor switch \u2014 optimistic draws stay visible while awaiting server confirmation' },
+      { type: 'improvement', text: 'Server-side admin deletion guard \u2014 request-deletion endpoint rejects admin-role users' },
+    ],
+  },
+  {
+    version: '1.8.0',
+    date: '2026-02-13',
     changes: [
       { type: 'feature', text: 'Operator Lineup System \u2014 select 5 defenders per battleplan to filter the icon sidebar' },
       { type: 'feature', text: 'Optional Attacker Lineup \u2014 add 5 attacker slots on demand, remove when not needed' },

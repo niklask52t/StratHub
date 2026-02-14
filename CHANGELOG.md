@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.8.1 — 2026-02-13
+
+- [feature] Visual operator lineup picker — clickable image grid replaces dropdown selectors
+- [feature] Sandbox mode matches room layout — full-screen canvas with icon sidebar and toolbar
+- [fix] Session persistence — sessions now survive page reload (was using GET instead of POST for refresh)
+- [fix] Admin self-deletion protection — admin role users can no longer see or trigger account deletion
+- [fix] Eraser tool now works immediately — optimistic draw tracking makes draws erasable before API response
+- [fix] Select/Move tool works immediately — draws are selectable and movable right after creation
+- [fix] Draws persist on floor switch — optimistic draws stay visible while awaiting server confirmation
+- [improvement] Server-side admin deletion guard — request-deletion endpoint rejects admin-role users
+
 ## v1.8.0 — 2026-02-13
 
 - [feature] Operator Lineup System — select 5 defenders per battleplan to filter the icon sidebar to only lineup operators and their gadgets

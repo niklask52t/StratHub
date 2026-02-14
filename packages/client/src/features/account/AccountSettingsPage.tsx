@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { AlertTriangle } from 'lucide-react';
-import { DEFAULT_ADMIN_EMAIL } from '@tactihub/shared';
-
 export default function AccountSettingsPage() {
   const { user } = useAuthStore();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -56,7 +54,7 @@ export default function AccountSettingsPage() {
         </CardContent>
       </Card>
 
-      {user.email !== DEFAULT_ADMIN_EMAIL && (
+      {user.role !== 'admin' && (
         <Card className="border-destructive/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">

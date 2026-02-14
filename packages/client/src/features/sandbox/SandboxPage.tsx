@@ -1,12 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { apiGet } from '@/lib/api';
 import { CanvasView } from '@/features/canvas/CanvasView';
 import { Toolbar } from '@/features/canvas/tools/Toolbar';
+import { IconSidebar } from '@/features/canvas/tools/IconSidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, AlertTriangle, Gamepad2 } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Gamepad2, Info } from 'lucide-react';
 import { useCanvasStore } from '@/stores/canvas.store';
 
 interface Game {
@@ -34,10 +36,13 @@ export default function SandboxPage() {
   const [step, setStep] = useState<'game' | 'map' | 'canvas'>('game');
   const [selectedGame, setSelectedGame] = useState<GameWithMaps | null>(null);
   const [selectedMap, setSelectedMap] = useState<MapWithFloors | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Local draws state (no persistence)
-  const [localDraws, setLocalDraws] = useState<Map<string, any[]>>(new Map());
-  const { pushMyDraw, popUndo, popRedo } = useCanvasStore();
+  const [localDraws, setLocalDraws] = useState<Record<string, any[]>>({});
+  const localIdCounter = useRef(0);
+  const isRedoingRef = useRef(false);
+  const { pushMyDraw, popUndo, popRedo, updateDrawId, clearHistory } = useCanvasStore();
 
   const { data: gamesData, isLoading: gamesLoading } = useQuery({
     queryKey: ['games'],
@@ -69,28 +74,48 @@ export default function SandboxPage() {
   const handleDrawCreate = useCallback((floorId: string, draws: any[]) => {
     const newDraws = draws.map((d) => ({
       ...d,
-      id: crypto.randomUUID(),
-      battleplanFloorId: floorId,
-      isDeleted: false,
+      id: `local-${++localIdCounter.current}`,
+      isLocal: true,
     }));
-    setLocalDraws((prev) => {
-      const next = new Map(prev);
-      const existing = next.get(floorId) || [];
-      next.set(floorId, [...existing, ...newDraws]);
-      return next;
-    });
-    for (const draw of newDraws) {
-      pushMyDraw({ id: draw.id, floorId, payload: draws[0] });
+    setLocalDraws((prev) => ({
+      ...prev,
+      [floorId]: [...(prev[floorId] || []), ...newDraws],
+    }));
+    if (!isRedoingRef.current) {
+      for (let i = 0; i < newDraws.length; i++) {
+        pushMyDraw({ id: newDraws[i].id, floorId, payload: draws[i] });
+      }
     }
   }, [pushMyDraw]);
 
   const handleDrawDelete = useCallback((drawIds: string[]) => {
+    const idSet = new Set(drawIds);
     setLocalDraws((prev) => {
-      const next = new Map(prev);
-      for (const [floorId, draws] of next) {
-        next.set(floorId, draws.filter((d) => !drawIds.includes(d.id)));
+      const next: Record<string, any[]> = {};
+      let changed = false;
+      for (const [fid, draws] of Object.entries(prev)) {
+        const filtered = draws.filter((d) => !idSet.has(d.id));
+        if (filtered.length !== draws.length) changed = true;
+        next[fid] = filtered;
       }
-      return next;
+      return changed ? next : prev;
+    });
+  }, []);
+
+  const handleDrawUpdate = useCallback((drawId: string, updates: any) => {
+    setLocalDraws((prev) => {
+      const next: Record<string, any[]> = {};
+      let changed = false;
+      for (const [fid, draws] of Object.entries(prev)) {
+        next[fid] = draws.map((d) => {
+          if (d.id === drawId) {
+            changed = true;
+            return { ...d, ...updates, data: updates.data ? { ...d.data, ...updates.data } : d.data };
+          }
+          return d;
+        });
+      }
+      return changed ? next : prev;
     });
   }, []);
 
@@ -101,41 +126,102 @@ export default function SandboxPage() {
 
   const handleRedo = useCallback(() => {
     const entry = popRedo();
-    if (entry) handleDrawCreate(entry.floorId, [entry.payload]);
-  }, [popRedo, handleDrawCreate]);
+    if (!entry) return;
+    isRedoingRef.current = true;
+    const newId = `local-${++localIdCounter.current}`;
+    const newDraw = { ...entry.payload, id: newId, isLocal: true };
+    setLocalDraws((prev) => ({
+      ...prev,
+      [entry.floorId]: [...(prev[entry.floorId] || []), newDraw],
+    }));
+    updateDrawId(entry.id, newId);
+    isRedoingRef.current = false;
+  }, [popRedo, updateDrawId]);
 
-  // Build floors with local draws for CanvasView
+  // Keyboard shortcuts: Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z
+  useEffect(() => {
+    if (step !== 'canvas') return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if (e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [step, handleUndo, handleRedo]);
+
+  // Clear history when leaving canvas
+  const handleBackToMaps = () => {
+    setStep('map');
+    setSelectedMap(null);
+    setLocalDraws({});
+    clearHistory();
+  };
+
+  // Build floors for CanvasView (draws are empty — local draws passed via localDraws prop)
   const floors = (mapDetailData?.data?.floors || []).map((floor) => ({
     id: floor.id,
     mapFloorId: floor.id,
     mapFloor: floor,
-    draws: localDraws.get(floor.id) || [],
+    draws: [] as any[],
   }));
 
   if (step === 'canvas' && selectedMap) {
     return (
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-center gap-2 mb-4 px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg text-sm text-primary">
-          <AlertTriangle className="h-4 w-4" />
-          Sandbox Mode — Draws are not saved. Log in to persist your work.
+      <div className="h-screen flex flex-col bg-background">
+        {/* Sandbox info banner */}
+        <div className="flex items-center justify-center gap-2 px-4 py-1.5 bg-primary/10 border-b text-sm text-muted-foreground">
+          <Info className="h-3.5 w-3.5" />
+          Sandbox Mode — Changes won&apos;t be saved. <Link to="/auth/login" className="underline font-medium text-primary">Log in</Link> to persist.
         </div>
 
-        <div className="flex items-center gap-4 mb-4">
-          <Button variant="ghost" size="sm" onClick={() => { setStep('map'); setSelectedMap(null); }}>
-            <ArrowLeft className="h-4 w-4 mr-1" /> Back to Maps
-          </Button>
-          <h2 className="text-lg font-bold">{selectedMap.name}</h2>
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-4 py-2 border-b bg-background/95">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={handleBackToMaps}>
+              <ArrowLeft className="h-4 w-4 mr-1" /> Back to Maps
+            </Button>
+            <span className="text-sm font-medium">{selectedMap.name}</span>
+          </div>
         </div>
 
-        <div className="flex justify-center mb-4">
+        {/* Toolbar */}
+        <div className="flex justify-center py-2 border-b">
           <Toolbar onUndo={handleUndo} onRedo={handleRedo} />
         </div>
 
-        <CanvasView
-          floors={floors}
-          onDrawCreate={handleDrawCreate}
-          onDrawDelete={handleDrawDelete}
-        />
+        {/* Canvas area */}
+        <div className="flex-1 overflow-hidden relative">
+          {/* Icon sidebar */}
+          {selectedGame?.slug && (
+            <IconSidebar
+              gameSlug={selectedGame.slug}
+              open={sidebarOpen}
+              onToggle={() => setSidebarOpen((v) => !v)}
+              isAuthenticated={false}
+            />
+          )}
+
+          <div className="h-full p-4" style={{ marginLeft: selectedGame?.slug && sidebarOpen ? 280 : 0, transition: 'margin-left 0.2s ease-in-out' }}>
+            {floors.length > 0 ? (
+              <CanvasView
+                floors={floors}
+                onDrawCreate={handleDrawCreate}
+                onDrawDelete={handleDrawDelete}
+                onDrawUpdate={handleDrawUpdate}
+                localDraws={localDraws}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                <p>Loading map floors...</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     );
   }

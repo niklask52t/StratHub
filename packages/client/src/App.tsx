@@ -1,7 +1,7 @@
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { lazy, Suspense, useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth.store';
-import { apiGet } from '@/lib/api';
+import { apiPost } from '@/lib/api';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { AuthLayout } from '@/components/layout/AuthLayout';
@@ -55,7 +55,7 @@ export function App() {
 
   useEffect(() => {
     // Try to restore session on load
-    apiGet<{ data: { user: any; accessToken: string } }>('/auth/refresh')
+    apiPost<{ data: { user: any; accessToken: string } }>('/auth/refresh', {})
       .then((res) => {
         if (res.data) {
           setAuth(res.data.user, res.data.accessToken);

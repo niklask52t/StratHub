@@ -7,7 +7,6 @@ import type { OperatorSlot } from '@tactihub/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ChevronLeft, ChevronRight, Search, Plus, Trash2 } from 'lucide-react';
 
@@ -60,6 +59,7 @@ export function IconSidebar({
   const { selectedIcon, setSelectedIcon, setTool } = useCanvasStore();
   const [search, setSearch] = useState('');
   const [showAll, setShowAll] = useState(false);
+  const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
   const [hasBeenSeen, setHasBeenSeen] = useState(() =>
     sessionStorage.getItem('iconSidebarSeen') === 'true'
   );
@@ -245,45 +245,78 @@ export function IconSidebar({
   const renderSlotRow = (slot: OperatorSlot, side: 'defender' | 'attacker') => {
     const available = getAvailableOperators(side, slot.id);
     const currentOp = operators.find(op => op.id === slot.operatorId);
+    const isExpanded = expandedSlotId === slot.id;
 
     return (
-      <div key={slot.id} className="flex items-center gap-2 mb-1.5">
-        {/* Slot number */}
-        <span className="text-xs text-muted-foreground w-4 text-right">{slot.slotNumber}</span>
-        {/* Avatar */}
-        <div className="h-7 w-7 rounded-full flex items-center justify-center overflow-hidden bg-muted shrink-0">
-          {currentOp?.icon ? (
-            <img src={`/uploads${currentOp.icon}`} alt={currentOp.name} className="h-7 w-7 rounded-full" />
-          ) : currentOp ? (
-            <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: currentOp.color }}>
-              {currentOp.name[0]}
-            </div>
-          ) : (
-            <span className="text-xs text-muted-foreground">?</span>
+      <div key={slot.id} className="mb-1">
+        {/* Slot row — clickable to expand picker */}
+        <div
+          className={`flex items-center gap-2 px-1.5 py-1 rounded cursor-pointer transition-colors ${isExpanded ? 'bg-muted' : 'hover:bg-muted/50'}`}
+          onClick={() => {
+            if (!isAuthenticated || !onSlotChange) return;
+            setExpandedSlotId(isExpanded ? null : slot.id);
+          }}
+        >
+          <span className="text-xs text-muted-foreground w-4 text-right shrink-0">{slot.slotNumber}</span>
+          <div className="h-7 w-7 rounded-full flex items-center justify-center overflow-hidden bg-muted shrink-0">
+            {currentOp?.icon ? (
+              <img src={`/uploads${currentOp.icon}`} alt={currentOp.name} className="h-7 w-7 rounded-full" />
+            ) : currentOp ? (
+              <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: currentOp.color }}>
+                {currentOp.name[0]}
+              </div>
+            ) : (
+              <span className="text-xs text-muted-foreground">?</span>
+            )}
+          </div>
+          <span className={`text-xs flex-1 truncate ${currentOp ? 'text-foreground' : 'text-muted-foreground'}`}>
+            {currentOp?.name || 'Select operator...'}
+          </span>
+          {/* Clear button */}
+          {isAuthenticated && onSlotChange && currentOp && (
+            <button
+              className="h-5 w-5 flex items-center justify-center rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+              title="Clear slot"
+              onClick={(e) => { e.stopPropagation(); onSlotChange(slot.id, null); }}
+            >
+              <span className="text-xs font-bold">&times;</span>
+            </button>
           )}
         </div>
-        {/* Select dropdown */}
-        {isAuthenticated && onSlotChange ? (
-          <Select
-            value={slot.operatorId || '__none'}
-            onValueChange={(val) => onSlotChange(slot.id, val === '__none' ? null : val)}
-          >
-            <SelectTrigger className="h-7 text-xs flex-1">
-              <SelectValue placeholder="Select operator..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__none">— None —</SelectItem>
-              {available.map(op => (
-                <SelectItem key={op.id} value={op.id}>
-                  {op.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <span className="text-xs text-muted-foreground flex-1 truncate">
-            {currentOp?.name || '— Empty —'}
-          </span>
+
+        {/* Expanded operator picker grid */}
+        {isExpanded && isAuthenticated && onSlotChange && (
+          <div className="mt-1 mb-2 p-2 bg-muted/30 rounded border border-border/50">
+            {available.length > 0 ? (
+              <div className="grid grid-cols-4 gap-1">
+                {available.map(op => (
+                  <button
+                    key={op.id}
+                    className="flex flex-col items-center justify-center gap-0.5 p-1 rounded hover:bg-muted transition-colors"
+                    title={op.name}
+                    onClick={() => {
+                      onSlotChange(slot.id, op.id);
+                      setExpandedSlotId(null);
+                    }}
+                  >
+                    {op.icon ? (
+                      <img src={`/uploads${op.icon}`} alt={op.name} className="h-8 w-8 rounded-full" />
+                    ) : (
+                      <div
+                        className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                        style={{ backgroundColor: op.color }}
+                      >
+                        {op.name[0]}
+                      </div>
+                    )}
+                    <span className="text-[9px] leading-tight truncate w-full text-center">{op.name}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground text-center py-1">All operators assigned</p>
+            )}
+          </div>
         )}
       </div>
     );
