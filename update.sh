@@ -160,15 +160,8 @@ elif [ "$MODE" = "prod" ]; then
   run_as_tactihub pnpm --filter @tactihub/shared build
 
   echo ""
-  echo "--- Cleaning old migration files ---"
-  run_as_tactihub rm -rf packages/server/drizzle/*
-
-  echo ""
-  echo "--- Generating migrations ---"
+  echo "--- Applying database migrations ---"
   run_as_tactihub pnpm db:generate
-
-  echo ""
-  echo "--- Applying migrations ---"
   run_as_tactihub pnpm db:migrate
 
   echo ""
