@@ -22,7 +22,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <TooltipProvider>
           <App />
-          <Toaster position="top-right" theme="dark" richColors />
+          <Toaster position="top-right" theme="dark" richColors closeButton />
         </TooltipProvider>
       </BrowserRouter>
     </QueryClientProvider>
