@@ -17,7 +17,7 @@ interface Release {
 
 const releases: Release[] = [
   {
-    version: '1.9.0',
+    version: '1.8.2',
     date: '2026-02-14',
     tag: 'Latest',
     changes: [
