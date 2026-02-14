@@ -300,7 +300,7 @@ tactihub-update             # Same, if symlinked: sudo ln -sf /opt/tactihub/upda
 - `noUnusedLocals` and `noUnusedParameters` are enabled in client — remove unused imports
 - Seed data includes: 1 admin user, 1 game (R6 Siege), 21 maps with correct floor counts + cover thumbnails, ~78 operators (complete Y1-Y10 roster), ~87 gadgets (23 with pre-seeded icons)
 - Admin login after seed: `admin` / `admin@tactihub.local` / `changeme` (forced credential change on first login)
-- Upload directory structure: `uploads/{games,maps,operators,gadgets}/` — maps/ and gadgets/ are tracked in git (pre-seeded), games/ and operators/ are gitignored
+- Upload directory structure: `uploads/{games,maps,operators,gadgets}/` — all directories are tracked in git (pre-seeded images committed to repo)
 - Pre-seeded images: 165 map floor WebP + 23 gadget icon WebP + 21 map cover WebP committed to repo, referenced by seed via deterministic names (`{slug}-{num}-{variant}.webp`, `{slug}-cover.webp`)
 - Images uploaded via admin panel are processed by Sharp (resized, converted to WebP) and override the seed paths in the DB
 - `processUpload()` returns `null` for empty file buffers (e.g. form submits without selecting a file) — callers skip processing
