@@ -374,7 +374,7 @@ The Vite dev client proxies all `/api/*` and `/socket.io` requests to `localhost
 ## API Endpoints Overview
 
 ### Auth: `/api/auth/`
-POST register, login, logout, refresh, forgot-password, reset-password, change-credentials, request-deletion, request-magic-link, resend-verification, request-email-change
+POST register, login, logout, refresh, forgot-password, reset-password, change-credentials, change-password, request-deletion, request-magic-link, resend-verification, request-email-change
 GET verify-email, confirm-deletion, magic-login, confirm-email-change, me, registration-status (public), recaptcha-key (public)
 
 ### Admin Users: `/api/admin/users/`

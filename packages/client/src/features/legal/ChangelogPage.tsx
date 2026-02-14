@@ -19,6 +19,7 @@ const releases: Release[] = [
     tag: 'Latest',
     changes: [
       { type: 'feature', text: 'Email address change \u2014 all users (including admin) can change their email via Account Settings with password confirmation and new-email verification' },
+      { type: 'feature', text: 'Password change \u2014 all users can change their password via Account Settings (current password + new password with confirmation)' },
       { type: 'feature', text: 'reCAPTCHA on login page (optional, same as registration \u2014 only active when RECAPTCHA keys are configured)' },
       { type: 'feature', text: 'Admin can resend verification email to unverified users (mail icon in admin user table)' },
       { type: 'feature', text: 'SMTP test script (bash test-smtp.sh) for troubleshooting email delivery' },

@@ -431,6 +431,32 @@ export default async function authRoutes(fastify: FastifyInstance) {
     return { message: successMessage };
   });
 
+  // POST /api/auth/change-password
+  fastify.post('/change-password', { preHandler: [requireAuth] }, async (request, reply) => {
+    const body = z.object({
+      currentPassword: z.string().min(1),
+      newPassword: z.string().min(8),
+    }).parse(request.body);
+
+    const [user] = await db.select().from(users).where(eq(users.id, request.user!.userId));
+    if (!user) {
+      return reply.status(404).send({ error: 'Not Found', message: 'User not found', statusCode: 404 });
+    }
+
+    const validPassword = await verifyPassword(body.currentPassword, user.passwordHash);
+    if (!validPassword) {
+      return reply.status(401).send({ error: 'Unauthorized', message: 'Current password is incorrect', statusCode: 401 });
+    }
+
+    const newHash = await hashPassword(body.newPassword);
+    await db.update(users).set({
+      passwordHash: newHash,
+      updatedAt: new Date(),
+    }).where(eq(users.id, user.id));
+
+    return { message: 'Password changed successfully' };
+  });
+
   // POST /api/auth/request-email-change
   fastify.post('/request-email-change', { preHandler: [requireAuth] }, async (request, reply) => {
     const body = z.object({

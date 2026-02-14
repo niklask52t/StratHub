@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { AlertTriangle, Mail } from 'lucide-react';
+import { AlertTriangle, Mail, Lock } from 'lucide-react';
 export default function AccountSettingsPage() {
   const { user } = useAuthStore();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -17,6 +17,23 @@ export default function AccountSettingsPage() {
   const [currentEmail, setCurrentEmail] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [emailChangePassword, setEmailChangePassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+  const passwordChangeMutation = useMutation({
+    mutationFn: () => apiPost('/auth/change-password', {
+      currentPassword,
+      newPassword,
+    }),
+    onSuccess: (res: any) => {
+      toast.success(res.message || 'Password changed successfully.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
 
   const emailChangeMutation = useMutation({
     mutationFn: () => apiPost('/auth/request-email-change', {
@@ -127,6 +144,67 @@ export default function AccountSettingsPage() {
               disabled={emailChangeMutation.isPending || !currentEmail || !newEmail || !emailChangePassword}
             >
               {emailChangeMutation.isPending ? 'Sending...' : 'Request Email Change'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="h-5 w-5 text-primary" />
+            Change Password
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (newPassword !== confirmNewPassword) {
+                toast.error('New passwords do not match');
+                return;
+              }
+              passwordChangeMutation.mutate();
+            }}
+            className="space-y-3"
+          >
+            <div className="space-y-1">
+              <Label htmlFor="current-password" className="text-xs uppercase tracking-wider text-muted-foreground">Current Password</Label>
+              <Input
+                id="current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="new-password" className="text-xs uppercase tracking-wider text-muted-foreground">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                minLength={8}
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="confirm-new-password" className="text-xs uppercase tracking-wider text-muted-foreground">Confirm New Password</Label>
+              <Input
+                id="confirm-new-password"
+                type="password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                minLength={8}
+                required
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={passwordChangeMutation.isPending || !currentPassword || !newPassword || !confirmNewPassword}
+            >
+              {passwordChangeMutation.isPending ? 'Changing...' : 'Change Password'}
             </Button>
           </form>
         </CardContent>
