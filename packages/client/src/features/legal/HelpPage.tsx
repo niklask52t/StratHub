@@ -55,7 +55,7 @@ export default function HelpPage() {
                 <MousePointer2 className="h-5 w-5 mt-0.5 text-primary shrink-0" />
                 <div>
                   <p className="font-medium">Select, Resize &amp; Rotate</p>
-                  <p className="text-sm text-muted-foreground">Click on your own drawing to select it. Drag to reposition. Use the 8 square handles (corners and edges) to resize. Use the circle handle above the selection to rotate. After drawing, the tool automatically switches to Select mode so you can immediately adjust.</p>
+                  <p className="text-sm text-muted-foreground">Click on your own drawing to select it. Drag to reposition. Use the 8 square handles (corners and edges) to resize. Use the circle handle above the selection to rotate. After drawing a line or rectangle, the tool automatically switches to Select mode so you can immediately adjust.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -141,9 +141,9 @@ export default function HelpPage() {
           <CardContent>
             <div className="grid gap-2 sm:grid-cols-2">
               {[
-                ['Ctrl + Z', 'Undo last drawing'],
-                ['Ctrl + Y', 'Redo drawing'],
-                ['Ctrl + Shift + Z', 'Redo drawing (alternative)'],
+                ['Ctrl + Z', 'Undo last action'],
+                ['Ctrl + Y', 'Redo last action'],
+                ['Ctrl + Shift + Z', 'Redo (alternative)'],
                 ['K', 'Go to floor above'],
                 ['J', 'Go to floor below'],
                 ['Middle Mouse', 'Pan (drag)'],
@@ -281,7 +281,7 @@ export default function HelpPage() {
             <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5" /> Operator Lineup</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>Each battleplan has a <strong>Lineup</strong> of 5 defender operator slots. Select operators for your lineup using the dropdown selectors in the Lineup tab of the icon sidebar.</p>
+            <p>Each battleplan has a <strong>Lineup</strong> of 5 defender operator slots. Select operators for your lineup using the visual image grid in the Lineup tab of the icon sidebar.</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               <li>When operators are assigned, the <strong>Operators</strong> and <strong>Gadgets</strong> tabs automatically filter to show only lineup members and their gadgets</li>
               <li>Use the <strong>"Show all"</strong> checkbox to reveal all operators/gadgets — non-lineup items show an orange "Nicht im Lineup" warning</li>

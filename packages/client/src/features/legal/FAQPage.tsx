@@ -31,7 +31,7 @@ const faqs = [
   },
   {
     q: 'Can I undo my drawings?',
-    a: 'Yes. Press Ctrl+Z to undo and Ctrl+Y (or Ctrl+Shift+Z) to redo. You can also use the undo/redo buttons in the toolbar.',
+    a: 'Yes. Press Ctrl+Z to undo and Ctrl+Y (or Ctrl+Shift+Z) to redo. Undo/redo covers drawing, moving, and resizing operations. You can also use the undo/redo buttons in the toolbar.',
   },
   {
     q: 'How do I use the laser pointer?',
@@ -119,11 +119,11 @@ const faqs = [
   },
   {
     q: 'Why does the tool switch to Select after I draw something?',
-    a: 'After completing a drawing (pen, line, rectangle, text), the tool automatically switches to Select mode and highlights the new drawing. This lets you immediately reposition, resize, or rotate what you just drew. The Icon tool stays active so you can place multiple icons in a row.',
+    a: 'After completing a line or rectangle, the tool automatically switches to Select mode and highlights the new drawing. This lets you immediately reposition, resize, or rotate what you just drew. Pen and Text tools stay active so you can keep drawing. The Icon tool also stays active for placing multiple icons in a row.',
   },
   {
     q: 'What is the Operator Lineup?',
-    a: 'Each battleplan has 5 defender operator slots (the Lineup). Open the icon sidebar and go to the Lineup tab to assign operators using the dropdown selectors. Once operators are assigned, the Operators and Gadgets tabs automatically filter to show only lineup members and their gadgets. Use the "Show all" checkbox to see everything, with non-lineup items marked in orange.',
+    a: 'Each battleplan has 5 defender operator slots (the Lineup). Open the icon sidebar and go to the Lineup tab to assign operators using the visual image grid. Once operators are assigned, the Operators and Gadgets tabs automatically filter to show only lineup members and their gadgets. Use the "Show all" checkbox to see everything, with non-lineup items marked in orange.',
   },
   {
     q: 'Can I add attackers to the lineup?',

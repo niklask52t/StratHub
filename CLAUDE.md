@@ -9,7 +9,7 @@ This file provides context for AI assistants working on the TactiHub codebase.
 TactiHub is a real-time collaborative strategy planning tool for Rainbow Six Siege. Users can draw tactics on game maps, save/share battle plans, and collaborate in rooms with live cursors and drawing sync.
 
 **Author**: Niklas Kronig
-**Version**: 1.8.2
+**Version**: 1.8.4
 **Repo**: https://github.com/niklask52t/TactiHub
 **Based on**: [r6-map-planner](https://github.com/prayansh/r6-map-planner) (Node/Express/Socket.IO) and [r6-maps](https://github.com/jayfoe/r6-maps) (Laravel/Vue)
 
@@ -96,9 +96,11 @@ packages/
 
 ### Undo/Redo
 - `myDrawHistory` and `undoStack` in canvas Zustand store
-- `pushMyDraw(entry)` after REST create returns IDs (guarded by `isRedoingRef` to prevent double-push)
-- `popUndo()` → delete via REST + socket broadcast
-- `popRedo()` → recreate via REST + socket broadcast + `updateDrawId(oldId, newId)` to track new server ID
+- `DrawHistoryEntry` has `action` discriminator ('create' | 'update') and optional `previousState`
+- `pushMyDraw(entry)` after REST create returns IDs (guarded by `isRedoingRef` to prevent double-push) — action defaults to 'create'
+- `pushMyUpdate(entry)` for move/resize/rotate operations — stores `previousState` for undo reversal
+- `popUndo()` → if action is 'update': restore `previousState` via PUT; if 'create': delete via REST + socket broadcast
+- `popRedo()` → if action is 'update': re-apply via PUT; if 'create': recreate via REST + socket broadcast + `updateDrawId(oldId, newId)`
 - `updateDrawId(oldId, newId)` updates both `myDrawHistory` and `undoStack` when redo creates a new draw with a different ID
 - Keyboard: Ctrl+Z (undo), Ctrl+Y / Ctrl+Shift+Z (redo)
 
@@ -170,7 +172,7 @@ packages/
 - Release: persists via PUT /api/draws/:id + socket broadcast
 - `getDrawBounds()` helper in CanvasLayer computes axis-aligned bounding box for all draw types
 - `selectedDrawId`, `interactionMode` ('none'|'move'|'resize'|'rotate'), `activeResizeHandle` in Zustand canvas store
-- **Auto-switch**: After completing a drawing (pen, line, rect, text), tool automatically switches to Select and auto-selects the new draw. Icon tool stays active for multi-placement.
+- **Auto-switch**: After completing a Line or Rectangle drawing, tool automatically switches to Select and auto-selects the new draw. Pen and Text tools stay active. Icon tool stays active for multi-placement.
 
 ### Ownership-Based Draw Interaction
 - Eraser and Select tools only interact with draws where `draw.userId === currentUserId`
