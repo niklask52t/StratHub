@@ -36,6 +36,10 @@ interface CanvasViewProps {
   cursors?: Map<string, { x: number; y: number; color: string; userId: string; isLaser?: boolean }>;
   localDraws?: Record<string, any[]>;
   currentUserId?: string | null;
+  // Strat filtering props (passed through to CanvasLayer)
+  activePhaseId?: string | null;
+  visibleSlotIds?: Set<string> | null;
+  landscapeVisible?: boolean;
 }
 
 const VIEW_MODE_LABELS: Record<ViewMode, string> = {
@@ -45,7 +49,7 @@ const VIEW_MODE_LABELS: Record<ViewMode, string> = {
   realview: 'Real View',
 };
 
-export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelete, onDrawUpdate, onLaserLine, onCursorMove, peerLaserLines, cursors, localDraws, currentUserId }: CanvasViewProps) {
+export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelete, onDrawUpdate, onLaserLine, onCursorMove, peerLaserLines, cursors, localDraws, currentUserId, activePhaseId, visibleSlotIds, landscapeVisible }: CanvasViewProps) {
   const { scale, zoomTo, resetViewport, containerWidth, containerHeight } = useCanvasStore();
 
   const sortedFloors = useMemo(() =>
@@ -243,6 +247,9 @@ export function CanvasView({ floors, readOnly = false, onDrawCreate, onDrawDelet
         activeImagePath={activeImagePath}
         peerDraws={localDraws?.[currentFloor!.id]}
         currentUserId={currentUserId}
+        activePhaseId={activePhaseId}
+        visibleSlotIds={visibleSlotIds}
+        landscapeVisible={landscapeVisible}
       />
     </div>
   );

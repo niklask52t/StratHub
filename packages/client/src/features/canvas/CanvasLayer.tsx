@@ -45,6 +45,10 @@ interface CanvasLayerProps {
   cursors?: Map<string, { x: number; y: number; color: string; userId: string; isLaser?: boolean }>;
   activeImagePath?: string;
   currentUserId?: string | null;
+  // Strat filtering props
+  activePhaseId?: string | null;
+  visibleSlotIds?: Set<string> | null;
+  landscapeVisible?: boolean;
 }
 
 /** Render a single draw onto a canvas context. Exported for use in export utilities. */
@@ -244,7 +248,7 @@ export function getDrawBounds(draw: any): { x: number; y: number; width: number;
   }
 }
 
-export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelete, onDrawUpdate, onLaserLine, onCursorMove, peerDraws, peerLaserLines, cursors, activeImagePath, currentUserId }: CanvasLayerProps) {
+export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelete, onDrawUpdate, onLaserLine, onCursorMove, peerDraws, peerLaserLines, cursors, activeImagePath, currentUserId, activePhaseId, visibleSlotIds, landscapeVisible = true }: CanvasLayerProps) {
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const drawCanvasRef = useRef<HTMLCanvasElement>(null);
   const activeCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -381,6 +385,18 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
       if (draw.isDeleted) continue;
       // Hide the draw being dragged (it's shown as a preview on the active canvas)
       if (draggedDrawId && draw.id === draggedDrawId) continue;
+
+      // Strat phase filter: skip draws from other phases
+      if (activePhaseId && draw.phaseId && draw.phaseId !== activePhaseId) continue;
+
+      // Strat operator visibility filter
+      if (draw.operatorSlotId) {
+        if (visibleSlotIds && !visibleSlotIds.has(draw.operatorSlotId)) continue;
+      } else {
+        // Landscape draw (no operator): respect landscape visibility
+        if (landscapeVisible === false) continue;
+      }
+
       ctx.save();
       // Dim others' draws
       if (currentUserId && draw.userId && draw.userId !== currentUserId) {
@@ -438,7 +454,7 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
         }
       }
     }
-  }, [floor.draws, peerDraws, currentUserId, selectedDrawId, draggedDrawId]);
+  }, [floor.draws, peerDraws, currentUserId, selectedDrawId, draggedDrawId, activePhaseId, visibleSlotIds, landscapeVisible]);
 
   // Keep renderDrawsRef in sync with the latest renderDraws callback
   renderDrawsRef.current = renderDraws;
@@ -623,6 +639,10 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
         if (!draw.id || draw.isDeleted) continue;
         // Ownership check: only delete own draws
         if (currentUserId && draw.userId && draw.userId !== currentUserId) continue;
+        // Strat filters: skip draws from other phases or hidden operators
+        if (activePhaseId && draw.phaseId && draw.phaseId !== activePhaseId) continue;
+        if (draw.operatorSlotId && visibleSlotIds && !visibleSlotIds.has(draw.operatorSlotId)) continue;
+        if (!draw.operatorSlotId && landscapeVisible === false) continue;
         if (hitTestDraw(draw, pos.x, pos.y)) {
           onDrawDelete?.([draw.id]);
           return;
@@ -676,6 +696,10 @@ export function CanvasLayer({ floor, readOnly = false, onDrawCreate, onDrawDelet
         const draw = allDraws[i]!;
         if (!draw.id || draw.isDeleted) continue;
         if (currentUserId && draw.userId && draw.userId !== currentUserId) continue;
+        // Strat filters
+        if (activePhaseId && draw.phaseId && draw.phaseId !== activePhaseId) continue;
+        if (draw.operatorSlotId && visibleSlotIds && !visibleSlotIds.has(draw.operatorSlotId)) continue;
+        if (!draw.operatorSlotId && landscapeVisible === false) continue;
         if (hitTestDraw(draw, pos.x, pos.y)) {
           setSelectedDrawId(draw.id);
           setIsDragging(true);
