@@ -36,7 +36,9 @@ const AdminUsers = lazy(() => import('@/features/admin/users/UsersPage'));
 const AdminTokens = lazy(() => import('@/features/admin/tokens/TokensPage'));
 const AdminSettings = lazy(() => import('@/features/admin/settings/SettingsPage'));
 const AccountSettingsPage = lazy(() => import('@/features/account/AccountSettingsPage'));
+const AboutPage = lazy(() => import('@/features/legal/AboutPage'));
 const ImpressumPage = lazy(() => import('@/features/legal/ImpressumPage'));
+const AGBPage = lazy(() => import('@/features/legal/AGBPage'));
 const HelpPage = lazy(() => import('@/features/legal/HelpPage'));
 const FAQPage = lazy(() => import('@/features/legal/FAQPage'));
 const ChangelogPage = lazy(() => import('@/features/legal/ChangelogPage'));
@@ -88,7 +90,9 @@ export function App() {
         {/* Main app */}
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/impressum" element={<ImpressumPage />} />
+          <Route path="/agb" element={<AGBPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/changelog" element={<ChangelogPage />} />

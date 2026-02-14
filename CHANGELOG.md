@@ -3,8 +3,6 @@
 ## v1.8.2 — 2026-02-14
 
 - [removed] Valorant game data removed from seed — TactiHub now focuses exclusively on Rainbow Six Siege
-- [feature] Screenshot slideshow on Homepage preview section — themed groups with auto-rotate and manual navigation
-- [fix] Homepage hero viewport gap on Windows — changed to full-screen height
 - [improvement] Updated all documentation to reflect R6 Siege-only focus
 
 ## v1.8.1 — 2026-02-13

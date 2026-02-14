@@ -401,7 +401,9 @@ Full CRUD for games, maps, map-floors, operators, gadgets, operator-gadgets, use
 | `/help` | HelpPage | Public |
 | `/faq` | FAQPage | Public |
 | `/changelog` | ChangelogPage | Public |
+| `/about` | AboutPage | Public |
 | `/impressum` | ImpressumPage | Public |
+| `/agb` | AGBPage | Public |
 | `/:gameSlug` | GameDashboard | Public |
 | `/:gameSlug/plans/public` | PublicPlansPage | Public |
 | `/:gameSlug/plans/:planId` | BattleplanViewer | Public (optionalAuth on server) |

@@ -22,8 +22,6 @@ const releases: Release[] = [
     tag: 'Latest',
     changes: [
       { type: 'removed', text: 'Valorant game data removed from seed \u2014 TactiHub now focuses exclusively on Rainbow Six Siege' },
-      { type: 'feature', text: 'Screenshot slideshow on Homepage preview section \u2014 themed groups with auto-rotate and navigation' },
-      { type: 'fix', text: 'Homepage hero viewport gap on Windows \u2014 changed to full-screen height' },
       { type: 'improvement', text: 'Updated all documentation to reflect R6 Siege-only focus' },
     ],
   },
@@ -289,7 +287,7 @@ export default function ChangelogPage() {
                       const badge = getTypeBadge(change.type);
                       return (
                         <div key={j} className="flex items-start gap-3">
-                          <span className={`shrink-0 px-2 py-0.5 rounded text-xs font-medium border ${badge.cls}`}>
+                          <span className={`shrink-0 min-w-[70px] text-center px-2 py-0.5 rounded text-xs font-medium border ${badge.cls}`}>
                             {badge.label}
                           </span>
                           <span className="text-sm">{change.text}</span>

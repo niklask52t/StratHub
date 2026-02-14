@@ -1,186 +1,102 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { APP_VERSION } from '@tactihub/shared';
 
 export default function ImpressumPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8">
+        <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-2">Legal</p>
         <h1 className="text-3xl font-bold">Impressum</h1>
-        <Badge variant="outline" className="text-xs">v{APP_VERSION}</Badge>
       </div>
 
-      <div className="space-y-8">
-        {/* Developer Info */}
+      <div className="space-y-6">
+        {/* § 5 TMG */}
         <Card>
           <CardHeader>
-            <CardTitle>Developer</CardTitle>
+            <CardTitle>Angaben gemäß § 5 TMG</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-lg font-medium">Niklas Kronig</p>
-            <p className="text-muted-foreground">
-              Lifelong passion for technology and IT.
-              Currently working in the IT field, combining professional experience with a drive for creative side projects.
+          <CardContent className="space-y-1">
+            <p className="font-medium">Niklas Kronig</p>
+            <p className="text-muted-foreground">Musterstraße 1</p>
+            <p className="text-muted-foreground">12345 Musterstadt</p>
+            <p className="text-muted-foreground">Deutschland</p>
+          </CardContent>
+        </Card>
+
+        {/* Kontakt */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Kontakt</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p>
+              <span className="text-muted-foreground">E-Mail: </span>
+              <a href="mailto:kontakt@tactihub.de" className="text-primary hover:underline">
+                kontakt@tactihub.de
+              </a>
             </p>
-            <p className="text-muted-foreground">
-              Passionate gamer and active in the Rainbow Six Siege esports scene.
-              TactiHub is a heart project — built to help his team and other esports teams plan and coordinate strategies more effectively.
+            <p>
+              <span className="text-muted-foreground">GitHub: </span>
+              <a href="https://github.com/niklask52t/TactiHub" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                github.com/niklask52t/TactiHub
+              </a>
+            </p>
+            <p>
+              <span className="text-muted-foreground">Website: </span>
+              <a href="https://tactihub.de" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                tactihub.de
+              </a>
             </p>
           </CardContent>
         </Card>
 
-        {/* About */}
+        {/* Haftungsausschluss */}
         <Card>
           <CardHeader>
-            <CardTitle>About TactiHub</CardTitle>
+            <CardTitle>Haftungsausschluss</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground">
-              TactiHub is a modern, collaborative strategy planning tool for Rainbow Six Siege.
-              It allows teams to draw tactics on game maps, share battle plans, and coordinate
-              strategies in real-time.
+            <div>
+              <h3 className="font-semibold mb-1">Haftung für Inhalte (§ 7 TMG)</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-1">Haftung für Links (§ 8 TMG)</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Urheberrecht */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Urheberrecht</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.
             </p>
-            <p className="text-muted-foreground">
-              This project is built upon the ideas and work of two original open-source projects
-              that are unfortunately no longer actively maintained. TactiHub merges their best
-              features into a single, modern application with a new tech stack and additional functionality.
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Der Quellcode von TactiHub ist unter der{' '}
+              <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                MIT-Lizenz
+              </a>{' '}
+              veröffentlicht.
             </p>
           </CardContent>
         </Card>
 
-        <Separator />
-
-        {/* Original Projects */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Based On</h2>
-          <p className="text-muted-foreground mb-6">
-            TactiHub would not exist without these two projects. While both have been inactive for
-            several years, they laid the groundwork for what TactiHub is today.
-          </p>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  r6-map-planner
-                  <a
-                    href="https://github.com/prayansh/r6-map-planner"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:text-primary/80"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  by <span className="font-medium text-foreground">prayansh</span>
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  A real-time collaborative map planning tool built with Node.js, Express and
-                  Socket.IO. It provided the foundation for the real-time collaboration features,
-                  live cursor tracking, and the multi-game canvas drawing system.
-                </p>
-                <a
-                  href="https://github.com/prayansh/r6-map-planner"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  github.com/prayansh/r6-map-planner
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  r6-maps
-                  <a
-                    href="https://github.com/jayfoe/r6-maps"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:text-primary/80"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  by <span className="font-medium text-foreground">jayfoe</span>
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  A battle plan management system built with Laravel and Vue.js. It provided
-                  the blueprint for user authentication, database persistence, battle plan
-                  management, voting system, and the admin panel.
-                </p>
-                <a
-                  href="https://github.com/jayfoe/r6-maps"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                >
-                  github.com/jayfoe/r6-maps
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Changelog link */}
+        {/* Weitere rechtliche Informationen */}
         <Card>
           <CardContent className="pt-6">
             <p className="text-muted-foreground">
-              For a full list of changes and past releases, see the{' '}
-              <Link to="/changelog" className="text-primary hover:underline font-medium">Changelog</Link>.
+              Unsere allgemeinen Geschäftsbedingungen finden Sie auf der{' '}
+              <Link to="/agb" className="text-primary hover:underline font-medium">AGB-Seite</Link>.
             </p>
-          </CardContent>
-        </Card>
-
-        {/* Tech Stack */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Technology</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              TactiHub is built as a modern TypeScript monorepo using:
-            </p>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li>React + Vite (Frontend)</li>
-              <li>Fastify (Backend API)</li>
-              <li>Socket.IO (Real-time Communication)</li>
-              <li>PostgreSQL + Drizzle ORM (Database)</li>
-              <li>Redis (Caching & Session Management)</li>
-              <li>Tailwind CSS + shadcn/ui (UI)</li>
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* Source Code */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Source Code</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <a
-              href="https://github.com/niklask52t/TactiHub"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-primary hover:underline"
-            >
-              github.com/niklask52t/TactiHub
-              <ExternalLink className="h-4 w-4" />
-            </a>
           </CardContent>
         </Card>
 
@@ -191,13 +107,10 @@ export default function ImpressumPage() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
             <p>
-              TactiHub is a fan-made tool and is not affiliated with, endorsed by, or connected
-              to Ubisoft or any other game publisher. All game names, logos, and
-              related assets are trademarks of their respective owners.
+              TactiHub is a fan-made tool and is not affiliated with, endorsed by, or connected to Ubisoft or any other game publisher. All game names, logos, and related assets are trademarks of their respective owners.
             </p>
             <p>
-              Map images and operator icons used in this application are property of their
-              respective game publishers and are used for informational and educational purposes only.
+              Map images and operator icons used in this application are property of their respective game publishers and are used for informational and educational purposes only.
             </p>
           </CardContent>
         </Card>
