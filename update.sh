@@ -28,28 +28,87 @@ run_as_tactihub() {
   fi
 }
 
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
 echo "=== TactiHub Update ==="
 echo ""
+echo "Current branch: $CURRENT_BRANCH"
+echo ""
 echo "Select mode:"
-echo "  [1] dev      — Full reset: delete ALL data, rebuild from scratch"
-echo "  [2] prod     — Update only: pull main, install, migrate, rebuild (keeps data)"
-echo "  [3] prod-dev — Update only: pull dev, install, migrate, rebuild (keeps data)"
+echo "  [1] dev      — Full reset: delete ALL data, rebuild from scratch (current branch)"
+echo "  [2] update   — Update only: pull current branch, install, migrate, rebuild (keeps data)"
+echo "  [3] reset    — Full reset on current branch: delete ALL data, rebuild from scratch"
+echo "  [4] prod     — Update only: pull main, install, migrate, rebuild (keeps data)"
+echo "  [5] prod-dev — Update only: pull dev, install, migrate, rebuild (keeps data)"
 echo ""
 
 while true; do
-  read -p "Enter mode (1, 2 or 3): " mode
+  read -p "Enter mode (1-5): " mode
   case "$mode" in
     1) MODE="dev"; break ;;
-    2) MODE="prod"; BRANCH="main"; break ;;
-    3) MODE="prod"; BRANCH="dev"; break ;;
-    *) echo "Please enter 1, 2 or 3." ;;
+    2) MODE="update"; BRANCH="$CURRENT_BRANCH"; break ;;
+    3) MODE="dev-current"; break ;;
+    4) MODE="prod"; BRANCH="main"; break ;;
+    5) MODE="prod"; BRANCH="dev"; break ;;
+    *) echo "Please enter 1-5." ;;
   esac
 done
 
 echo ""
 
-if [ "$MODE" = "dev" ]; then
-  echo "=== DEV RESET ==="
+if [ "$MODE" = "update" ]; then
+  echo "=== UPDATE (branch: $BRANCH) ==="
+  echo "This will pull the latest changes from '$BRANCH', install dependencies,"
+  echo "apply database migrations, and rebuild the project."
+  echo "Your existing data will be preserved."
+  echo ""
+
+  if ! ask_yn "Continue?"; then
+    echo "Aborted."
+    exit 0
+  fi
+
+  echo ""
+  echo "--- Pulling latest $BRANCH ---"
+  git pull origin "$BRANCH"
+
+  echo ""
+  echo "--- Installing dependencies ---"
+  pnpm install
+
+  echo ""
+  echo "--- Building shared package ---"
+  pnpm --filter @tactihub/shared build
+
+  echo ""
+  echo "--- Generating database migrations ---"
+  pnpm db:generate
+
+  echo ""
+  echo "--- Applying database migrations ---"
+  pnpm db:migrate
+
+  echo ""
+  echo "--- Building all packages ---"
+  pnpm build
+
+  echo ""
+  echo "=== Update complete! ==="
+
+  if ask_yn "Start dev server now?"; then
+    pnpm dev
+  else
+    echo "Run 'pnpm dev' to start."
+  fi
+
+elif [ "$MODE" = "dev" ] || [ "$MODE" = "dev-current" ]; then
+  if [ "$MODE" = "dev-current" ]; then
+    RESET_BRANCH="$CURRENT_BRANCH"
+  else
+    RESET_BRANCH="dev"
+  fi
+
+  echo "=== FULL RESET (branch: $RESET_BRANCH) ==="
   echo "This will DELETE all database data (users, battleplans, everything)"
   echo "and rebuild the entire project from scratch."
   echo ""
@@ -67,9 +126,11 @@ if [ "$MODE" = "dev" ]; then
   fi
 
   echo ""
-  echo "--- Pulling latest dev branch ---"
-  git checkout dev
-  git pull origin dev
+  echo "--- Pulling latest $RESET_BRANCH branch ---"
+  if [ "$RESET_BRANCH" != "$CURRENT_BRANCH" ]; then
+    git checkout "$RESET_BRANCH"
+  fi
+  git pull origin "$RESET_BRANCH"
 
   echo ""
   echo "--- Installing dependencies ---"
