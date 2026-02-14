@@ -15,12 +15,14 @@ export default async function drawsRoutes(fastify: FastifyInstance) {
 
     const { items } = z.object({
       items: z.array(z.object({
-        type: z.enum(['path', 'line', 'rectangle', 'text', 'icon']),
+        type: z.enum(['path', 'line', 'arrow', 'rectangle', 'ellipse', 'text', 'icon']),
         originX: z.number(),
         originY: z.number(),
         destinationX: z.number().optional(),
         destinationY: z.number().optional(),
         data: z.record(z.unknown()),
+        phaseId: z.string().uuid().nullable().optional(),
+        operatorSlotId: z.string().uuid().nullable().optional(),
       })),
     }).parse(request.body);
 
@@ -35,6 +37,8 @@ export default async function drawsRoutes(fastify: FastifyInstance) {
         destinationX: item.destinationX,
         destinationY: item.destinationY,
         data: item.data,
+        phaseId: item.phaseId ?? null,
+        operatorSlotId: item.operatorSlotId ?? null,
       }).returning();
       created.push(draw);
     }

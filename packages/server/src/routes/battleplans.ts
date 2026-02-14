@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { eq, and, desc, sql, count } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../db/connection.js';
-import { battleplans, battleplanFloors, draws, operatorSlots, maps, mapFloors, votes, users, operators, games } from '../db/schema/index.js';
+import { battleplans, battleplanFloors, battleplanPhases, operatorBans, draws, operatorSlots, maps, mapFloors, votes, users, operators, games } from '../db/schema/index.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
 import { MAX_OPERATOR_SLOTS } from '@tactihub/shared';
 
@@ -45,6 +45,15 @@ async function getBattleplanWithDetails(id: string, userId?: string) {
     return { ...slot, operator };
   }));
 
+  // Phases
+  const phases = await db.select().from(battleplanPhases)
+    .where(eq(battleplanPhases.battleplanId, id))
+    .orderBy(battleplanPhases.index);
+
+  // Bans
+  const bans = await db.select().from(operatorBans)
+    .where(eq(operatorBans.battleplanId, id));
+
   // Vote count
   const voteResult = await db.select({ total: sql<number>`COALESCE(SUM(${votes.value}), 0)` })
     .from(votes).where(eq(votes.battleplanId, id));
@@ -66,6 +75,8 @@ async function getBattleplanWithDetails(id: string, userId?: string) {
     map: map || null,
     floors: floorsWithDraws,
     operatorSlots: slotsWithOperators,
+    phases,
+    bans,
     voteCount,
     userVote,
   };
@@ -142,14 +153,29 @@ export default async function battleplansRoutes(fastify: FastifyInstance) {
       });
     }
 
-    // Auto-create defender operator slots
+    // Auto-create defender + attacker operator slots (5 each)
+    const defaultColors = ['#FF4444', '#44AAFF', '#44FF44', '#FFAA44', '#AA44FF'];
     for (let i = 1; i <= MAX_OPERATOR_SLOTS; i++) {
       await db.insert(operatorSlots).values({
         battleplanId: plan.id,
         slotNumber: i,
         side: 'defender',
+        color: defaultColors[(i - 1) % defaultColors.length],
+      });
+      await db.insert(operatorSlots).values({
+        battleplanId: plan.id,
+        slotNumber: i,
+        side: 'attacker',
+        color: defaultColors[(i - 1) % defaultColors.length],
       });
     }
+
+    // Auto-create default phase
+    await db.insert(battleplanPhases).values({
+      battleplanId: plan.id,
+      index: 0,
+      name: 'Action Phase',
+    });
 
     const fullPlan = await getBattleplanWithDetails(plan.id, request.user!.userId);
     return reply.status(201).send({ data: fullPlan });
@@ -304,6 +330,141 @@ export default async function battleplansRoutes(fastify: FastifyInstance) {
     );
 
     return { message: 'Attacker lineup removed' };
+  });
+
+  // --- Strat Config ---
+
+  // POST /api/battleplans/:id/strat-config
+  fastify.post('/:id/strat-config', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const body = z.object({
+      side: z.enum(['Attackers', 'Defenders', 'Unknown']).optional(),
+      mode: z.enum(['Bomb', 'Secure', 'Hostage', 'Unknown']).optional(),
+      site: z.enum(['1', '2', '3', '4', '5', 'Unknown']).optional(),
+    }).parse(request.body);
+
+    const [existing] = await db.select().from(battleplans).where(eq(battleplans.id, id));
+    if (!existing) return reply.status(404).send({ error: 'Not Found', message: 'Battleplan not found', statusCode: 404 });
+    if (existing.ownerId !== request.user!.userId && request.user!.role !== 'admin') {
+      return reply.status(403).send({ error: 'Forbidden', message: 'Not authorized', statusCode: 403 });
+    }
+
+    const updateData: Record<string, unknown> = { updatedAt: new Date() };
+    if (body.side !== undefined) updateData.stratSide = body.side;
+    if (body.mode !== undefined) updateData.stratMode = body.mode;
+    if (body.site !== undefined) updateData.stratSite = body.site;
+
+    const [plan] = await db.update(battleplans).set(updateData).where(eq(battleplans.id, id)).returning();
+    return { data: plan };
+  });
+
+  // --- Phases ---
+
+  // GET /api/battleplans/:id/phases
+  fastify.get('/:id/phases', async (request, reply) => {
+    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const phases = await db.select().from(battleplanPhases)
+      .where(eq(battleplanPhases.battleplanId, id))
+      .orderBy(battleplanPhases.index);
+    return { data: phases };
+  });
+
+  // POST /api/battleplans/:id/phases
+  fastify.post('/:id/phases', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const body = z.object({
+      name: z.string().min(1).max(100),
+      description: z.string().optional(),
+    }).parse(request.body);
+
+    // Get max index
+    const existing = await db.select().from(battleplanPhases)
+      .where(eq(battleplanPhases.battleplanId, id))
+      .orderBy(desc(battleplanPhases.index));
+    const nextIndex = existing.length > 0 ? existing[0].index + 1 : 0;
+
+    const [phase] = await db.insert(battleplanPhases).values({
+      battleplanId: id,
+      index: nextIndex,
+      name: body.name,
+      description: body.description,
+    }).returning();
+
+    return reply.status(201).send({ data: phase });
+  });
+
+  // POST /api/battleplans/:id/phases/:phaseId/update
+  fastify.post('/:id/phases/:phaseId/update', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { phaseId } = z.object({ id: z.string().uuid(), phaseId: z.string().uuid() }).parse(request.params);
+    const body = z.object({
+      name: z.string().min(1).max(100).optional(),
+      description: z.string().optional(),
+    }).parse(request.body);
+
+    const [phase] = await db.update(battleplanPhases).set({
+      ...body,
+      updatedAt: new Date(),
+    }).where(eq(battleplanPhases.id, phaseId)).returning();
+
+    if (!phase) return reply.status(404).send({ error: 'Not Found', message: 'Phase not found', statusCode: 404 });
+    return { data: phase };
+  });
+
+  // POST /api/battleplans/:id/phases/:phaseId/delete
+  fastify.post('/:id/phases/:phaseId/delete', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { phaseId } = z.object({ id: z.string().uuid(), phaseId: z.string().uuid() }).parse(request.params);
+
+    // Set phaseId to null on associated draws instead of deleting them
+    await db.update(draws).set({ phaseId: null, updatedAt: new Date() })
+      .where(eq(draws.phaseId, phaseId));
+
+    await db.delete(battleplanPhases).where(eq(battleplanPhases.id, phaseId));
+    return { message: 'Phase deleted' };
+  });
+
+  // --- Bans ---
+
+  // GET /api/battleplans/:id/bans
+  fastify.get('/:id/bans', async (request, reply) => {
+    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const bans = await db.select().from(operatorBans)
+      .where(eq(operatorBans.battleplanId, id));
+    return { data: bans };
+  });
+
+  // POST /api/battleplans/:id/bans
+  fastify.post('/:id/bans', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
+    const body = z.object({
+      operatorName: z.string().min(1).max(100),
+      side: z.enum(['attacker', 'defender']),
+      slotIndex: z.number().int().min(0).max(1),
+    }).parse(request.body);
+
+    // Upsert: delete existing ban at this slot, then insert
+    await db.delete(operatorBans).where(
+      and(
+        eq(operatorBans.battleplanId, id),
+        eq(operatorBans.side, body.side),
+        eq(operatorBans.slotIndex, body.slotIndex),
+      )
+    );
+
+    const [ban] = await db.insert(operatorBans).values({
+      battleplanId: id,
+      operatorName: body.operatorName,
+      side: body.side,
+      slotIndex: body.slotIndex,
+    }).returning();
+
+    return reply.status(201).send({ data: ban });
+  });
+
+  // POST /api/battleplans/:id/bans/:banId/delete
+  fastify.post('/:id/bans/:banId/delete', { preHandler: [requireAuth] }, async (request, reply) => {
+    const { banId } = z.object({ id: z.string().uuid(), banId: z.string().uuid() }).parse(request.params);
+    await db.delete(operatorBans).where(eq(operatorBans.id, banId));
+    return { message: 'Ban removed' };
   });
 
   // POST /api/battleplans/:id/vote
