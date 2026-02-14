@@ -220,7 +220,7 @@ export default function SandboxPage() {
             <span className="text-sm font-medium text-white">{selectedMap.name}</span>
           </div>
           <span className="text-xs text-primary flex items-center gap-1.5">
-            <AlertTriangle className="h-3 w-3" /> Sandbox — drawings are not saved
+            <AlertTriangle className="h-3 w-3" /> Sandbox Mode — Your drawings won't be saved. <Link to="/auth/login" className="underline">Log in</Link> to create persistent plans.
           </span>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
@@ -279,6 +279,7 @@ export default function SandboxPage() {
       ? allMaps.filter((m) => m.name.toLowerCase().includes(mapSearch.toLowerCase()))
       : allMaps;
     return (
+      <div className="min-h-screen gaming-bg">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" onClick={() => { setStep('game'); setSelectedGame(null); setMapSearch(''); }}>
@@ -310,16 +311,18 @@ export default function SandboxPage() {
           ))}
         </div>
       </div>
+      </div>
     );
   }
 
   // Step: game
   return (
+    <div className="min-h-screen gaming-bg">
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Sandbox — Choose a Game</h1>
       <div className="flex items-center justify-center gap-2 mb-6 px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg text-sm text-primary">
         <AlertTriangle className="h-4 w-4" />
-        Sandbox Mode — Your drawings won't be saved. Log in to create persistent plans.
+        Sandbox Mode — Your drawings won't be saved. <Link to="/auth/login" className="underline">Log in</Link> to create persistent plans.
       </div>
       {gamesLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -343,6 +346,7 @@ export default function SandboxPage() {
           ))}
         </div>
       )}
+    </div>
     </div>
   );
 }

@@ -7,7 +7,9 @@
 - [fix] Sandbox mode layout matches logged-in room layout (single header bar, no scrollbar)
 - [feature] Map name displayed in room and sandbox header bar
 - [feature] Map name included in battleplan API response
-- [improvement] Sandbox header: Exit button, yellow sandbox warning, Login/Register buttons
+- [fix] Sandbox warning text now matches game selection banner with "Log in" link
+- [fix] Sandbox game/map selection pages now show grid background like other pages
+- [improvement] Sandbox header: Exit button, sandbox warning, Login/Register buttons
 
 ## v1.8.3 — 2026-02-14
 

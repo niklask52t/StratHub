@@ -25,7 +25,9 @@ const releases: Release[] = [
       { type: 'fix', text: 'Laser line persists while fading \u2014 new lines no longer clear old fading lines' },
       { type: 'fix', text: 'Sandbox mode layout matches logged-in room layout (single header bar, no scrollbar)' },
       { type: 'feature', text: 'Map name displayed in room and sandbox header bar' },
-      { type: 'improvement', text: 'Sandbox header: Exit button, yellow sandbox warning, Login/Register buttons' },
+      { type: 'fix', text: 'Sandbox warning text now matches game selection banner with "Log in" link' },
+      { type: 'fix', text: 'Sandbox game/map selection pages now show grid background like other pages' },
+      { type: 'improvement', text: 'Sandbox header: Exit button, sandbox warning, Login/Register buttons' },
     ],
   },
   {
