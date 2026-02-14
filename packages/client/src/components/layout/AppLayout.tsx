@@ -85,7 +85,7 @@ export function AppLayout() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1">
         <Outlet />
       </main>
 

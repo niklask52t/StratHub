@@ -18,7 +18,7 @@ export default function HomePage() {
   });
 
   return (
-    <div className="relative overflow-hidden h-full flex flex-col">
+    <div className="relative overflow-hidden min-h-[calc(100vh-3.5rem-3rem)] flex flex-col">
       {/* Floating particles */}
       <span className="gaming-particle" style={{ left: '5%', bottom: '30%', animationDelay: '0s' }} />
       <span className="gaming-particle" style={{ left: '15%', bottom: '10%', animationDelay: '1.5s' }} />
