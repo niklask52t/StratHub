@@ -70,14 +70,7 @@ export function OperatorStrip({ gameSlug, readOnly, onOperatorAssign }: Operator
         side={slot.side}
         slotId={slot.id}
         gameSlug={gameSlug}
-        trigger={
-          <Tooltip>
-            <TooltipTrigger asChild>{inner}</TooltipTrigger>
-            <TooltipContent className="text-xs">
-              {slot.operatorName || 'Click to assign'} — Right-click to change
-            </TooltipContent>
-          </Tooltip>
-        }
+        trigger={inner}
         onSelect={onOperatorAssign}
       />
     );

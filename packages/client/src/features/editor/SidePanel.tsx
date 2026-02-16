@@ -3,6 +3,7 @@
  * Contains: visibility row, landscape section, tool grid, operator avatars.
  */
 
+import { useMemo } from 'react';
 import { Tool } from '@tactihub/shared';
 import type { StratOperatorSlot } from '@tactihub/shared';
 import { useStratStore } from '@/stores/strat.store';
@@ -27,7 +28,11 @@ const LANDSCAPE_TOOLS: Array<{ tool: Tool; icon: typeof Pencil; label: string }>
 ];
 
 export function SidePanel({ side, readOnly, onVisibilityToggle, onColorChange }: SidePanelProps) {
-  const slots = useStratStore(s => side === 'attacker' ? s.getAttackerSlots() : s.getDefenderSlots());
+  const operatorSlots = useStratStore(s => s.operatorSlots);
+  const slots = useMemo(
+    () => operatorSlots.filter(s => s.side === side).sort((a, b) => a.slotNumber - b.slotNumber),
+    [operatorSlots, side],
+  );
   const activeSlotId = useStratStore(s => s.activeOperatorSlotId);
   const { landscapeColor, landscapeVisible, setLandscapeColor, setLandscapeVisible } = useStratStore();
   const { tool: activeTool, setTool, setColor } = useCanvasStore();
