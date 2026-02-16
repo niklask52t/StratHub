@@ -14,9 +14,27 @@ interface Release {
 
 const releases: Release[] = [
   {
+    version: '2.0.0',
+    date: '2026-02-16',
+    tag: 'Latest',
+    changes: [
+      { type: 'feature', text: 'Complete canvas system rewrite \u2014 replaced 1197-line monolithic CanvasLayer with modular architecture (MapCanvas, BackgroundLayer, DrawLayer, ActiveLayer, tool hooks)' },
+      { type: 'feature', text: 'r6calls.com-style editor layout \u2014 CSS grid with TopNavBar, OperatorStrip, and left/right SidePanels (ATK/DEF)' },
+      { type: 'feature', text: 'Per-operator gadget toolbar \u2014 each operator column shows unique, secondary, and general gadgets below the standard drawing tools' },
+      { type: 'feature', text: 'Inline operator picker \u2014 click operator slots in the OperatorStrip to assign operators via searchable popover grid' },
+      { type: 'feature', text: 'SVG Real View as default \u2014 maps now open in interactive SVG view with toggleable layers' },
+      { type: 'feature', text: 'Phase management \u2014 create, rename, delete, and switch between strategy phases per battleplan' },
+      { type: 'feature', text: 'Strategy config popover and landscape drawing mode (draw without operator slot)' },
+      { type: 'feature', text: 'Per-operator visibility toggles and color pickers in the side panels' },
+      { type: 'improvement', text: 'Corrected SVG floor mapping \u2014 floor numbers now match SVG group IDs (Basement, 1F, 2F, 3F naming)' },
+      { type: 'improvement', text: 'Granular Zustand selectors throughout the editor \u2014 prevents unnecessary re-renders' },
+      { type: 'fix', text: 'Infinite re-render crashes fixed \u2014 Zustand selectors and Radix UI composeRefs issues resolved' },
+      { type: 'fix', text: 'Operator display, map covers, and game icons now render correctly' },
+    ],
+  },
+  {
     version: '1.8.6',
     date: '2026-02-14',
-    tag: 'Latest',
     changes: [
       { type: 'feature', text: 'Email address change \u2014 all users (including admin) can change their email via Account Settings with password confirmation and new-email verification' },
       { type: 'feature', text: 'Password change \u2014 all users can change their password via Account Settings (current password + new password with confirmation)' },

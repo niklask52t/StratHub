@@ -9,7 +9,7 @@ This file provides context for AI assistants working on the TactiHub codebase.
 TactiHub is a real-time collaborative strategy planning tool for Rainbow Six Siege. Users can draw tactics on game maps, save/share battle plans, and collaborate in rooms with live cursors and drawing sync.
 
 **Author**: Niklas Kronig
-**Version**: 1.8.6
+**Version**: 2.0.0
 **Repo**: https://github.com/niklask52t/TactiHub
 **Based on**: [r6-map-planner](https://github.com/prayansh/r6-map-planner) (Node/Express/Socket.IO) and [r6-maps](https://github.com/jayfoe/r6-maps) (Laravel/Vue)
 
@@ -69,10 +69,25 @@ packages/
 - Pre-seeded images are committed to repo under `packages/server/uploads/maps/` (165 WebP) and `packages/server/uploads/gadgets/` (23 WebP)
 - Re-process from source folder: `pnpm --filter @tactihub/server tsx src/scripts/process-images.ts <source-folder>`
 
-### Canvas System (3 layers per floor)
-1. **Background layer** — Map floor image (variant based on view mode selector)
-2. **Drawings layer** — All persisted/committed draws
-3. **Active layer** — Current drawing action + peer cursors
+### Canvas System (modular architecture, v2.0.0 rewrite)
+- Old monolithic CanvasLayer.tsx (1,197 lines) replaced with modular architecture in `features/canvas/`
+- Subdirs: `rendering/`, `layers/`, `tools/`, `hooks/`, `utils/`
+- Main component: `MapCanvas.tsx` (default export) — composed of `BackgroundLayer`, `DrawLayer`, `ActiveLayer`
+- Tool hooks pattern: `useDrawTool`, `useSelectTool`, `usePanTool`, `useIconTool`, etc., composed by `useToolRouter`
+- Types in `features/canvas/types.ts`: `LaserLineData`, `Floor`, `CursorData`, `MapFloor`
+- 3 layer components per floor:
+  1. **BackgroundLayer** — Map floor image or SVG Real View (variant based on view mode selector)
+  2. **DrawLayer** — All persisted/committed draws
+  3. **ActiveLayer** — Current drawing action + peer cursors
+
+### Editor Layout (r6calls.com-style, v2.0.0)
+- `EditorShell.tsx` — CSS grid: `gridTemplateRows: 'auto auto 1fr'`, `gridTemplateColumns: '220px 1fr 220px'`
+- Row 1: `TopNavBar` (full width) — map name, floor tabs, view mode, phases, layer toggle, tools, zoom
+- Row 2: `OperatorStrip` (full width) — 5 ATK + 5 DEF operator slots with popover picker
+- Row 3: `SidePanel` (ATK, 220px) | Canvas (1fr) | `SidePanel` (DEF, 220px)
+- SidePanel contains: visibility row, color pickers, landscape section, `SidePanelToolGrid` (5-col tool + gadget matrix), operator avatars
+- SidePanelToolGrid: 5 columns (one per operator) × tool rows (Pen, Line, Rectangle, Text, Eraser, Select) + gadget rows per operator (unique → secondary → general)
+- Clicking a gadget cell sets: `activeOperatorSlotId`, `tool=Icon`, `color=slot.color`, `selectedIcon={gadget}`
 
 ### Viewport (Zoom + Pan)
 - CSS `transform: translate(${offsetX}px, ${offsetY}px) scale(${scale})` on the canvas container
@@ -134,26 +149,21 @@ packages/
 - **Laser Line**: Tool.LaserLine — collects points on drag, sends via `laser:line` socket event, fades over 3 seconds after release
 - Both are **not persisted** to database — purely ephemeral broadcast
 
-### Icon Tool (Operator/Gadget placement)
-- Tool.Icon in toolbar shows IconSidebar with operators (by side: Attackers/Defenders) and gadgets (grouped by category: Unique/Secondary/General)
-- IconSidebar fetches from `/api/games/:slug/operators` and `/api/games/:slug/gadgets`
-- All gadgets shown regardless of icon availability — text fallback (colored circle with abbreviation) for gadgets without icons
-- Game slug comes from battleplan response (now includes `game: { id, slug, name }`)
-- Click places `type: 'icon'` draw with `{ iconUrl, size: 40 }` — persisted like other draws
-- Icon sidebar has vertical "Icons" label when collapsed, `animate-pulse` on first visit per session (sessionStorage)
-- Module-level `iconImageCache` Map in CanvasLayer prevents async flicker on icon re-renders
+### Icon Tool (Gadget placement via Side Panels)
+- Gadget placement is integrated into the SidePanel tool grid — no separate IconSidebar
+- SidePanel fetches operators (with gadgets) from `/api/games/:slug/operators` and general gadgets from `/api/games/:slug/gadgets`
+- Each operator column shows their unique + secondary gadgets; general gadgets (Drone, Barricade, etc.) shown for all slots
+- All gadgets shown regardless of icon availability — text fallback (3-letter abbreviation) for gadgets without icons
+- Clicking a gadget cell sets: `activeOperatorSlotId`, `tool=Icon`, `color=slot.color`, `selectedIcon={gadget}`
+- `useIconTool` hook reads `selectedIcon` from canvas store — click places `type: 'icon'` draw with `{ iconUrl, size: 40 }`
+- Gadget rows are unified across columns — same gadget occupies same row, unavailable cells are dimmed
+- Category headers (Unique, Secondary, General) separate gadget groups
 
 ### Operator Lineup System
-- Each battleplan has 5 defender operator slots (created automatically via `side: 'defender'`)
-- Optional attacker lineup: POST `/:id/attacker-lineup` creates 5 attacker slots, POST `/:id/attacker-lineup/delete` removes them
+- OperatorStrip (full width, row 2 of EditorShell) shows 5 ATK + 5 DEF slots with blue/red borders
+- Click a slot → `OperatorPickerPopover` with searchable 6-column operator grid (banned/assigned operators dimmed)
 - `operator_slots` table has `side` column (`slot_side` pgEnum: 'defender' | 'attacker') with default 'defender'
-- IconSidebar has 3 tabs: **Lineup** (visual grid picker), **Operators** (filtered grid), **Gadgets** (filtered grid)
-- Lineup slots: click row to expand 4-column operator image grid, click operator to assign, X button to clear
-- When lineup has assigned operators: Operators/Gadgets tabs auto-filter to lineup members
-- When lineup is empty (no operators assigned): all operators/gadgets shown (no filtering)
-- "Show all" checkbox reveals all items with orange "Nicht im Lineup" warning on non-lineup entries
-- Gadget filtering: collects gadget IDs from `operator.gadgets[]` (returned by operators API) of lineup operators
-- Attackers section hidden unless attacker lineup exists
+- Optional attacker lineup: POST `/:id/attacker-lineup` creates 5 attacker slots, POST `/:id/attacker-lineup/delete` removes them
 - Real-time sync: `operator-slot:update/updated` (includes `side`), `attacker-lineup:create/created` socket events
 - BattleplanViewer: read-only lineup display with operator avatar circles (blue border for DEF, orange for ATK)
 

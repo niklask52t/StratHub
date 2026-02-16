@@ -1,5 +1,27 @@
 # Changelog
 
+## v2.0.0 — 2026-02-16
+
+- [feature] Complete canvas system rewrite — replaced 1197-line monolithic CanvasLayer with modular architecture (MapCanvas, BackgroundLayer, DrawLayer, ActiveLayer, tool hooks)
+- [feature] r6calls.com-style editor layout — CSS grid with TopNavBar, OperatorStrip, and left/right SidePanels (ATK/DEF)
+- [feature] Per-operator gadget toolbar — each operator column in the side panel shows that operator's unique, secondary, and general gadgets below the standard drawing tools
+- [feature] Inline operator picker — click operator slots in the OperatorStrip to assign operators via searchable popover grid
+- [feature] SVG Real View as default — maps now open in interactive SVG view by default instead of static blueprint images
+- [feature] SVG layer toggle — toggle visibility of individual map layers (bomb sites, hatches, breakable walls, cameras, etc.) in Real View mode
+- [feature] Phase management — create, rename, delete, and switch between strategy phases per battleplan
+- [feature] Strategy config popover — configure strategy settings (attack/defense mode, objective type)
+- [feature] Landscape drawing mode — draw without an operator slot using a separate landscape color (green-tinted section in side panel)
+- [feature] Per-operator visibility toggles and color pickers in the side panels
+- [improvement] Corrected SVG floor mapping — floor numbers now match SVG group IDs, fixing shifted floor content on maps with basements
+- [improvement] Floor naming convention changed to Basement, 1F, 2F, 3F, Roof (was Ground Floor, Top Floor, etc.)
+- [improvement] Granular Zustand selectors throughout the editor — prevents unnecessary re-renders from store subscriptions
+- [improvement] Removed old IconSidebar and Icon tool row — replaced by per-operator gadget cells in side panel
+- [fix] Infinite re-render crashes fixed — Zustand selectors no longer call methods that return new Set/Array objects every render
+- [fix] Radix UI composeRefs crash fixed — removed nested Tooltip inside PopoverTrigger that caused infinite ref cleanup loop with React 19
+- [fix] Operator display now shows assigned operator name and icon instead of "?" placeholder
+- [fix] Map cover images now use correct API field name (thumbnail)
+- [fix] Game icon (R6 logo) now renders correctly in Sandbox map selection
+
 ## v1.8.6 — 2026-02-14
 
 - [feature] Email address change — all users (including admin) can change their email via Account Settings with password confirmation and new-email verification

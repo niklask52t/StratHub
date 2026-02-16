@@ -39,7 +39,7 @@ const faqs = [
   },
   {
     q: 'How do I place operators or gadgets on the map?',
-    a: 'Select the Icon tool (sticker icon) in the toolbar. A picker will appear showing available operators and gadgets for the current game. Select an icon, then click anywhere on the canvas to place it. Placed icons are saved like regular drawings and can be removed with the eraser.',
+    a: 'In the side panels (ATK/DEF), each operator column shows their available gadgets below the drawing tools. Click a gadget cell to activate the Icon tool with that gadget selected, then click on the canvas to place it. General gadgets (Drone, Barricade, etc.) are available for all slots regardless of operator assignment. Placed icons are saved like regular drawings and can be removed with the eraser.',
   },
   {
     q: 'How do rooms work?',
@@ -62,8 +62,12 @@ const faqs = [
     a: 'Use the floor switcher in the top-right corner of the canvas, or press K to go up and J to go down.',
   },
   {
-    q: 'What are Blueprint, Darkprint, and Whiteprint?',
-    a: 'These are different visual styles for the same floor layout. Blueprint is the default colored version, Darkprint is a dark/black version, and Whiteprint is a white/clean version. Use the view mode buttons in the top-left corner of the canvas to switch between them (only visible when a floor has multiple variants).',
+    q: 'What are the different view modes?',
+    a: 'Maps support up to 4 view modes: Real View (interactive SVG with toggleable layers — default), Blueprint (static colored image), Darkprint (dark version), and Whiteprint (clean white version). Switch between them using the view mode buttons in the top bar. In Real View, use the Layer Toggle to show/hide individual layers like bomb sites, hatches, cameras, etc.',
+  },
+  {
+    q: 'What are Phases?',
+    a: 'Phases let you organize a strategy into steps (e.g., "Action Phase 0", "Retake Phase"). Use the Phase dropdown in the top bar to create, rename, delete, and switch between phases. Each phase can have its own set of drawings. Phases are saved with the battleplan.',
   },
   {
     q: 'Can I self-host TactiHub?',
@@ -123,15 +127,15 @@ const faqs = [
   },
   {
     q: 'What is the Operator Lineup?',
-    a: 'Each battleplan has 5 defender operator slots (the Lineup). Open the icon sidebar and go to the Lineup tab to assign operators using the visual image grid. Once operators are assigned, the Operators and Gadgets tabs automatically filter to show only lineup members and their gadgets. Use the "Show all" checkbox to see everything, with non-lineup items marked in orange.',
+    a: 'The editor has an OperatorStrip at the top with 5 ATK + 5 DEF slots. Click a slot to assign an operator via a searchable popover. The left (ATK) and right (DEF) side panels show per-operator tool columns — when an operator is assigned, their specific gadgets appear in that column below the drawing tools.',
   },
   {
-    q: 'Can I add attackers to the lineup?',
-    a: 'Yes. In the Lineup tab, click "Add Attacker Lineup" to create 5 attacker slots. Attackers only appear in the sidebar when an attacker lineup exists. You can remove the attacker lineup anytime by clicking the trash icon next to the Attackers header.',
+    q: 'What are the side panels?',
+    a: 'The left panel is for Attackers, the right for Defenders. Each has: visibility toggles, color pickers, a landscape drawing section, a 5-column tool grid (one per operator), gadget rows per operator, and operator avatars at the bottom. Click any cell to activate that tool/gadget with that operator\'s color.',
   },
   {
-    q: 'Why are some operators/gadgets hidden in the sidebar?',
-    a: 'When you assign operators to your lineup, the Operators and Gadgets tabs filter to show only lineup members and their associated gadgets. This helps you focus on the relevant items for your strategy. Check the "Show all" box to reveal everything — non-lineup items will show an orange "Nicht im Lineup" warning.',
+    q: 'What is the Landscape section?',
+    a: 'The Landscape section (green-tinted) in each side panel lets you draw without being tied to a specific operator slot. It has its own color picker and basic tools (Pen, Line, Rectangle, Text). Useful for drawing general map annotations that aren\'t operator-specific.',
   },
   {
     q: 'How do I report a bug or suggest a feature?',

@@ -61,8 +61,8 @@ export default function HelpPage() {
               <div className="flex items-start gap-3">
                 <Sticker className="h-5 w-5 mt-0.5 text-primary shrink-0" />
                 <div>
-                  <p className="font-medium">Icon</p>
-                  <p className="text-sm text-muted-foreground">Place operator or gadget icons on the map. Select an icon from the picker, then click to place.</p>
+                  <p className="font-medium">Gadget Icons</p>
+                  <p className="text-sm text-muted-foreground">Place operator gadgets on the map. In the side panels (ATK/DEF), each operator column shows their available gadgets below the drawing tools. Click a gadget cell to select it, then click on the canvas to place the icon. General gadgets (Drone, Barricade, etc.) are available for all slots.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -275,24 +275,26 @@ export default function HelpPage() {
           </CardContent>
         </Card>
 
-        {/* Operator Lineup */}
+        {/* Operator Lineup & Side Panels */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5" /> Operator Lineup</CardTitle>
+            <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5" /> Operator Lineup &amp; Side Panels</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>Each battleplan has a <strong>Lineup</strong> of 5 defender operator slots. Select operators for your lineup using the visual image grid in the Lineup tab of the icon sidebar.</p>
+            <p>The editor has an <strong>OperatorStrip</strong> at the top showing 5 ATK + 5 DEF operator slots. Click a slot to assign an operator via a searchable popover grid.</p>
+            <p>The left and right <strong>Side Panels</strong> (Attackers / Defenders) contain:</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>When operators are assigned, the <strong>Operators</strong> and <strong>Gadgets</strong> tabs automatically filter to show only lineup members and their gadgets</li>
-              <li>Use the <strong>"Show all"</strong> checkbox to reveal all operators/gadgets — non-lineup items show an orange "Nicht im Lineup" warning</li>
-              <li>If no operators are assigned yet, all operators and gadgets are shown (no filtering)</li>
-              <li>Already-assigned operators are hidden from other slot dropdowns to prevent duplicates</li>
+              <li><strong>Visibility toggles</strong> and <strong>color pickers</strong> per operator slot</li>
+              <li><strong>Landscape section</strong> — draw without a specific operator using a separate color</li>
+              <li><strong>Tool grid</strong> — 5 columns (one per operator) × drawing tools (Pen, Line, Rectangle, Text, Eraser, Select). Clicking a cell activates that tool with that operator&apos;s color.</li>
+              <li><strong>Gadget rows</strong> — below the tools, each column shows operator-specific gadgets (unique, secondary) plus general gadgets (Drone, Barricade, etc.). Click a gadget to activate Icon tool and place it on the canvas.</li>
+              <li><strong>Operator avatars</strong> — bottom row showing assigned operators with active slot highlight</li>
             </ul>
             <Separator />
-            <p className="font-medium text-foreground">Attacker Lineup (Optional)</p>
-            <p>Click <strong>"Add Attacker Lineup"</strong> in the Lineup tab to create 5 attacker slots. Attackers only appear in the sidebar when an attacker lineup exists. Remove it anytime with the trash icon.</p>
+            <p className="font-medium text-foreground">Phases</p>
+            <p>Use the <strong>Phase dropdown</strong> in the top bar to create, rename, delete, and switch between strategy phases. Each phase can have its own set of drawings.</p>
             <Separator />
-            <p>Lineup changes are synced in real-time to all room participants via Socket.IO. The lineup is also displayed as operator avatars on the BattleplanViewer page.</p>
+            <p>Lineup changes are synced in real-time to all room participants via Socket.IO.</p>
           </CardContent>
         </Card>
 
