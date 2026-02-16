@@ -300,7 +300,7 @@ pnpm db:studio              # Open Drizzle Studio
 docker compose up -d        # Start PostgreSQL + Redis
 docker compose down         # Stop containers (data stays in volumes)
 docker compose down -v      # Stop + delete ALL data (pgdata + redisdata volumes)
-bash update.sh              # Interactive: dev (full reset) or prod (update only)
+bash update.sh              # Interactive: 8 modes (update, reset, dev reset, pull main/dev, prod main/dev, prod reset)
 tactihub-update             # Same, if symlinked: sudo ln -sf /opt/tactihub/update.sh /usr/local/bin/tactihub-update
 bash test-smtp.sh           # Test SMTP email delivery with .env settings
 ```

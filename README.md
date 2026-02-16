@@ -345,7 +345,7 @@ Log in with the default admin credentials to access the admin panel and manage g
 | `docker compose up -d` | Start PostgreSQL + Redis containers |
 | `docker compose down` | Stop containers (data persists in volumes) |
 | `docker compose down -v` | Stop containers and **delete all data** (DB + Redis) |
-| `bash update.sh` | Interactive update: choose **dev** (full reset) or **prod** (update only) mode |
+| `bash update.sh` | Interactive update: 8 modes (update, reset, dev reset, pull main/dev, prod main/dev/reset) |
 | `tactihub-update` | Same as above, available system-wide after symlinking (see below) |
 
 ### Global `tactihub-update` command
