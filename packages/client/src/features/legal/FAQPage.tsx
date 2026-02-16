@@ -62,8 +62,8 @@ const faqs = [
     a: 'Use the floor switcher in the top-right corner of the canvas, or press K to go up and J to go down.',
   },
   {
-    q: 'What are the different view modes?',
-    a: 'Maps support up to 4 view modes: Real View (interactive SVG with toggleable layers — default), Blueprint (static colored image), Darkprint (dark version), and Whiteprint (clean white version). Switch between them using the view mode buttons in the top bar. In Real View, use the Layer Toggle to show/hide individual layers like bomb sites, hatches, cameras, etc.',
+    q: 'What are the map layers?',
+    a: 'Maps use interactive SVG Real View with toggleable layers. Use the Layer Toggle in the top bar to show/hide individual layers like bomb sites, hatches, cameras, soft walls, and more.',
   },
   {
     q: 'What are Phases?',

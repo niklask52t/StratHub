@@ -2,9 +2,7 @@ export interface MapFloor {
   id: string;
   name: string;
   floorNumber: number;
-  imagePath: string;
-  darkImagePath?: string | null;
-  whiteImagePath?: string | null;
+  imagePath?: string | null;
 }
 
 export interface Floor {

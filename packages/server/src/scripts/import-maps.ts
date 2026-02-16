@@ -1,6 +1,6 @@
 /**
- * One-time import script: Processes map floor images (Blueprint/Darkprint/Whiteprint)
- * from a source folder and imports them into the database.
+ * One-time import script: Processes map floor images from a source folder
+ * and imports them into the database.
  *
  * Also imports gadget icons from the Gadgets subfolder.
  *
@@ -31,9 +31,7 @@ const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
 interface FloorDef {
   name: string;
   floorNumber: number;
-  blueprint: string;       // filename relative to map folder
-  dark?: string;           // filename for darkprint
-  white?: string;          // filename for whiteprint
+  image: string;           // filename relative to map folder
 }
 
 interface MapDef {
@@ -56,188 +54,188 @@ const MAP_DEFS: MapDef[] = [
     slug: 'bank',
     folder: 'Bank Rework',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'BankReworkBasementBlue.jpg', dark: 'BankReworkBasementBlack.jpg', white: 'BankReworkBasementBW.jpg' },
-      { name: 'Ground Floor', floorNumber: 2, blueprint: 'BankReworkGroundFloorBlue.jpg', dark: 'BankReworkGroundFloorBlack.jpg', white: 'BankReworkGroundFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 3, blueprint: 'BankReworkTopFloorBlue.jpg', dark: 'BankReworkTopFloorBlack.jpg', white: 'BankReworkTopFloorBW.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'BankReworkBasementBlue.jpg' },
+      { name: 'Ground Floor', floorNumber: 2, image: 'BankReworkGroundFloorBlue.jpg' },
+      { name: 'Top Floor', floorNumber: 3, image: 'BankReworkTopFloorBlue.jpg' },
     ],
   },
   {
     slug: 'border',
     folder: 'Border',
     floors: [
-      { name: 'Ground Floor', floorNumber: 1, blueprint: 'BorderGroundFloor.jpg', dark: 'BorderGroundFloorB.jpg', white: 'BorderGroundFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 2, blueprint: 'BorderTopFloor.jpg', dark: 'BorderTopFloorB.jpg', white: 'BorderTopFloorBW.jpg' },
+      { name: 'Ground Floor', floorNumber: 1, image: 'BorderGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 2, image: 'BorderTopFloor.jpg' },
     ],
   },
   {
     slug: 'coastline',
     folder: 'Coastline',
     floors: [
-      { name: 'Ground Floor', floorNumber: 1, blueprint: 'CoastlineGroundFloor.jpg', dark: 'CoastlineGroundFloorB.jpg', white: 'CoastlineGroundFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 2, blueprint: 'CoastlineTopFloor.jpg', dark: 'CoastlineTopFloorB.jpg', white: 'CoastlineTopFloorBW.jpg' },
+      { name: 'Ground Floor', floorNumber: 1, image: 'CoastlineGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 2, image: 'CoastlineTopFloor.jpg' },
     ],
   },
   {
     slug: 'consulate',
     folder: 'Consulate Rework',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'ConsulateRWBasement.jpg', dark: 'ConsulateRWBasementBlack.jpg', white: 'ConsulateRWBasementBW.jpg' },
-      { name: 'Ground Floor', floorNumber: 2, blueprint: 'ConsulateRWGround.jpg', dark: 'ConsulateRWGroundB.jpg', white: 'ConsulateRWGroundBW.jpg' },
-      { name: 'Top Floor', floorNumber: 3, blueprint: 'ConsulateRWTopFloorB.jpg', dark: 'ConsulateRWTopFloorBlack.jpg', white: 'ConsulateRWTopFloorBW.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'ConsulateRWBasement.jpg' },
+      { name: 'Ground Floor', floorNumber: 2, image: 'ConsulateRWGround.jpg' },
+      { name: 'Top Floor', floorNumber: 3, image: 'ConsulateRWTopFloorB.jpg' },
     ],
   },
   {
     slug: 'chalet',
     folder: 'Chalet Rework',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'ChaletRWBasement.jpg', dark: 'ChaletRWBasementB.jpg', white: 'ChaletRWBasementBW.jpg' },
-      { name: 'Ground Floor', floorNumber: 2, blueprint: 'ChaletRWGroundFloor.jpg', dark: 'ChaletRWGroundFloorB.jpg', white: 'ChaletRWGroundFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 3, blueprint: 'ChaletRWTopFloor.jpg', dark: 'ChaletRWTopFloorB.jpg', white: 'ChaletRWTopFloorBW.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'ChaletRWBasement.jpg' },
+      { name: 'Ground Floor', floorNumber: 2, image: 'ChaletRWGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 3, image: 'ChaletRWTopFloor.jpg' },
     ],
   },
   {
     slug: 'clubhouse',
     folder: 'Clubhouse',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'ClubhouseBasement.jpg', dark: 'ClubhouseBasementB.jpg', white: 'ClubHouseBasementBW.jpg' },
-      { name: 'Ground Floor', floorNumber: 2, blueprint: 'ClubhouseGroundFloor.jpg', dark: 'ClubhouseGroundFloorB.jpg', white: 'ClubhouseGroundFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 3, blueprint: 'ClubhouseTopFloor.jpg', dark: 'ClubhouseTopFloorB.jpg', white: 'ClubhouseTopFloorBW.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'ClubhouseBasement.jpg' },
+      { name: 'Ground Floor', floorNumber: 2, image: 'ClubhouseGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 3, image: 'ClubhouseTopFloor.jpg' },
     ],
   },
   {
     slug: 'hereford',
     folder: 'Hereford',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'HerefordBasement.jpg', dark: 'HerefordBasementB.jpg' },
-      { name: 'Ground Floor', floorNumber: 2, blueprint: 'HerefordGroundFloor.jpg', dark: 'HerefordGroundFloorB.jpg' },
-      { name: 'First Floor', floorNumber: 3, blueprint: 'HerefordFirstFloor.jpg', dark: 'HerefordFirstFloorB.jpg' },
-      { name: 'Top Floor', floorNumber: 4, blueprint: 'HerefordTopFloor.jpg', dark: 'HerefordTopFloorB.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'HerefordBasement.jpg' },
+      { name: 'Ground Floor', floorNumber: 2, image: 'HerefordGroundFloor.jpg' },
+      { name: 'First Floor', floorNumber: 3, image: 'HerefordFirstFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 4, image: 'HerefordTopFloor.jpg' },
     ],
   },
   {
     slug: 'kafe',
     folder: 'Kafe',
     floors: [
-      { name: 'Ground Floor', floorNumber: 1, blueprint: 'KafeGroundFloor.jpg', dark: 'KafeGroundFloorB.jpg', white: 'KafeGroundBW.jpg' },
-      { name: 'Middle Floor', floorNumber: 2, blueprint: 'KafeMiddleFloor.jpg', dark: 'KafeMiddleFloorB.jpg', white: 'KafeMiddleFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 3, blueprint: 'KafeTopFloor.jpg', dark: 'KafeTopFloorB.jpg', white: 'KafeTopFloorBW.jpg' },
+      { name: 'Ground Floor', floorNumber: 1, image: 'KafeGroundFloor.jpg' },
+      { name: 'Middle Floor', floorNumber: 2, image: 'KafeMiddleFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 3, image: 'KafeTopFloor.jpg' },
     ],
   },
   {
     slug: 'oregon',
     folder: 'Oregon Rework',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'OregonRWbasement.jpg', dark: 'OregonRWbasementB.jpg', white: 'OregonRWbasementBW.jpg' },
-      { name: 'Ground Floor', floorNumber: 2, blueprint: 'OregonRWgroundfloor.jpg', dark: 'OregonRWgroundfloorB.jpg', white: 'OregonRWgroundfloorBW.jpg' },
-      { name: 'Tier 3', floorNumber: 3, blueprint: 'OregonRWT3.jpg', dark: 'OregonRWT3B.jpg', white: 'OregonRWT3bw.jpg' },
-      { name: 'Top Floor', floorNumber: 4, blueprint: 'OregonRWTopFloor.jpg', dark: 'OregonRWTopFloorB.jpg', white: 'OregonRWTopFloorBW.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'OregonRWbasement.jpg' },
+      { name: 'Ground Floor', floorNumber: 2, image: 'OregonRWgroundfloor.jpg' },
+      { name: 'Tier 3', floorNumber: 3, image: 'OregonRWT3.jpg' },
+      { name: 'Top Floor', floorNumber: 4, image: 'OregonRWTopFloor.jpg' },
     ],
   },
   {
     slug: 'skyscraper',
     folder: 'Skyscraper Rework',
     floors: [
-      { name: 'Ground Floor', floorNumber: 1, blueprint: 'SkyscraperGroundFloor.jpg', dark: 'SkyscraperGroundFloorB.jpg', white: 'SkyscraperGroundFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 2, blueprint: 'SkyscraperTopFloor.jpg', dark: 'SkyscraperTopFloorB.jpg', white: 'SkyscraperTopFloorBW.jpg' },
+      { name: 'Ground Floor', floorNumber: 1, image: 'SkyscraperGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 2, image: 'SkyscraperTopFloor.jpg' },
     ],
   },
   {
     slug: 'theme-park',
     folder: 'Themepark',
     floors: [
-      { name: 'Ground Floor', floorNumber: 1, blueprint: 'ThemeparkGroundFloor.jpg', dark: 'ThemeparkGroundFloorBlack.jpg', white: 'ThemeparkGroudFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 2, blueprint: 'ThemeparkTopFloor.jpg', dark: 'ThemeparkTopFloorBlack.jpg', white: 'ThemeparkTopFloorBW.jpg' },
+      { name: 'Ground Floor', floorNumber: 1, image: 'ThemeparkGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 2, image: 'ThemeparkTopFloor.jpg' },
     ],
   },
   {
     slug: 'villa',
     folder: 'Villa',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'VillaBasement.jpg', dark: 'VillaBasementB.jpg', white: 'VillaBasementBW.jpg' },
-      { name: 'Ground Floor', floorNumber: 2, blueprint: 'VillaGroundFloor.jpg', dark: 'VillaGroundFloorB.jpg', white: 'VillaGroundFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 3, blueprint: 'VillaTopFloor.jpg', dark: 'VillaTopFloorB.jpg', white: 'VillaTopFloorBW.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'VillaBasement.jpg' },
+      { name: 'Ground Floor', floorNumber: 2, image: 'VillaGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 3, image: 'VillaTopFloor.jpg' },
     ],
   },
   {
     slug: 'favela',
     folder: 'Favela',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'FavelaBasement.jpg', dark: 'FavelaBasementB.jpg' },
-      { name: 'First Floor', floorNumber: 2, blueprint: 'FavelaFirstFloor.jpg', dark: 'FavelaFirstFloorB.jpg' },
-      { name: 'Second Floor', floorNumber: 3, blueprint: 'FavelaSecondFloor.jpg', dark: 'FavelaSecondFloorB.jpg' },
-      { name: 'Top Floor', floorNumber: 4, blueprint: 'FavelaTopFloor.jpg', dark: 'FavelaTopFloorB.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'FavelaBasement.jpg' },
+      { name: 'First Floor', floorNumber: 2, image: 'FavelaFirstFloor.jpg' },
+      { name: 'Second Floor', floorNumber: 3, image: 'FavelaSecondFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 4, image: 'FavelaTopFloor.jpg' },
     ],
   },
   {
     slug: 'fortress',
     folder: 'Fortress',
     floors: [
-      { name: 'Ground Floor', floorNumber: 1, blueprint: 'FortressGroundFloor.jpg', dark: 'FortressGroundFloorB.jpg' },
-      { name: 'Top Floor', floorNumber: 2, blueprint: 'FortressTopFloor.jpg', dark: 'FortressTopFloorB.jpg' },
+      { name: 'Ground Floor', floorNumber: 1, image: 'FortressGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 2, image: 'FortressTopFloor.jpg' },
     ],
   },
   {
     slug: 'house',
     folder: 'House Rework',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'HouseRWBasement.jpg', dark: 'HouseRWBasementB.jpg', white: 'HouseRWBasementBW.jpg' },
-      { name: 'Ground Floor', floorNumber: 2, blueprint: 'HouseRWGroundFloor.jpg', dark: 'HouseRWGroundFloorB.jpg', white: 'HouseRWGroundFloorBW.jpg' },
-      { name: 'Top Floor', floorNumber: 3, blueprint: 'HouseRWTopFloor.jpg', dark: 'HouseRWTopFloorB.jpg', white: 'HouseRWTopFloorBW.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'HouseRWBasement.jpg' },
+      { name: 'Ground Floor', floorNumber: 2, image: 'HouseRWGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 3, image: 'HouseRWTopFloor.jpg' },
     ],
   },
   {
     slug: 'kanal',
     folder: 'Kanal',
     floors: [
-      { name: 'Lower Basement', floorNumber: 1, blueprint: 'KanalLowerBottomFloor.jpg', dark: 'KanalLowerBottomB.jpg', white: 'KanalLowerBottomBW.jpg' },
-      { name: 'Basement', floorNumber: 2, blueprint: 'KanalBottomFloor.jpg', dark: 'KanalBottomFloorB.jpg', white: 'KanalBottomFloorBW.jpg' },
-      { name: 'Ground Floor', floorNumber: 3, blueprint: 'KanalGroundFloor.jpg', dark: 'KanalGroundFloorB.jpg', white: 'KanalGroundFloorBW.jpg' },
-      { name: 'Middle Floor', floorNumber: 4, blueprint: 'KanalM.jpg' },
-      { name: 'Top Floor', floorNumber: 5, blueprint: 'KanalTopFloor.jpg', dark: 'KanalTopFloorB.jpg', white: 'KanalTopFloorBW.jpg' },
+      { name: 'Lower Basement', floorNumber: 1, image: 'KanalLowerBottomFloor.jpg' },
+      { name: 'Basement', floorNumber: 2, image: 'KanalBottomFloor.jpg' },
+      { name: 'Ground Floor', floorNumber: 3, image: 'KanalGroundFloor.jpg' },
+      { name: 'Middle Floor', floorNumber: 4, image: 'KanalM.jpg' },
+      { name: 'Top Floor', floorNumber: 5, image: 'KanalTopFloor.jpg' },
     ],
   },
   {
     slug: 'nighthaven-labs',
     folder: 'Nighthaven Labs',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'NighthavenBasement.jpg', dark: 'NighthavenBasementB.jpg', white: 'NighthavenBasementBW.jpg' },
-      { name: 'Ground Floor', floorNumber: 2, blueprint: 'NighthavenGroundFloor.jpg', dark: 'NighthavenGroundB.jpg', white: 'NighthavenGroundBW.jpg' },
-      { name: 'Top Floor', floorNumber: 3, blueprint: 'NighthavenTopFloor.jpg', dark: 'NighthavenTopFloorB.jpg', white: 'NighthavenTopBW.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'NighthavenBasement.jpg' },
+      { name: 'Ground Floor', floorNumber: 2, image: 'NighthavenGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 3, image: 'NighthavenTopFloor.jpg' },
     ],
   },
   {
     slug: 'outback',
     folder: 'Outback Rework',
     floors: [
-      { name: 'Ground Floor', floorNumber: 1, blueprint: 'OutbackReworkGroundFloor.jpg', dark: 'OutbackReworkGroundFloorBlack.jpg', white: 'OutbackReworkGroundBW.jpg' },
-      { name: 'Top Floor', floorNumber: 2, blueprint: 'OutbackReworkTopFloor.jpg', dark: 'OutbackReworkTopFloorBlack.jpg', white: 'OutbackReworkTopBW.jpg' },
+      { name: 'Ground Floor', floorNumber: 1, image: 'OutbackReworkGroundFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 2, image: 'OutbackReworkTopFloor.jpg' },
     ],
   },
   {
     slug: 'plane',
     folder: 'Plane',
     floors: [
-      { name: 'Bottom Floor', floorNumber: 1, blueprint: 'PlaneBottomFloor.jpg', dark: 'PlaneBottomFloorB.jpg' },
-      { name: 'Middle Floor', floorNumber: 2, blueprint: 'PlaneMiddleFloor.jpg', dark: 'PlaneMiddleFloorB.jpg' },
-      { name: 'Top Floor', floorNumber: 3, blueprint: 'PlaneTopFloor.jpg', dark: 'PlaneTopFloorB.jpg' },
+      { name: 'Bottom Floor', floorNumber: 1, image: 'PlaneBottomFloor.jpg' },
+      { name: 'Middle Floor', floorNumber: 2, image: 'PlaneMiddleFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 3, image: 'PlaneTopFloor.jpg' },
     ],
   },
   {
     slug: 'tower',
     folder: 'Tower',
     floors: [
-      { name: 'Bottom Floor', floorNumber: 1, blueprint: 'TowerBottomFloor.jpg', dark: 'TowerBottomFloorB.jpg' },
-      { name: 'Top Floor', floorNumber: 2, blueprint: 'TowerTopFloor.jpg', dark: 'TowerTopFloorB.jpg' },
+      { name: 'Bottom Floor', floorNumber: 1, image: 'TowerBottomFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 2, image: 'TowerTopFloor.jpg' },
     ],
   },
   {
     slug: 'yacht',
     folder: 'Yacht',
     floors: [
-      { name: 'Basement', floorNumber: 1, blueprint: 'YachtBasement.jpg', dark: 'YachtBasementB.jpg' },
-      { name: 'First Floor', floorNumber: 2, blueprint: 'YachtFirstFloor.jpg', dark: 'YachtFirstFloorB.jpg' },
-      { name: 'Second Floor', floorNumber: 3, blueprint: 'YachtSecondFloor.jpg', dark: 'YachtSecondFloorB.jpg' },
-      { name: 'Top Floor', floorNumber: 4, blueprint: 'YachtTopFloor.jpg', dark: 'YachtTopFloorB.jpg' },
+      { name: 'Basement', floorNumber: 1, image: 'YachtBasement.jpg' },
+      { name: 'First Floor', floorNumber: 2, image: 'YachtFirstFloor.jpg' },
+      { name: 'Second Floor', floorNumber: 3, image: 'YachtSecondFloor.jpg' },
+      { name: 'Top Floor', floorNumber: 4, image: 'YachtTopFloor.jpg' },
     ],
   },
 ];
@@ -336,55 +334,25 @@ async function main() {
     await db.delete(mapFloors).where(eq(mapFloors.mapId, map.id));
 
     for (const floor of mapDef.floors) {
-      const blueprintSrc = path.join(srcRoot, mapDef.folder, floor.blueprint);
+      const imgSrc = path.join(srcRoot, mapDef.folder, floor.image);
 
       try {
-        await fs.access(blueprintSrc);
+        await fs.access(imgSrc);
       } catch {
-        console.warn(`  ⚠ Blueprint not found: ${floor.blueprint} — skipping floor "${floor.name}"`);
+        console.warn(`  ⚠ Image not found: ${floor.image} — skipping floor "${floor.name}"`);
         continue;
       }
 
-      const imagePath = await processImage(blueprintSrc, 'maps', { width: 1200 });
-      let darkImagePath: string | null = null;
-      let whiteImagePath: string | null = null;
-
-      if (floor.dark) {
-        const darkSrc = path.join(srcRoot, mapDef.folder, floor.dark);
-        try {
-          await fs.access(darkSrc);
-          darkImagePath = await processImage(darkSrc, 'maps', { width: 1200 });
-        } catch {
-          console.warn(`  ⚠ Dark not found: ${floor.dark}`);
-        }
-      }
-
-      if (floor.white) {
-        const whiteSrc = path.join(srcRoot, mapDef.folder, floor.white);
-        try {
-          await fs.access(whiteSrc);
-          whiteImagePath = await processImage(whiteSrc, 'maps', { width: 1200 });
-        } catch {
-          console.warn(`  ⚠ White not found: ${floor.white}`);
-        }
-      }
+      const imagePath = await processImage(imgSrc, 'maps', { width: 1200 });
 
       await db.insert(mapFloors).values({
         mapId: map.id,
         name: floor.name,
         floorNumber: floor.floorNumber,
         imagePath,
-        darkImagePath,
-        whiteImagePath,
       });
 
-      const variants = [
-        'blueprint',
-        darkImagePath ? 'dark' : null,
-        whiteImagePath ? 'white' : null,
-      ].filter(Boolean).join(', ');
-
-      console.log(`  ✓ ${floor.name} (${variants})`);
+      console.log(`  ✓ ${floor.name}`);
       totalFloors++;
     }
   }

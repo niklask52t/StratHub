@@ -1,7 +1,6 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Gamepad2,
   Users,
   Key,
   Settings,
@@ -12,7 +11,6 @@ import { Button } from '@/components/ui/button';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { label: 'Games', href: '/admin/games', icon: Gamepad2 },
   { label: 'Users', href: '/admin/users', icon: Users },
   { label: 'Tokens', href: '/admin/tokens', icon: Key },
   { label: 'Settings', href: '/admin/settings', icon: Settings },

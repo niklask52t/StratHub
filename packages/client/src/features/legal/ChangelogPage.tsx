@@ -220,17 +220,13 @@ const releases: Release[] = [
   },
   {
     version: '1.4.0',
-    subtitle: 'Floor Image Variants',
+    subtitle: 'Floor Image Import',
     date: '2026-02-12',
     changes: [
-      { type: 'feature', text: 'Floor image variants: Blueprint, Darkprint, and Whiteprint per floor' },
-      { type: 'feature', text: 'View mode switcher on canvas (top-left, only visible when floor has multiple variants)' },
       { type: 'feature', text: 'Batch image import script for floor images and gadget icons' },
       { type: 'feature', text: 'Added 3 new R6 maps: Fortress, Nighthaven Labs, Outback' },
       { type: 'feature', text: 'Gadget icon import from source folder' },
-      { type: 'improvement', text: 'Admin floor upload now supports dark and white image variants' },
       { type: 'fix', text: 'Correct floor names and counts per map (was generic 4-floor placeholder)' },
-      { type: 'removed', text: 'Removed Bartlett map (no image data available)' },
     ],
   },
   {

@@ -28,11 +28,6 @@ const CreateRoomPage = lazy(() => import('@/features/room/CreateRoomPage'));
 const RoomPage = lazy(() => import('@/features/room/RoomPage'));
 const SandboxPage = lazy(() => import('@/features/sandbox/SandboxPage'));
 const AdminDashboard = lazy(() => import('@/features/admin/DashboardPage'));
-const AdminGames = lazy(() => import('@/features/admin/games/GamesPage'));
-const AdminGameMaps = lazy(() => import('@/features/admin/maps/MapsPage'));
-const AdminMapFloors = lazy(() => import('@/features/admin/maps/FloorsPage'));
-const AdminGameOperators = lazy(() => import('@/features/admin/operators/OperatorsPage'));
-const AdminGameGadgets = lazy(() => import('@/features/admin/gadgets/GadgetsPage'));
 const AdminUsers = lazy(() => import('@/features/admin/users/UsersPage'));
 const AdminTokens = lazy(() => import('@/features/admin/tokens/TokensPage'));
 const AdminSettings = lazy(() => import('@/features/admin/settings/SettingsPage'));
@@ -113,11 +108,6 @@ export function App() {
           <Route element={<AdminRoute />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/games" element={<AdminGames />} />
-              <Route path="/admin/games/:id/maps" element={<AdminGameMaps />} />
-              <Route path="/admin/maps/:mapId/floors" element={<AdminMapFloors />} />
-              <Route path="/admin/games/:id/operators" element={<AdminGameOperators />} />
-              <Route path="/admin/games/:id/gadgets" element={<AdminGameGadgets />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/tokens" element={<AdminTokens />} />
               <Route path="/admin/settings" element={<AdminSettings />} />

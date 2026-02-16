@@ -86,8 +86,6 @@ export default function SandboxPage() {
           name: f.name,
           floorNumber: f.floorNumber,
           imagePath: f.imagePath,
-          darkImagePath: f.darkImagePath,
-          whiteImagePath: f.whiteImagePath,
         },
         draws: [],
       }));

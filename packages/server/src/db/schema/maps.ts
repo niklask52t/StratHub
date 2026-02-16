@@ -18,9 +18,7 @@ export const mapFloors = pgTable('map_floors', {
   mapId: uuid('map_id').notNull().references(() => maps.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 255 }).notNull(),
   floorNumber: integer('floor_number').notNull(),
-  imagePath: varchar('image_path', { length: 500 }).notNull(),
-  darkImagePath: varchar('dark_image_path', { length: 500 }),
-  whiteImagePath: varchar('white_image_path', { length: 500 }),
+  imagePath: varchar('image_path', { length: 500 }),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

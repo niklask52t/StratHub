@@ -18,12 +18,6 @@ import battleplansRoutes from './routes/battleplans.js';
 import drawsRoutes from './routes/draws.js';
 import operatorSlotsRoutes from './routes/operator-slots.js';
 import roomsRoutes from './routes/rooms.js';
-import adminGamesRoutes from './routes/admin/games.js';
-import adminMapsRoutes from './routes/admin/maps.js';
-import adminMapFloorsRoutes from './routes/admin/map-floors.js';
-import adminOperatorsRoutes from './routes/admin/operators.js';
-import adminGadgetsRoutes from './routes/admin/gadgets.js';
-import adminOperatorGadgetsRoutes from './routes/admin/operator-gadgets.js';
 import adminUsersRoutes from './routes/admin/users.js';
 import adminTokensRoutes from './routes/admin/tokens.js';
 import adminSettingsRoutes from './routes/admin/settings.js';
@@ -63,12 +57,6 @@ async function start() {
   await fastify.register(roomsRoutes, { prefix: '/api/rooms' });
 
   // Admin Routes
-  await fastify.register(adminGamesRoutes, { prefix: '/api/admin/games' });
-  await fastify.register(adminMapsRoutes, { prefix: '/api/admin' });
-  await fastify.register(adminMapFloorsRoutes, { prefix: '/api/admin' });
-  await fastify.register(adminOperatorsRoutes, { prefix: '/api/admin' });
-  await fastify.register(adminGadgetsRoutes, { prefix: '/api/admin' });
-  await fastify.register(adminOperatorGadgetsRoutes, { prefix: '/api/admin' });
   await fastify.register(adminUsersRoutes, { prefix: '/api/admin/users' });
   await fastify.register(adminTokensRoutes, { prefix: '/api/admin/tokens' });
   await fastify.register(adminSettingsRoutes, { prefix: '/api/admin/settings' });

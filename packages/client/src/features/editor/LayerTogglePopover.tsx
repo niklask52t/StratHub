@@ -1,6 +1,5 @@
 /**
  * SVG layer visibility popover — grouped checkboxes.
- * Only shown when viewMode === 'realview'.
  */
 
 import { useStratStore } from '@/stores/strat.store';

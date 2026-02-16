@@ -35,42 +35,41 @@ async function seed() {
   if (r6Game) {
     console.log('Seeding R6 Siege...');
 
-    // R6 Maps — each with correct floor layout and image variants
-    // Variants: 'bdw' = blueprint+dark+white, 'bd' = blueprint+dark, 'b' = blueprint only
+    // R6 Maps — each with correct floor layout
     // svgFloor: must match <g id="Floor {n}"> in the SVG file
-    type FloorDef = { name: string; variants: 'bdw' | 'bd' | 'b'; svgFloor: number };
+    // img: 1-based WebP image number (omitted if no WebP exists for this floor)
+    type FloorDef = { name: string; svgFloor: number; img?: number };
     const r6Maps: Array<{ name: string; slug: string; isCompetitive: boolean; floors: FloorDef[] }> = [
       // Competitive — SVG floors verified against /public/maps/svg/*.svg
-      { name: 'Bank', slug: 'bank', isCompetitive: true, floors: [{ name: 'Basement', variants: 'bdw', svgFloor: 0 }, { name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Border', slug: 'border', isCompetitive: true, floors: [{ name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Coastline', slug: 'coastline', isCompetitive: true, floors: [{ name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Consulate', slug: 'consulate', isCompetitive: true, floors: [{ name: 'Basement', variants: 'bdw', svgFloor: 0 }, { name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Chalet', slug: 'chalet', isCompetitive: true, floors: [{ name: 'Basement', variants: 'bdw', svgFloor: 0 }, { name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Clubhouse', slug: 'clubhouse', isCompetitive: true, floors: [{ name: 'Basement', variants: 'bdw', svgFloor: 0 }, { name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Hereford', slug: 'hereford', isCompetitive: true, floors: [{ name: 'Basement', variants: 'bd', svgFloor: 0 }, { name: '1F', variants: 'bd', svgFloor: 1 }, { name: '2F', variants: 'bd', svgFloor: 2 }, { name: '3F', variants: 'bd', svgFloor: 3 }, { name: 'Roof', variants: 'b', svgFloor: 4 }] },
-      { name: 'Kafe', slug: 'kafe', isCompetitive: true, floors: [{ name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: '3F', variants: 'bdw', svgFloor: 3 }, { name: 'Roof', variants: 'b', svgFloor: 4 }] },
-      { name: 'Oregon', slug: 'oregon', isCompetitive: true, floors: [{ name: 'Basement', variants: 'bdw', svgFloor: 0 }, { name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: '3F', variants: 'bdw', svgFloor: 3 }, { name: 'Roof', variants: 'b', svgFloor: 4 }] },
-      { name: 'Skyscraper', slug: 'skyscraper', isCompetitive: true, floors: [{ name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Theme Park', slug: 'theme-park', isCompetitive: true, floors: [{ name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Villa', slug: 'villa', isCompetitive: true, floors: [{ name: 'Basement', variants: 'bdw', svgFloor: 0 }, { name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
+      { name: 'Bank', slug: 'bank', isCompetitive: true, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Border', slug: 'border', isCompetitive: true, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Coastline', slug: 'coastline', isCompetitive: true, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Consulate', slug: 'consulate', isCompetitive: true, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Chalet', slug: 'chalet', isCompetitive: true, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Clubhouse', slug: 'clubhouse', isCompetitive: true, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Hereford', slug: 'hereford', isCompetitive: true, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: '3F', svgFloor: 3, img: 4 }, { name: 'Roof', svgFloor: 4 }] },
+      { name: 'Kafe', slug: 'kafe', isCompetitive: true, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: '3F', svgFloor: 3, img: 3 }, { name: 'Roof', svgFloor: 4 }] },
+      { name: 'Oregon', slug: 'oregon', isCompetitive: true, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: '3F', svgFloor: 3, img: 4 }, { name: 'Roof', svgFloor: 4 }] },
+      { name: 'Skyscraper', slug: 'skyscraper', isCompetitive: true, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Theme Park', slug: 'theme-park', isCompetitive: true, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Villa', slug: 'villa', isCompetitive: true, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: 'Roof', svgFloor: 3 }] },
       // Non-competitive
-      { name: 'Favela', slug: 'favela', isCompetitive: false, floors: [{ name: 'Basement', variants: 'bd', svgFloor: 0 }, { name: '1F', variants: 'bd', svgFloor: 1 }, { name: '2F', variants: 'bd', svgFloor: 2 }, { name: '3F', variants: 'bd', svgFloor: 3 }, { name: 'Roof', variants: 'b', svgFloor: 4 }] },
-      { name: 'Fortress', slug: 'fortress', isCompetitive: false, floors: [{ name: '1F', variants: 'bd', svgFloor: 1 }, { name: '2F', variants: 'bd', svgFloor: 2 }, { name: '3F', variants: 'b', svgFloor: 3 }, { name: '4F', variants: 'b', svgFloor: 4 }, { name: 'Roof', variants: 'b', svgFloor: 5 }] },
-      { name: 'House', slug: 'house', isCompetitive: false, floors: [{ name: 'Basement', variants: 'bdw', svgFloor: 0 }, { name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Kanal', slug: 'kanal', isCompetitive: false, floors: [{ name: 'Basement', variants: 'b', svgFloor: 0 }, { name: '1F', variants: 'b', svgFloor: 1 }, { name: '2F', variants: 'b', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Nighthaven Labs', slug: 'nighthaven-labs', isCompetitive: false, floors: [{ name: 'Basement', variants: 'bdw', svgFloor: 0 }, { name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Outback', slug: 'outback', isCompetitive: false, floors: [{ name: '1F', variants: 'bdw', svgFloor: 1 }, { name: '2F', variants: 'bdw', svgFloor: 2 }, { name: 'Roof', variants: 'b', svgFloor: 3 }] },
-      { name: 'Plane', slug: 'plane', isCompetitive: false, floors: [{ name: '1F', variants: 'bd', svgFloor: 1 }, { name: '2F', variants: 'bd', svgFloor: 2 }, { name: '3F', variants: 'bd', svgFloor: 3 }, { name: 'Roof', variants: 'b', svgFloor: 4 }] },
-      { name: 'Tower', slug: 'tower', isCompetitive: false, floors: [{ name: '1F', variants: 'bd', svgFloor: 1 }, { name: '2F', variants: 'bd', svgFloor: 2 }, { name: '3F', variants: 'b', svgFloor: 3 }, { name: '4F', variants: 'b', svgFloor: 4 }, { name: 'Roof', variants: 'b', svgFloor: 5 }] },
-      { name: 'Yacht', slug: 'yacht', isCompetitive: false, floors: [{ name: '1F', variants: 'bd', svgFloor: 1 }, { name: '2F', variants: 'bd', svgFloor: 2 }, { name: '3F', variants: 'bd', svgFloor: 3 }, { name: '4F', variants: 'bd', svgFloor: 4 }, { name: 'Roof', variants: 'b', svgFloor: 5 }] },
-      // New maps (SVG Real View available, no WebP blueprint images)
-      { name: 'Bartlett University', slug: 'bartlett', isCompetitive: false, floors: [{ name: '1F', variants: 'b', svgFloor: 1 }, { name: '2F', variants: 'b', svgFloor: 2 }, { name: '3F', variants: 'b', svgFloor: 3 }] },
-      { name: 'Close Quarters', slug: 'close-quarters', isCompetitive: false, floors: [{ name: '1F', variants: 'b', svgFloor: 1 }, { name: '2F', variants: 'b', svgFloor: 2 }] },
-
-      { name: 'Emerald Plains', slug: 'emerald-plains', isCompetitive: true, floors: [{ name: '1F', variants: 'b', svgFloor: 1 }, { name: '2F', variants: 'b', svgFloor: 2 }, { name: '3F', variants: 'b', svgFloor: 3 }] },
-      { name: 'Lair', slug: 'lair', isCompetitive: true, floors: [{ name: 'Basement', variants: 'b', svgFloor: 0 }, { name: '1F', variants: 'b', svgFloor: 1 }, { name: '2F', variants: 'b', svgFloor: 2 }, { name: '3F', variants: 'b', svgFloor: 3 }] },
-      { name: 'Stadium Alpha', slug: 'stadium-alpha', isCompetitive: false, floors: [{ name: 'Basement', variants: 'b', svgFloor: 0 }, { name: '1F', variants: 'b', svgFloor: 1 }, { name: '2F', variants: 'b', svgFloor: 2 }, { name: '3F', variants: 'b', svgFloor: 3 }] },
-      { name: 'Stadium Bravo', slug: 'stadium-bravo', isCompetitive: false, floors: [{ name: 'Basement', variants: 'b', svgFloor: 0 }, { name: '1F', variants: 'b', svgFloor: 1 }, { name: '2F', variants: 'b', svgFloor: 2 }, { name: '3F', variants: 'b', svgFloor: 3 }] },
+      { name: 'Favela', slug: 'favela', isCompetitive: false, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: '3F', svgFloor: 3, img: 4 }, { name: 'Roof', svgFloor: 4 }] },
+      { name: 'Fortress', slug: 'fortress', isCompetitive: false, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: '3F', svgFloor: 3 }, { name: '4F', svgFloor: 4 }, { name: 'Roof', svgFloor: 5 }] },
+      { name: 'House', slug: 'house', isCompetitive: false, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Kanal', slug: 'kanal', isCompetitive: false, floors: [{ name: 'Basement', svgFloor: 0, img: 2 }, { name: '1F', svgFloor: 1, img: 3 }, { name: '2F', svgFloor: 2, img: 4 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Nighthaven Labs', slug: 'nighthaven-labs', isCompetitive: false, floors: [{ name: 'Basement', svgFloor: 0, img: 1 }, { name: '1F', svgFloor: 1, img: 2 }, { name: '2F', svgFloor: 2, img: 3 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Outback', slug: 'outback', isCompetitive: false, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: 'Roof', svgFloor: 3 }] },
+      { name: 'Plane', slug: 'plane', isCompetitive: false, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: '3F', svgFloor: 3, img: 3 }, { name: 'Roof', svgFloor: 4 }] },
+      { name: 'Tower', slug: 'tower', isCompetitive: false, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: '3F', svgFloor: 3 }, { name: '4F', svgFloor: 4 }, { name: 'Roof', svgFloor: 5 }] },
+      { name: 'Yacht', slug: 'yacht', isCompetitive: false, floors: [{ name: '1F', svgFloor: 1, img: 1 }, { name: '2F', svgFloor: 2, img: 2 }, { name: '3F', svgFloor: 3, img: 3 }, { name: '4F', svgFloor: 4, img: 4 }, { name: 'Roof', svgFloor: 5 }] },
+      // SVG-only maps (no WebP images)
+      { name: 'Bartlett University', slug: 'bartlett', isCompetitive: false, floors: [{ name: '1F', svgFloor: 1 }, { name: '2F', svgFloor: 2 }, { name: '3F', svgFloor: 3 }] },
+      { name: 'Close Quarters', slug: 'close-quarters', isCompetitive: false, floors: [{ name: '1F', svgFloor: 1 }, { name: '2F', svgFloor: 2 }] },
+      { name: 'Emerald Plains', slug: 'emerald-plains', isCompetitive: true, floors: [{ name: '1F', svgFloor: 1 }, { name: '2F', svgFloor: 2 }, { name: '3F', svgFloor: 3 }] },
+      { name: 'Lair', slug: 'lair', isCompetitive: true, floors: [{ name: 'Basement', svgFloor: 0 }, { name: '1F', svgFloor: 1 }, { name: '2F', svgFloor: 2 }, { name: '3F', svgFloor: 3 }] },
+      { name: 'Stadium Alpha', slug: 'stadium-alpha', isCompetitive: false, floors: [{ name: 'Basement', svgFloor: 0 }, { name: '1F', svgFloor: 1 }, { name: '2F', svgFloor: 2 }, { name: '3F', svgFloor: 3 }] },
+      { name: 'Stadium Bravo', slug: 'stadium-bravo', isCompetitive: false, floors: [{ name: 'Basement', svgFloor: 0 }, { name: '1F', svgFloor: 1 }, { name: '2F', svgFloor: 2 }, { name: '3F', svgFloor: 3 }] },
     ];
 
     for (const map of r6Maps) {
@@ -82,16 +81,12 @@ async function seed() {
         thumbnail: `/maps/${map.slug}-cover.webp`,
       }).returning();
 
-      for (let i = 0; i < map.floors.length; i++) {
-        const f = map.floors[i]!;
-        const imgNum = i + 1; // image files use 1-based sequential numbering
+      for (const f of map.floors) {
         await db.insert(mapFloors).values({
           mapId: m.id,
           name: f.name,
           floorNumber: f.svgFloor, // must match SVG <g id="Floor {n}">
-          imagePath: `/maps/${map.slug}-${imgNum}-blueprint.webp`,
-          darkImagePath: f.variants !== 'b' ? `/maps/${map.slug}-${imgNum}-dark.webp` : null,
-          whiteImagePath: f.variants === 'bdw' ? `/maps/${map.slug}-${imgNum}-white.webp` : null,
+          imagePath: f.img ? `/maps/${map.slug}-${f.img}-blueprint.webp` : null,
         });
       }
     }
