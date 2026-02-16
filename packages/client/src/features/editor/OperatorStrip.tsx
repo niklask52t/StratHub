@@ -3,6 +3,7 @@
  * 5 ATK "?" slots (blue) + separator + 5 DEF "?" slots (red).
  */
 
+import { useMemo } from 'react';
 import { useStratStore } from '@/stores/strat.store';
 import { OperatorPickerPopover } from './OperatorPickerPopover';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
@@ -16,8 +17,15 @@ interface OperatorStripProps {
 }
 
 export function OperatorStrip({ gameSlug, readOnly, onOperatorAssign }: OperatorStripProps) {
-  const attackerSlots = useStratStore((s) => s.getAttackerSlots());
-  const defenderSlots = useStratStore((s) => s.getDefenderSlots());
+  const operatorSlots = useStratStore((s) => s.operatorSlots);
+  const attackerSlots = useMemo(
+    () => operatorSlots.filter(s => s.side === 'attacker').sort((a, b) => a.slotNumber - b.slotNumber),
+    [operatorSlots],
+  );
+  const defenderSlots = useMemo(
+    () => operatorSlots.filter(s => s.side === 'defender').sort((a, b) => a.slotNumber - b.slotNumber),
+    [operatorSlots],
+  );
   const activeSlotId = useStratStore((s) => s.activeOperatorSlotId);
   const setActiveSlotId = useStratStore((s) => s.setActiveOperatorSlotId);
 
