@@ -304,8 +304,10 @@ export default function SandboxPage() {
                   key={g.id || g.slug}
                   variant={selectedGameSlug === g.slug ? 'default' : 'outline'}
                   size="sm"
+                  className="gap-2"
                   onClick={() => { setSelectedGameSlug(g.slug); setSelectedMapSlug(null); }}
                 >
+                  {g.icon && <img src={`/uploads${g.icon}`} alt="" className="h-5 w-5" />}
                   {g.name}
                 </Button>
               ))}
@@ -326,9 +328,9 @@ export default function SandboxPage() {
                   className="h-auto py-2 flex flex-col gap-1"
                   onClick={() => setSelectedMapSlug(m.slug)}
                 >
-                  {m.coverImagePath && (
+                  {m.thumbnail && (
                     <img
-                      src={`/uploads${m.coverImagePath}`}
+                      src={`/uploads${m.thumbnail}`}
                       alt={m.name}
                       className="w-full h-16 object-cover rounded-sm"
                     />
