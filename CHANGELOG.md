@@ -3,7 +3,7 @@
 ## v2.0.0 — 2026-02-16
 
 - [feature] Complete canvas system rewrite — replaced 1197-line monolithic CanvasLayer with modular architecture (MapCanvas, BackgroundLayer, DrawLayer, ActiveLayer, tool hooks)
-- [feature] r6calls.com-style editor layout — CSS grid with TopNavBar, OperatorStrip, and left/right SidePanels (ATK/DEF)
+- [feature] New editor layout — CSS grid with TopNavBar, OperatorStrip, and left/right SidePanels (ATK/DEF)
 - [feature] Per-operator gadget toolbar — each operator column in the side panel shows that operator's unique, secondary, and general gadgets below the standard drawing tools
 - [feature] Inline operator picker — click operator slots in the OperatorStrip to assign operators via searchable popover grid
 - [feature] SVG Real View as default — maps now open in interactive SVG view by default instead of static blueprint images

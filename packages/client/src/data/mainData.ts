@@ -1,5 +1,5 @@
 /**
- * Static map metadata from r6calls mainData.json.
+ * Static map metadata.
  * Floor ranges, layer definitions, floor terms, and map pools.
  */
 

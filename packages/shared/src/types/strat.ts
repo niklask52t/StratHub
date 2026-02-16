@@ -1,5 +1,5 @@
 /**
- * Types for the r6calls-inspired Strat Planner system.
+ * Types for the Strat Planner system.
  */
 
 // --- Strat Config ---

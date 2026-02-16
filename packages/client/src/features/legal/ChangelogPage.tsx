@@ -19,7 +19,7 @@ const releases: Release[] = [
     tag: 'Latest',
     changes: [
       { type: 'feature', text: 'Complete canvas system rewrite \u2014 replaced 1197-line monolithic CanvasLayer with modular architecture (MapCanvas, BackgroundLayer, DrawLayer, ActiveLayer, tool hooks)' },
-      { type: 'feature', text: 'r6calls.com-style editor layout \u2014 CSS grid with TopNavBar, OperatorStrip, and left/right SidePanels (ATK/DEF)' },
+      { type: 'feature', text: 'New editor layout \u2014 CSS grid with TopNavBar, OperatorStrip, and left/right SidePanels (ATK/DEF)' },
       { type: 'feature', text: 'Per-operator gadget toolbar \u2014 each operator column shows unique, secondary, and general gadgets below the standard drawing tools' },
       { type: 'feature', text: 'Inline operator picker \u2014 click operator slots in the OperatorStrip to assign operators via searchable popover grid' },
       { type: 'feature', text: 'SVG Real View as default \u2014 maps now open in interactive SVG view with toggleable layers' },

@@ -1,5 +1,5 @@
 /**
- * Top navigation bar — r6calls style.
+ * Top navigation bar for the editor.
  * Map name + floor tabs + view mode + undo/redo/export/zoom.
  */
 

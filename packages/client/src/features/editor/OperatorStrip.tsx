@@ -1,5 +1,5 @@
 /**
- * Horizontal operator slots strip — r6calls style.
+ * Horizontal operator slots strip (5 ATK + 5 DEF).
  * 5 ATK "?" slots (blue) + separator + 5 DEF "?" slots (red).
  */
 

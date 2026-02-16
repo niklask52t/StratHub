@@ -1,5 +1,5 @@
 /**
- * EditorShell — master CSS grid layout for the r6calls-style editor.
+ * EditorShell — master CSS grid layout for the strat editor.
  * Replaces StratLayout + MapCanvas wrapper.
  *
  * Grid:

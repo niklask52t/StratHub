@@ -80,7 +80,7 @@ packages/
   2. **DrawLayer** — All persisted/committed draws
   3. **ActiveLayer** — Current drawing action + peer cursors
 
-### Editor Layout (r6calls.com-style, v2.0.0)
+### Editor Layout (v2.0.0)
 - `EditorShell.tsx` — CSS grid: `gridTemplateRows: 'auto auto 1fr'`, `gridTemplateColumns: '220px 1fr 220px'`
 - Row 1: `TopNavBar` (full width) — map name, floor tabs, view mode, phases, layer toggle, tools, zoom
 - Row 2: `OperatorStrip` (full width) — 5 ATK + 5 DEF operator slots with popover picker

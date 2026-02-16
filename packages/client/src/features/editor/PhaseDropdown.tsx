@@ -1,5 +1,5 @@
 /**
- * Phase selector dropdown — "Action Phase 0" r6calls style.
+ * Phase selector dropdown — "Action Phase 0" style.
  * Add, rename, delete, switch phases.
  */
 

@@ -1,5 +1,5 @@
 /**
- * Static operator loadout data from r6calls stratData.json.
+ * Static operator loadout data.
  * Contains all attackers and defenders with their weapons, equipment, and abilities.
  */
 
