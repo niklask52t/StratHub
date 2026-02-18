@@ -58,17 +58,16 @@ export function OperatorStrip({ gameSlug, readOnly, onOperatorAssign }: Operator
         onClick={() => setActiveSlotId(slot.id)}
       >
         {slot.operatorId ? (
-          <div className="h-full w-full rounded-full overflow-hidden">
+          <div className="h-full w-full rounded-full overflow-hidden" style={{ backgroundColor: slot.color }}>
             {operatorIconMap[slot.operatorId] ? (
               <img
                 src={`/uploads${operatorIconMap[slot.operatorId]}`}
                 alt={slot.operatorName || ''}
-                className="h-full w-full object-cover rounded-full"
+                className="h-full w-full object-cover rounded-full scale-125"
               />
             ) : (
               <div
                 className="h-full w-full rounded-full flex items-center justify-center text-xs font-bold text-white"
-                style={{ backgroundColor: slot.color }}
               >
                 {slot.operatorName?.[0] || '?'}
               </div>

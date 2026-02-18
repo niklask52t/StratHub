@@ -98,7 +98,7 @@ function textBounds(
 }
 
 function iconBounds(ox: number, oy: number, size: number | undefined): Rect {
-  const s = size ?? 32;
+  const s = (size ?? 14) + 4; // include background padding
   const half = s / 2;
   return { x: ox - half, y: oy - half, width: s, height: s };
 }

@@ -91,7 +91,9 @@ export function OperatorPickerPopover({
                 title={`${op.name}${isBanned ? ' (banned)' : isAssigned ? ' (assigned)' : ''}`}
               >
                 {op.icon ? (
-                  <img src={`/uploads${op.icon}`} alt={op.name} className="h-8 w-8 rounded-full" />
+                  <div className="h-8 w-8 rounded-full overflow-hidden" style={{ backgroundColor: op.color }}>
+                    <img src={`/uploads${op.icon}`} alt={op.name} className="h-full w-full object-cover scale-125" />
+                  </div>
                 ) : (
                   <div
                     className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white"

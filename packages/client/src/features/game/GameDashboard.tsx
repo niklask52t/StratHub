@@ -26,11 +26,17 @@ export default function GameDashboard() {
   if (!game) return <div className="container mx-auto p-8 text-center text-muted-foreground">Game not found</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8 relative">
-      <div className="flex items-center gap-4 mb-8">
+    <div className="container mx-auto px-6 py-12 relative max-w-7xl">
+      <div className="flex items-center gap-5 mb-10">
         <Link to="/" className="text-muted-foreground hover:text-primary transition-colors"><ArrowLeft className="h-5 w-5" /></Link>
-        <div className="flex items-center gap-3">
-          {game.icon && <img src={`/uploads${game.icon}`} className="h-12 w-12 rounded-lg" alt="" />}
+        <div className="flex items-center gap-4">
+          {game.icon && (
+            <img
+              src={`/uploads${game.icon}`}
+              className="h-16 w-16 rounded-lg drop-shadow-[0_0_12px_oklch(0.68_0.19_45/0.4)]"
+              alt=""
+            />
+          )}
           <div>
             <h1 className="text-3xl font-bold tracking-wide">{game.name}</h1>
             {game.description && <p className="text-muted-foreground">{game.description}</p>}
@@ -50,7 +56,7 @@ export default function GameDashboard() {
       </div>
 
       <h2 className="text-xs font-bold mb-4 tracking-wider uppercase text-muted-foreground">Maps</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-8">
         {game.maps.map((map) => (
           <div key={map.id} className="gaming-card">
             <div className="gaming-card-corners">

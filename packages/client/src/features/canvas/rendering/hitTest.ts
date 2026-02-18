@@ -104,7 +104,7 @@ function testIcon(
   size: number | undefined,
   px: number, py: number,
 ): boolean {
-  const half = (size ?? 32) / 2;
+  const half = ((size ?? 14) + 4) / 2; // include background padding
   return px >= ox - half && px <= ox + half && py >= oy - half && py <= oy + half;
 }
 

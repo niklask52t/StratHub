@@ -8,6 +8,7 @@ import { Tool } from '@tactihub/shared';
 import type { StratOperatorSlot, Gadget } from '@tactihub/shared';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Pencil, Minus, Square, Type, Eraser, MousePointer2 } from 'lucide-react';
+import { getGadgetFallbackIcon } from './GadgetIcons';
 
 const TOOL_ROWS: Array<{ tool: Tool; icon: typeof Pencil; label: string }> = [
   { tool: Tool.Pen, icon: Pencil, label: 'Pen' },
@@ -125,9 +126,10 @@ export function SidePanelToolGrid({
                               className="h-4 w-4 rounded object-contain"
                             />
                           ) : (
-                            <span className="text-[8px] font-bold leading-none">
-                              {gadget.name.substring(0, 3)}
-                            </span>
+                            (() => {
+                              const FallbackIcon = getGadgetFallbackIcon(gadget.name);
+                              return <FallbackIcon className="h-4 w-4" />;
+                            })()
                           )}
                         </button>
                       </TooltipTrigger>

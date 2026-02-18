@@ -1,6 +1,7 @@
 /**
  * Side panel — operator tool panel for one side (ATK or DEF).
- * Contains: visibility row, landscape section, tool grid with gadgets, operator avatars.
+ * Shows: operator avatars, drawing tools, and gadget list for the selected operator.
+ * When an operator is selected, shows their unique + secondary + general gadgets.
  */
 
 import { useMemo, useCallback } from 'react';
@@ -10,10 +11,10 @@ import type { StratOperatorSlot, Operator, Gadget } from '@tactihub/shared';
 import { apiGet } from '@/lib/api';
 import { useStratStore } from '@/stores/strat.store';
 import { useCanvasStore } from '@/stores/canvas.store';
-import { SidePanelToolGrid } from './SidePanelToolGrid';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Pencil, Minus, Square, Type } from 'lucide-react';
+import { Pencil, Minus, Square, Type, Eraser, MousePointer2 } from 'lucide-react';
+import { getGadgetFallbackIcon } from './GadgetIcons';
 
 interface SidePanelProps {
   side: 'attacker' | 'defender';
@@ -23,6 +24,15 @@ interface SidePanelProps {
   onColorChange?: (slotId: string, color: string) => void;
 }
 
+const DRAWING_TOOLS: Array<{ tool: Tool; icon: typeof Pencil; label: string }> = [
+  { tool: Tool.Pen, icon: Pencil, label: 'Pen' },
+  { tool: Tool.Line, icon: Minus, label: 'Line' },
+  { tool: Tool.Rectangle, icon: Square, label: 'Rectangle' },
+  { tool: Tool.Text, icon: Type, label: 'Text' },
+  { tool: Tool.Eraser, icon: Eraser, label: 'Eraser' },
+  { tool: Tool.Select, icon: MousePointer2, label: 'Select' },
+];
+
 const LANDSCAPE_TOOLS: Array<{ tool: Tool; icon: typeof Pencil; label: string }> = [
   { tool: Tool.Pen, icon: Pencil, label: 'Pen' },
   { tool: Tool.Line, icon: Minus, label: 'Line' },
@@ -31,6 +41,7 @@ const LANDSCAPE_TOOLS: Array<{ tool: Tool; icon: typeof Pencil; label: string }>
 ];
 
 const CATEGORY_ORDER: Record<string, number> = { unique: 0, secondary: 1, general: 2 };
+const CATEGORY_LABELS: Record<string, string> = { unique: 'Unique', secondary: 'Secondary', general: 'General' };
 
 export function SidePanel({ side, gameSlug, readOnly, onVisibilityToggle, onColorChange }: SidePanelProps) {
   const operatorSlots = useStratStore(s => s.operatorSlots);
@@ -53,6 +64,12 @@ export function SidePanel({ side, gameSlug, readOnly, onVisibilityToggle, onColo
 
   const accentColor = side === 'attacker' ? '#1a8fe3' : '#e33a3a';
 
+  // Find the active slot on this side
+  const activeSlot = useMemo(
+    () => slots.find(s => s.id === activeSlotId) ?? null,
+    [slots, activeSlotId],
+  );
+
   // Fetch operators (with gadgets) for this game
   const { data: operatorsData } = useQuery({
     queryKey: ['operators', gameSlug],
@@ -69,7 +86,7 @@ export function SidePanel({ side, gameSlug, readOnly, onVisibilityToggle, onColo
     enabled: !!gameSlug,
   });
 
-  // Build operator lookup: operatorId → Operator (with gadgets)
+  // Build operator lookup
   const operatorMap = useMemo(() => {
     const all = operatorsData?.data || [];
     const map: Record<string, Operator> = {};
@@ -77,87 +94,59 @@ export function SidePanel({ side, gameSlug, readOnly, onVisibilityToggle, onColo
     return map;
   }, [operatorsData]);
 
-  // General gadgets (shown for all slots regardless of operator)
+  // General gadgets
   const generalGadgets = useMemo(() => {
     const all = gadgetsData?.data || [];
     return all.filter(g => g.category === 'general');
   }, [gadgetsData]);
 
-  // Compute unified gadget rows and per-slot availability
-  const { gadgetRows, slotGadgetIds } = useMemo(() => {
+  // Gadgets for the active operator on this side
+  const activeOperatorGadgets = useMemo(() => {
+    if (!activeSlot?.operatorId) return [];
+    const op = operatorMap[activeSlot.operatorId];
+    if (!op?.gadgets) return [...generalGadgets];
+
+    // Combine operator's gadgets + general gadgets (deduped)
     const seen = new Set<string>();
-    const rows: Gadget[] = [];
-
-    // Collect gadgets from assigned operators
-    for (const slot of slots) {
-      if (!slot.operatorId) continue;
-      const op = operatorMap[slot.operatorId];
-      if (!op?.gadgets) continue;
-      for (const g of op.gadgets) {
-        if (!seen.has(g.id)) {
-          seen.add(g.id);
-          rows.push(g);
-        }
-      }
+    const result: Gadget[] = [];
+    for (const g of op.gadgets) {
+      if (!seen.has(g.id)) { seen.add(g.id); result.push(g); }
     }
-
-    // Add general gadgets
     for (const g of generalGadgets) {
-      if (!seen.has(g.id)) {
-        seen.add(g.id);
-        rows.push(g);
-      }
+      if (!seen.has(g.id)) { seen.add(g.id); result.push(g); }
     }
-
-    // Sort: unique → secondary → general, then by name
-    rows.sort((a, b) => {
+    // Sort by category then name
+    result.sort((a, b) => {
       const catDiff = (CATEGORY_ORDER[a.category] ?? 9) - (CATEGORY_ORDER[b.category] ?? 9);
       if (catDiff !== 0) return catDiff;
       return a.name.localeCompare(b.name);
     });
+    return result;
+  }, [activeSlot, operatorMap, generalGadgets]);
 
-    // Build per-slot gadget ID sets
-    const generalIds = new Set(generalGadgets.map(g => g.id));
-    const sgi = new Map<string, Set<string>>();
-    for (const slot of slots) {
-      const ids = new Set(generalIds);
-      if (slot.operatorId) {
-        const op = operatorMap[slot.operatorId];
-        if (op?.gadgets) {
-          for (const g of op.gadgets) ids.add(g.id);
-        }
-      }
-      sgi.set(slot.id, ids);
-    }
-
-    return { gadgetRows: rows, slotGadgetIds: sgi };
-  }, [slots, operatorMap, generalGadgets]);
-
-  const handleToolCellClick = useCallback((slotId: string, tool: Tool) => {
-    const slot = slots.find(s => s.id === slotId);
-    if (!slot) return;
-    setActiveSlotId(slotId);
+  const handleToolClick = useCallback((tool: Tool) => {
+    if (!activeSlot) return;
+    setActiveSlotId(activeSlot.id);
     setTool(tool);
-    setColor(slot.color);
+    setColor(activeSlot.color);
     if (tool !== Tool.Icon) setSelectedIcon(null);
-  }, [slots, setActiveSlotId, setTool, setColor, setSelectedIcon]);
+  }, [activeSlot, setActiveSlotId, setTool, setColor, setSelectedIcon]);
 
-  const handleGadgetCellClick = useCallback((slotId: string, gadget: Gadget) => {
-    const slot = slots.find(s => s.id === slotId);
-    if (!slot) return;
-    setActiveSlotId(slotId);
+  const handleGadgetClick = useCallback((gadget: Gadget) => {
+    if (!activeSlot) return;
+    setActiveSlotId(activeSlot.id);
     setTool(Tool.Icon);
-    setColor(slot.color);
-    const op = slot.operatorId ? operatorMap[slot.operatorId] : null;
+    setColor(activeSlot.color);
+    const op = activeSlot.operatorId ? operatorMap[activeSlot.operatorId] : null;
     setSelectedIcon({
       type: 'gadget',
       id: gadget.id,
       url: gadget.icon || '',
       name: gadget.name,
-      color: slot.color,
+      color: activeSlot.color,
       operatorIcon: op?.icon || undefined,
     });
-  }, [slots, operatorMap, setActiveSlotId, setTool, setColor, setSelectedIcon]);
+  }, [activeSlot, operatorMap, setActiveSlotId, setTool, setColor, setSelectedIcon]);
 
   const handleLandscapeTool = (tool: Tool) => {
     setActiveSlotId(null);
@@ -185,6 +174,34 @@ export function SidePanel({ side, gameSlug, readOnly, onVisibilityToggle, onColo
       <p className="text-[10px] font-bold uppercase tracking-wider text-center mb-2" style={{ color: accentColor }}>
         {side === 'attacker' ? 'Attackers' : 'Defenders'}
       </p>
+
+      {/* Operator avatars row */}
+      <div className="flex items-center justify-around mb-2">
+        {slots.map(slot => (
+          <Tooltip key={slot.id}>
+            <TooltipTrigger asChild>
+              <button
+                className={`h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white overflow-hidden transition-all ${
+                  activeSlotId === slot.id ? 'ring-2 ring-primary scale-110' : 'opacity-70 hover:opacity-100'
+                }`}
+                style={{ backgroundColor: slot.operatorId ? slot.color : '#555' }}
+                onClick={() => setActiveSlotId(slot.id)}
+              >
+                {slot.operatorId && operatorMap[slot.operatorId]?.icon ? (
+                  <img
+                    src={`/uploads${operatorMap[slot.operatorId]!.icon}`}
+                    alt={slot.operatorName || ''}
+                    className="h-full w-full object-cover scale-125"
+                  />
+                ) : (
+                  slot.operatorName?.[0] || '?'
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent className="text-xs">{slot.operatorName || `Slot ${slot.slotNumber}`}</TooltipContent>
+          </Tooltip>
+        ))}
+      </div>
 
       {/* Visibility row + color indicators */}
       <div className="flex items-center justify-around mb-2">
@@ -254,45 +271,114 @@ export function SidePanel({ side, gameSlug, readOnly, onVisibilityToggle, onColo
         )}
       </div>
 
-      {/* Tool grid + gadget rows */}
-      <SidePanelToolGrid
-        slots={slots}
-        activeTool={activeTool}
-        activeSlotId={activeSlotId}
-        onCellClick={handleToolCellClick}
-        gadgetRows={gadgetRows}
-        slotGadgetIds={slotGadgetIds}
-        onGadgetClick={handleGadgetCellClick}
-        activeGadgetId={activeTool === Tool.Icon ? selectedIcon?.id ?? null : null}
-        readOnly={readOnly}
-      />
+      {/* Selected operator section */}
+      {activeSlot && !readOnly && (
+        <div className="flex flex-col gap-1">
+          {/* Operator name */}
+          <div className="flex items-center gap-1.5 px-1">
+            <div
+              className="h-3 w-3 rounded-full flex-shrink-0"
+              style={{ backgroundColor: activeSlot.color }}
+            />
+            <span className="text-[10px] font-bold truncate">
+              {activeSlot.operatorName || `Slot ${activeSlot.slotNumber}`}
+            </span>
+          </div>
 
-      {/* Operator avatars */}
-      <div className="flex items-center justify-around mt-2 pt-2 border-t border-border/50">
-        {slots.map(slot => (
-          <Tooltip key={slot.id}>
-            <TooltipTrigger asChild>
-              <div
-                className={`h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white overflow-hidden ${
-                  activeSlotId === slot.id ? 'ring-2 ring-primary' : ''
-                }`}
-                style={{ backgroundColor: slot.operatorId ? slot.color : '#555' }}
-              >
-                {slot.operatorId && operatorMap[slot.operatorId]?.icon ? (
-                  <img
-                    src={`/uploads${operatorMap[slot.operatorId]!.icon}`}
-                    alt={slot.operatorName || ''}
-                    className="h-full w-full object-cover rounded-full"
-                  />
-                ) : (
-                  slot.operatorName?.[0] || '?'
-                )}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="text-xs">{slot.operatorName || `Slot ${slot.slotNumber}`}</TooltipContent>
-          </Tooltip>
-        ))}
-      </div>
+          {/* Drawing tools row */}
+          <div className="flex gap-0.5 mb-1">
+            {DRAWING_TOOLS.map(({ tool, icon: Icon, label }) => {
+              const isActive = activeSlotId === activeSlot.id && activeTool === tool && !selectedIcon;
+              return (
+                <Tooltip key={tool}>
+                  <TooltipTrigger asChild>
+                    <button
+                      className={`flex items-center justify-center h-7 flex-1 rounded-sm transition-colors ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                      }`}
+                      onClick={() => handleToolClick(tool)}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs">{label}</TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+
+          {/* Gadget list */}
+          {activeOperatorGadgets.length > 0 && (
+            <div className="flex flex-col gap-px">
+              {(() => {
+                let lastCat = '';
+                return activeOperatorGadgets.map((gadget) => {
+                  const showHeader = gadget.category !== lastCat;
+                  if (showHeader) lastCat = gadget.category;
+                  const isActive = selectedIcon?.id === gadget.id && activeTool === Tool.Icon;
+
+                  return (
+                    <div key={gadget.id}>
+                      {showHeader && (
+                        <div className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground/60 pt-1.5 pb-0.5 px-0.5 border-t border-border/20">
+                          {CATEGORY_LABELS[gadget.category] || gadget.category}
+                        </div>
+                      )}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            className={`flex items-center gap-2 w-full h-7 px-1.5 rounded-sm transition-colors ${
+                              isActive
+                                ? 'bg-primary text-primary-foreground'
+                                : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                            }`}
+                            onClick={() => handleGadgetClick(gadget)}
+                          >
+                            <div
+                              className={`h-5 w-5 rounded flex-shrink-0 flex items-center justify-center ${
+                                isActive ? '' : ''
+                              }`}
+                              style={{
+                                backgroundColor: isActive ? undefined : `${activeSlot.color}33`,
+                              }}
+                            >
+                              {gadget.icon ? (
+                                <img
+                                  src={`/uploads${gadget.icon}`}
+                                  alt={gadget.name}
+                                  className="h-4 w-4 rounded object-contain"
+                                />
+                              ) : (
+                                (() => {
+                                  const FallbackIcon = getGadgetFallbackIcon(gadget.name);
+                                  return <FallbackIcon className="h-3.5 w-3.5" />;
+                                })()
+                              )}
+                            </div>
+                            <span className="text-[9px] font-medium truncate">{gadget.name}</span>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="text-xs">{gadget.name}</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* No operator selected hint */}
+      {!activeSlot && !readOnly && (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-[9px] text-muted-foreground/50 text-center px-2">
+            Select an operator to see tools & gadgets
+          </p>
+        </div>
+      )}
     </div>
   );
 }
