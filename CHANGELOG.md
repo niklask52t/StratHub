@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.0.1 — 2026-02-18 — Operator Icons & Icon Sizing
+
+- [feature] Operator images in OperatorStrip and SidePanel — assigned operators now show their actual icon instead of just a first letter
+- [feature] Operator badge on placed gadget icons — small circular operator logo overlay in the bottom-right corner of canvas gadget icons
+- [improvement] Sandbox auto-selects game on load — no more blank page requiring hard reload
+- [improvement] Gadget/icon placement size reduced from 40px to 20px to fit SVG map proportions
+- [fix] Operator gadgets not loading in sandbox — incorrect game slug fallback ('r6' instead of actual slug) caused 404 on operator/gadget API calls
+
 ## v2.0.0 — 2026-02-16 — Canvas Rewrite & Side Panel Editor
 
 - [feature] Complete canvas system rewrite — replaced 1197-line monolithic CanvasLayer with modular architecture (MapCanvas, BackgroundLayer, DrawLayer, ActiveLayer, tool hooks)

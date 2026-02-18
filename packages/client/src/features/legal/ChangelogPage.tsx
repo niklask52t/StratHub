@@ -15,10 +15,22 @@ interface Release {
 
 const releases: Release[] = [
   {
+    version: '2.0.1',
+    subtitle: 'Operator Icons & Icon Sizing',
+    date: '2026-02-18',
+    tag: 'Latest',
+    changes: [
+      { type: 'feature', text: 'Operator images in OperatorStrip and SidePanel \u2014 assigned operators now show their actual icon instead of just a first letter' },
+      { type: 'feature', text: 'Operator badge on placed gadget icons \u2014 small circular operator logo overlay in the bottom-right corner of canvas gadget icons' },
+      { type: 'improvement', text: 'Sandbox auto-selects game on load \u2014 no more blank page requiring hard reload' },
+      { type: 'improvement', text: 'Gadget/icon placement size reduced from 40px to 20px to fit SVG map proportions' },
+      { type: 'fix', text: 'Operator gadgets not loading in sandbox \u2014 incorrect game slug fallback caused 404 on operator/gadget API calls' },
+    ],
+  },
+  {
     version: '2.0.0',
     subtitle: 'Canvas Rewrite & Side Panel Editor',
     date: '2026-02-16',
-    tag: 'Latest',
     changes: [
       { type: 'feature', text: 'Complete canvas system rewrite \u2014 replaced 1197-line monolithic CanvasLayer with modular architecture (MapCanvas, BackgroundLayer, DrawLayer, ActiveLayer, tool hooks)' },
       { type: 'feature', text: 'New editor layout \u2014 CSS grid with TopNavBar, OperatorStrip, and left/right SidePanels (ATK/DEF)' },
