@@ -11,7 +11,7 @@ export const COLORS_ARRAY = [
   '#00FF80', // Teal
 ] as const;
 
-export const DEFAULT_LINE_WIDTH = 3;
+export const DEFAULT_LINE_WIDTH = 1;
 export const DEFAULT_FONT_SIZE = 16;
 export const DEFAULT_ICON_SIZE = 20;
 export const DEFAULT_COLOR = '#FF0000';

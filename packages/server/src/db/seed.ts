@@ -293,6 +293,10 @@ async function seed() {
       { name: 'Impact Grenade', category: 'secondary', icon: '/gadgets/impact-grenade.webp' },
       { name: 'Smoke Grenade', category: 'secondary', icon: '/gadgets/smoke-grenade.webp' },
       { name: 'Stun Grenade', category: 'secondary' },
+      { name: 'Hard Breach Charge', category: 'secondary' },
+      { name: 'Impact EMP Grenade', category: 'secondary' },
+      { name: 'Proximity Alarm', category: 'secondary' },
+      { name: 'Observation Blocker', category: 'secondary' },
       // General
       { name: 'Barricade', category: 'general', icon: '/gadgets/barricade.webp' },
       { name: 'Drone', category: 'general', icon: '/gadgets/drone.webp' },
@@ -310,6 +314,109 @@ async function seed() {
       });
     }
     console.log(`Created ${r6Gadgets.length} R6 gadgets`);
+
+    // Build name→id lookups for operator-gadget linking
+    const allOps = await db.select().from(operators).where(eq(operators.gameId, r6Game.id));
+    const allGadgets = await db.select().from(gadgets).where(eq(gadgets.gameId, r6Game.id));
+    const opByName: Record<string, string> = {};
+    for (const o of allOps) opByName[o.name] = o.id;
+    const gadgetByName: Record<string, string> = {};
+    for (const g of allGadgets) gadgetByName[g.name] = g.id;
+
+    // Operator → [unique gadget, ...secondary gadgets] (Y10S4 loadouts)
+    const opGadgetMap: Record<string, string[]> = {
+      // ── Defenders ──
+      'Smoke':       ['Z8 Grenades', 'Barbed Wire', 'Deployable Shield'],
+      'Mute':        ['Signal Disruptor', 'Nitro Cell (C4)', 'Bulletproof Cam'],
+      'Castle':      ['Armor Panel', 'Bulletproof Cam', 'Proximity Alarm'],
+      'Pulse':       ['Heartbeat Sensor', 'Nitro Cell (C4)', 'Deployable Shield', 'Observation Blocker'],
+      'Doc':         ['Stim Pistol', 'Barbed Wire', 'Bulletproof Cam'],
+      'Rook':        ['Armor Pack', 'Proximity Alarm', 'Observation Blocker'],
+      'Jager':       ['ADS', 'Bulletproof Cam', 'Observation Blocker'],
+      'Bandit':      ['Shock Wire', 'Barbed Wire', 'Nitro Cell (C4)'],
+      'Tachanka':    ['Mounted LMG', 'Barbed Wire', 'Deployable Shield', 'Proximity Alarm'],
+      'Kapkan':      ['EDD', 'Barbed Wire', 'Nitro Cell (C4)', 'Impact Grenade'],
+      'Frost':       ['Welcome Mat', 'Deployable Shield', 'Bulletproof Cam'],
+      'Valkyrie':    ['Black Eye', 'Nitro Cell (C4)', 'Impact Grenade'],
+      'Caveira':     ['Silent Step', 'Impact Grenade', 'Proximity Alarm', 'Observation Blocker'],
+      'Echo':        ['Yokai', 'Deployable Shield', 'Impact Grenade'],
+      'Mira':        ['Black Mirror', 'Nitro Cell (C4)', 'Proximity Alarm'],
+      'Lesion':      ['Gu Mine', 'Bulletproof Cam', 'Observation Blocker'],
+      'Ela':         ['Grzmot Mine', 'Barbed Wire', 'Deployable Shield', 'Observation Blocker'],
+      'Vigil':       ['ERC-7', 'Impact Grenade', 'Bulletproof Cam'],
+      'Maestro':     ['Evil Eye', 'Barbed Wire', 'Impact Grenade', 'Observation Blocker'],
+      'Alibi':       ['Prisma', 'Proximity Alarm', 'Observation Blocker'],
+      'Clash':       ['CCE Shield', 'Barbed Wire', 'Deployable Shield', 'Impact Grenade'],
+      'Kaid':        ['Rtila Electroclaw', 'Barbed Wire', 'Nitro Cell (C4)', 'Observation Blocker'],
+      'Mozzie':      ['Pest Launcher', 'Barbed Wire', 'Nitro Cell (C4)'],
+      'Warden':      ['Glance Smart Glasses', 'Nitro Cell (C4)', 'Deployable Shield', 'Observation Blocker'],
+      'Goyo':        ['Volcan Shield', 'Proximity Alarm', 'Impact Grenade'],
+      'Wamai':       ['Mag-NET System', 'Proximity Alarm', 'Impact Grenade'],
+      'Oryx':        ['Remah Dash', 'Barbed Wire', 'Proximity Alarm'],
+      'Melusi':      ['Banshee Sonic Defence', 'Impact Grenade', 'Bulletproof Cam'],
+      'Aruni':       ['Surya Laser Gate', 'Barbed Wire', 'Bulletproof Cam'],
+      'Thunderbird': ['Kona Station', 'Barbed Wire', 'Deployable Shield'],
+      'Thorn':       ['Razorbloom Shell', 'Barbed Wire', 'Deployable Shield', 'Proximity Alarm'],
+      'Azami':       ['Kiba Barrier', 'Barbed Wire', 'Impact Grenade'],
+      'Solis':       ['SPEC-IO Electro-Sensor', 'Proximity Alarm', 'Impact Grenade'],
+      'Fenrir':      ['F-NATT Dread Mine', 'Bulletproof Cam', 'Observation Blocker'],
+      'Tubarao':     ['Zoto Canister', 'Nitro Cell (C4)', 'Proximity Alarm'],
+      'Sentry':      ['V10 Pantheon Shell', 'Barbed Wire', 'Deployable Shield'],
+      'Skopos':      ['T.R.I.P. Connector', 'Proximity Alarm', 'Impact Grenade'],
+      'Denari':      ['D.O.M. Panel Launcher', 'Deployable Shield', 'Observation Blocker'],
+      // ── Attackers ──
+      'Sledge':      ['The Caber', 'Stun Grenade', 'Impact EMP Grenade'],
+      'Thatcher':    ['EMP Grenade', 'Breaching Charge', 'Claymore'],
+      'Ash':         ['Breaching Round', 'Breaching Charge', 'Claymore'],
+      'Thermite':    ['Exothermic Charge', 'Breaching Charge', 'Stun Grenade'],
+      'Montagne':    ['Extendable Shield', 'Hard Breach Charge', 'Impact EMP Grenade'],
+      'Twitch':      ['Shock Drone', 'Breaching Charge', 'Claymore'],
+      'Blitz':       ['Flash Shield', 'Breaching Charge', 'Stun Grenade'],
+      'IQ':          ['Electronics Detector', 'Breaching Charge', 'Claymore', 'Frag Grenade'],
+      'Fuze':        ['Cluster Charge', 'Breaching Charge', 'Hard Breach Charge'],
+      'Glaz':        ['Flip Sight', 'Claymore', 'Frag Grenade'],
+      'Buck':        ['Skeleton Key', 'Hard Breach Charge', 'Stun Grenade'],
+      'Blackbeard':  ['TAPS Mk III', 'Breaching Charge', 'Claymore', 'Stun Grenade', 'Frag Grenade'],
+      'Capitao':     ['Micro Crossbow', 'Hard Breach Charge', 'Impact EMP Grenade'],
+      'Hibana':      ['X-Kairos', 'Breaching Charge', 'Claymore', 'Stun Grenade'],
+      'Jackal':      ['Eyenox', 'Claymore', 'Smoke Grenade'],
+      'Ying':        ['Candela', 'Breaching Charge', 'Hard Breach Charge'],
+      'Zofia':       ['KS79 Lifeline', 'Breaching Charge', 'Claymore'],
+      'Dokkaebi':    ['Logic Bomb', 'Stun Grenade', 'Impact EMP Grenade'],
+      'Lion':        ['EE-ONE-D', 'Claymore', 'Frag Grenade', 'Stun Grenade'],
+      'Finka':       ['Adrenal Surge', 'Hard Breach Charge', 'Stun Grenade', 'Frag Grenade'],
+      'Maverick':    ['Smelting Torch', 'Frag Grenade', 'Smoke Grenade'],
+      'Nomad':       ['Airjab Launcher', 'Breaching Charge', 'Stun Grenade'],
+      'Gridlock':    ['Trax Stingers', 'Breaching Charge', 'Impact EMP Grenade', 'Frag Grenade'],
+      'Nokk':        ['HEL Presence Reduction', 'Hard Breach Charge', 'Impact EMP Grenade'],
+      'Amaru':       ['Garra Hook', 'Hard Breach Charge', 'Stun Grenade'],
+      'Kali':        ['LV Explosive Lance', 'Claymore', 'Breaching Charge', 'Smoke Grenade'],
+      'Iana':        ['Gemini Replicator', 'Smoke Grenade', 'Impact EMP Grenade'],
+      'Ace':         ['S.E.L.M.A. Aqua Breacher', 'Stun Grenade', 'Breaching Charge'],
+      'Zero':        ['ARGUS Launcher', 'Hard Breach Charge', 'Claymore'],
+      'Flores':      ['RCE-Ratero Charge', 'Claymore', 'Stun Grenade', 'Frag Grenade'],
+      'Osa':         ['Talon-8 Clear Shield', 'Hard Breach Charge', 'Impact EMP Grenade', 'Frag Grenade'],
+      'Sens':        ['R.O.U. Projector System', 'Hard Breach Charge', 'Claymore', 'Frag Grenade'],
+      'Grim':        ['Kawan Hive Launcher', 'Breaching Charge', 'Hard Breach Charge', 'Impact EMP Grenade'],
+      'Brava':       ['Kludge Drone', 'Claymore', 'Smoke Grenade'],
+      'Ram':         ['BU-GI Auto-Breacher', 'Stun Grenade', 'Hard Breach Charge'],
+      'Deimos':      ['DeathMARK', 'Claymore', 'Frag Grenade', 'Smoke Grenade'],
+      'Striker':     ['Breaching Charge', 'Stun Grenade'],
+      'Rauora':      ['Smoke Grenade', 'Breaching Charge'],
+    };
+
+    let linkedCount = 0;
+    for (const [opName, gadgetNames] of Object.entries(opGadgetMap)) {
+      const opId = opByName[opName];
+      if (!opId) { console.warn(`  Operator not found: ${opName}`); continue; }
+      for (const gName of gadgetNames) {
+        const gId = gadgetByName[gName];
+        if (!gId) { console.warn(`  Gadget not found: ${gName}`); continue; }
+        await db.insert(operatorGadgets).values({ operatorId: opId, gadgetId: gId }).onConflictDoNothing();
+        linkedCount++;
+      }
+    }
+    console.log(`Linked ${linkedCount} operator-gadget relationships`);
   }
 
   console.log('Seeding complete!');

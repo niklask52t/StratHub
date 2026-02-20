@@ -69,7 +69,7 @@ function drawPath(ctx: CanvasRenderingContext2D, d: any): void {
   if (!pts || pts.length < 2) return;
 
   ctx.strokeStyle = d.color ?? '#FF0000';
-  ctx.lineWidth = d.lineWidth ?? 3;
+  ctx.lineWidth = d.lineWidth ?? 1;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
@@ -88,7 +88,7 @@ function drawLine(ctx: CanvasRenderingContext2D, draw: any, d: any): void {
   const y2 = draw.destinationY ?? y1;
 
   ctx.strokeStyle = d.color ?? '#FF0000';
-  ctx.lineWidth = d.lineWidth ?? 3;
+  ctx.lineWidth = d.lineWidth ?? 1;
   ctx.lineCap = 'round';
 
   ctx.beginPath();
@@ -102,7 +102,7 @@ function drawRectangle(ctx: CanvasRenderingContext2D, draw: any, d: any): void {
   const h = d.height ?? ((draw.destinationY ?? draw.originY) - draw.originY);
 
   ctx.strokeStyle = d.color ?? '#FF0000';
-  ctx.lineWidth = d.lineWidth ?? 3;
+  ctx.lineWidth = d.lineWidth ?? 1;
 
   if (d.filled) {
     ctx.fillStyle = d.color ?? '#FF0000';
